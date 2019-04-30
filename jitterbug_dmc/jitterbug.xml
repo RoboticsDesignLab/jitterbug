@@ -1,0 +1,138 @@
+<mujoco model="KatitaV5">
+
+    <!-- Units are SI, global (not relative) -->
+    <compiler coordinate="global"/>
+
+    <include file="./common/skybox.xml"/>
+    <include file="./common/visual.xml"/>
+    <include file="./common/materials.xml"/>
+
+    <asset>
+        <material name="grid1cm" texture="grid" texrepeat="100 100" texuniform="true" reflectance=".2"/>
+    </asset>
+
+    <option timestep="0.0002" />
+
+    <default>
+        <!-- Default density is steel at 7700kg/m^3 -->
+        <geom density="7700" material="self" />
+
+        <!-- No damping for now -->
+        <!--<joint type="hinge" axis="0 0 1" damping="0.00001"/>-->
+    </default>
+
+    <worldbody>
+        <!-- ============= Light ============ -->
+        <light name="light" pos="0 0 1"/>
+
+        <!-- ============= 1m square floor with 1cm checks ============ -->
+        <geom name="floor" pos="0 0 0" size="0.5 0.5 0.01" type="plane" material="grid1cm" />
+
+        <!-- ============= Camera ============ -->
+        <camera name="fixed" pos="0 0 .75" quat="1 0 0 0"/>
+
+        <!-- ============ Jitterbug ============ -->
+        <body name="katita" pos="0 0 0.035" quat="1 0 0 0" >
+            <joint name="root" type="free"/>
+
+            <!-- ======= Core body ======= -->
+            <!-- NB the boxes are not solid, hence we use a 10% and 50% density estimate here -->
+            <geom type="box" name="coreBody1" size=".0055 .006 .011" pos="0 0 .04" density="38.5" />
+            <geom type="box" name="coreBody2" size=".008 .006 .008" pos="0 0 .021" density="770" />
+            <geom type="cylinder" name="screw1" size=".002" fromto="0 0 .026  0 .012 .026" />
+            <geom type="ellipsoid" name="screw2" pos="0 .017 .026" size=".014 .006 .0005" />
+
+            <!-- Front legs -->
+            <!-- ========= Leg 2 ========= -->
+            <body name="leg2upper">
+                <geom type="cylinder" fromto=".0287 -.0308 .07 .005 .0035 .05" size=".00061" />
+                <geom type="sphere" pos=".0287 -.0308 .07" size=".00061" />
+                <joint type="hinge" name="joint1Leg2" pos=".003 .0035 .049" axis="-2.32 -3.68 0" stiffness="0.4" damping="0.00001" />
+
+                <body name="leg2lower">
+                    <geom type="cylinder" fromto=".0287 -.0308 0.005 .0287 -.0308 .07" size=".00061" />
+                    <geom type="sphere" name="foot2" pos=".0287 -.0308 .005" size=".003" density="1100" />
+                    <joint type="hinge" name="joint2Leg2" pos=".0287 -.0308 .068" axis="-2.32 -3.68 0" stiffness="0.4" damping="0.00001" />
+                </body>
+            </body>
+
+            <!-- ========= Leg 3 ========= -->
+            <body name="leg3upper">
+                <geom type="cylinder" fromto="-.0287 -.0308 .07 -.005 .0035 .05" size=".00061" />
+                <geom type="sphere" pos="-.0287 -.0308 .07" size=".00061" />
+                <joint type="hinge" name="joint1Leg3" pos="-.003 .0035 .049" axis="2.32 -3.68 0" stiffness="0.4" damping="0.00001" />
+
+                <body name="leg3lower">
+                    <geom type="cylinder" fromto="-.0287 -.0308 0.005 -.0287 -.0308 .07" size=".00061" />
+                    <geom type="sphere" name="foot3" pos="-.0287 -.0308 .005" size=".003" density="1100" />
+                    <joint type="hinge" name="joint2Leg3" pos="-.0287 -.0308 .068" axis="2.32 -3.68 0" stiffness="0.4" damping="0.00001" />
+                </body>
+            </body>
+
+            <!-- Back legs -->
+            <!-- ========= Leg 1 ========= -->
+            <body name="leg1upper">
+                <geom type="cylinder" fromto=".0287 .0328 .068 .003 .0035 .049" size=".00061" />
+                <geom type="sphere" pos="0.0287 0.0328 0.068" size=".00061" />
+                <joint type="hinge" name="joint1Leg1" pos=".003 .0035 .049" axis="2.32 -2.68 0" stiffness="0.4" damping="0.00001" />
+
+                <body name="leg1lower">
+                    <geom type="cylinder" fromto=".0287 .0328 0.003 .0287 .0328 .068" size=".00061" />
+                    <geom type="sphere" name="foot1" pos=".0287 .0328 .003" size=".003" density="1100" />
+                    <joint type="hinge" name="joint2Leg1" pos=".0287 .0328 .068" axis="2.32 -2.68 0" stiffness="0.4" damping="0.00001" />
+                </body>
+            </body>
+
+            <!-- ========= Leg 4 ========= -->
+            <body name="leg4upper">
+                <geom type="cylinder" fromto="-.0287 .0328 .068 -.003 .0035 .049" size=".00061" />
+                <geom type="sphere" pos="-.0287 .0328 .068" size=".00061" />
+                <joint type="hinge" name="joint1Leg4" pos="-.003 .0035 .049" axis="-2.32 -2.68 0" stiffness="0.4" damping="0.00001" />
+
+                <body name="leg4lower">
+                    <geom type="cylinder" fromto="-.0287 .0328 0.003 -.0287 .0328 .068" size=".00061" />
+                    <geom type="sphere" name="foot4" pos="-.0287 .0328 .003" size=".003" density="1100" />
+                    <joint type="hinge" name="joint2Leg4" pos="-.0287 .0328 .068" axis="-2.32 -2.68 0" stiffness="0.4" damping="0.00001" />
+                </body>
+            </body>
+
+            <!-- ========= Mass ========= -->
+            <body name="mass" pos="0 -.004 .061" quat="1 0 0 0" >
+                <geom type="cylinder" name="threadMass" fromto="0 -.004 .05 0 -.004 .0625" size=".001" material="effector" />
+                <geom type="ellipsoid" name="mass" pos=".0043 -.004 .061" size="0.008 0.01 0.003" material="effector" />
+                <joint name="jointMass" type="hinge" pos="0 -.004 .05" axis="0 0 1" />
+            </body>
+
+        </body>
+
+        <!-- Target pose -->
+        <body name="target" pos="0 0 0.035" quat="0 0 0 1" >
+            <geom name="target" type="sphere" conaffinity="0" contype="0" pos="0 0 0.035" size=".01" material="target" />
+            <geom name="targetPointer" type="sphere" conaffinity="0" contype="0" pos="0 0.01 0.035" density="0" size=".005" material="target" />
+        </body>
+
+    </worldbody>
+
+    <actuator>
+
+        <!-- Velocity servo -->
+        <general
+            joint="jointMass"
+
+            ctrllimited="true"
+            ctrlrange="-1 1"
+
+            gear="0.00833"
+
+            dyntype="none"
+            dynprm="0.1 0 0"
+
+            gaintype="fixed"
+            gainprm="1 0 0"
+
+            biastype="affine"
+            biasprm="0 0 -0.8"
+        />
+    </actuator>
+
+</mujoco>

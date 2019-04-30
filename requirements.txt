@@ -1,0 +1,2 @@
+# Requirements for jitterbug-dm are sourced from setup.py
+.

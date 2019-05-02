@@ -11,6 +11,10 @@
         <material name="grid1cm" texture="grid" texrepeat="100 100" texuniform="true" reflectance=".2"/>
     </asset>
 
+    <visual>
+        <global offwidth="1024" offheight="768" />
+    </visual>
+
     <option timestep="0.0002" />
 
     <default>

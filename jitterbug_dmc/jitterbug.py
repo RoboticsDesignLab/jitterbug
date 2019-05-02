@@ -475,14 +475,17 @@ def demo():
     # Add the jitterbug tasks to the suite
     import jitterbug_dmc
 
+    # Load the Jitterbug face_direction task
     env = suite.load(
         domain_name="jitterbug",
-        task_name="move_to_pose",
+        task_name="face_direction",
         visualize_reward=True
     )
+
+    # Use a constant policy
     policy = lambda ts: 0.8
 
-    # Run the viewer with a constant policy
+    # Dance, jitterbug, dance!
     viewer.launch(env, policy=policy)
 
 

@@ -41,3 +41,9 @@ suite.EASY = suite._get_tasks('easy')
 suite.HARD = suite._get_tasks('hard')
 suite.EXTRA = tuple(sorted(set(suite.ALL_TASKS) - set(suite.BENCHMARKING)))
 suite.TASKS_BY_DOMAIN = suite._get_tasks_by_domain(suite.ALL_TASKS)
+
+# Convenience imports
+from jitterbug_dmc.jitterbug import (
+    Jitterbug,
+    demo
+)

@@ -418,15 +418,28 @@ class Jitterbug(base.Task):
         dist_to_target = np.linalg.norm(physics.vec3_jitterbug_to_target())
         return 1 / (10 * dist_to_target + 1)
 
+    def upright_reward(self, physics):
+        """Reward Jitterbug for remaining upright"""
+        return min(
+            max(
+                0,
+                # Dot product of the Jitterbug Z axis with the global Z
+                physics.named.data.xmat['jitterbug', 'zz']
+            ),
+            1
+        )
+
     def get_reward(self, physics):
+
+        r = 0
 
         if self.task == "move_from_origin":
 
-            return (1 - self.move_to_position_reward(physics))
+            r = (1 - self.move_to_position_reward(physics))
 
         elif self.task == "face_direction":
 
-            return self.face_direction_reward(physics)
+            r = self.face_direction_reward(physics)
 
         elif self.task == "move_in_direction":
 
@@ -435,7 +448,7 @@ class Jitterbug(base.Task):
             jitterbug_vel = physics.jitterbug_velocity_xyz()[0:2]
             target_vel = 1.0 * physics.target_direction_vec2()
 
-            return min(
+            r = min(
                 max(
                     0.0,
                     jitterbug_vel @ target_vel
@@ -445,24 +458,29 @@ class Jitterbug(base.Task):
 
         elif self.task == "move_to_position":
 
-            return self.move_to_position_reward(physics)
+            r = self.move_to_position_reward(physics)
 
         elif self.task == "move_to_pose":
 
-            # Use multiplicitive reward
-            # return (
-            #     self.move_to_position_reward(physics) *
+            # # Use mean reward
+            # r = 0.5 * (
+            #     self.move_to_position_reward(physics) +
             #     self.face_direction_reward(physics)
             # )
 
-            # Use mean reward
-            return 0.5 * (
-                self.move_to_position_reward(physics) +
+            # Use multiplicitive reward
+            r = (
+                self.move_to_position_reward(physics) *
                 self.face_direction_reward(physics)
             )
 
         else:
             raise ValueError("Invalid task {}".format(self.task))
+
+        # Reward Jitterbug for staying upright
+        r *= self.upright_reward(physics)
+
+        return r
 
 
 def demo():
@@ -478,7 +496,7 @@ def demo():
     # Load the Jitterbug face_direction task
     env = suite.load(
         domain_name="jitterbug",
-        task_name="face_direction",
+        task_name="move_from_origin",
         visualize_reward=True
     )
 

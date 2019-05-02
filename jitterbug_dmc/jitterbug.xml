@@ -16,9 +16,6 @@
     <default>
         <!-- Default density is steel at 7700kg/m^3 -->
         <geom density="7700" material="self" />
-
-        <!-- No damping for now -->
-        <!--<joint type="hinge" axis="0 0 1" damping="0.00001"/>-->
     </default>
 
     <worldbody>
@@ -44,6 +41,7 @@
             <geom type="box" name="coreBody2" size=".008 .006 .008" pos="0 0 .021" density="770" />
             <geom type="cylinder" name="screw1" size=".002" fromto="0 0 .026  0 .012 .026" />
             <geom type="ellipsoid" name="screw2" pos="0 .017 .026" size=".014 .006 .0005" />
+            <camera name="Egocentric" pos="0 -0.007 0.04" xyaxes="-1 0 0 0 0 1" fovy="90" />
 
             <!-- Front legs -->
             <!-- ========= Leg 2 ========= -->

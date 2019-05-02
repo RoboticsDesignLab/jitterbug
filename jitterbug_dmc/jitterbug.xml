@@ -108,7 +108,7 @@
         <!-- Target pose -->
         <body name="target" pos="0 0 0.035" quat="0 0 0 1" >
             <geom name="target" type="sphere" conaffinity="0" contype="0" pos="0 0 0.035" size=".01" material="target" />
-            <geom name="targetPointer" type="sphere" conaffinity="0" contype="0" pos="0 0.01 0.035" density="0" size=".005" material="target" />
+            <geom name="targetPointer" type="sphere" conaffinity="0" contype="0" pos="0.01 0 0.035" density="0" size=".005" material="target" />
         </body>
 
     </worldbody>

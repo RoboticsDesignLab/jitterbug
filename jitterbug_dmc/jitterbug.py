@@ -26,6 +26,8 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import sys
+import inspect
 import collections
 
 import numpy as np
@@ -38,7 +40,6 @@ from dm_control.utils import rewards
 from dm_control.utils import containers
 from dm_control.utils import io as resources
 from dm_control.mujoco.wrapper.mjbindings import mjlib
-
 
 
 # Constants
@@ -74,6 +75,23 @@ def move_from_origin(
         **environment_kwargs
     )
 
+
+@SUITE.add("benchmarking", "easy")
+def face_direction(
+        time_limit=_DEFAULT_TIME_LIMIT,
+        random=None,
+        environment_kwargs=None
+):
+    """Move the Jitterbug to face a certain yaw angle"""
+    physics = Physics.from_xml_string(*get_model_and_assets())
+    task = Jitterbug(random=random, task="face_direction")
+    environment_kwargs = environment_kwargs or {}
+    return control.Environment(
+        physics,
+        task,
+        time_limit=time_limit,
+        **environment_kwargs
+    )
 
 @SUITE.add("benchmarking", "easy")
 def move_in_direction(
@@ -231,17 +249,20 @@ class Jitterbug(base.Task):
                 - None to select a seed automatically (default)
             task (str): Specifies which task to configure. Options are;
                 - move_from_origin
+                - face_direction
                 - move_in_direction
                 - move_to_position
                 - move_to_pose
         """
 
-        assert task in [
-            "move_from_origin",
-            "move_in_direction",
-            "move_to_position",
-            "move_to_pose"
+        # Reflect to get task names from the current module
+        self.task_names = [
+            obj[0]
+            for obj in inspect.getmembers(sys.modules[__name__])
+            if inspect.isfunction(obj[1]) and obj[0] in SUITE._tasks
         ]
+        assert task in self.task_names,\
+            "Invalid task {}, options are {}".format(task, self.task_names)
 
         self.task = task
         super(Jitterbug, self).__init__(random=random)
@@ -250,45 +271,53 @@ class Jitterbug(base.Task):
         """Sets the state of the environment at the start of each episode
         """
 
-        # Configure target based on task
-        angle = self.random.uniform(0, 2 * np.pi)
-        radius = self.random.uniform(.05, 0.4)
-        yaw = np.random.uniform(0, 2 * np.pi)
+        # Use reset context to ensure changes are applied immediately
+        with physics.reset_context():
 
-        if self.task == "move_from_origin":
+            # Configure target based on task
+            angle = self.random.uniform(0, 2 * np.pi)
+            radius = self.random.uniform(.05, 0.3)
+            yaw = np.random.uniform(0, 2 * np.pi)
 
-            # Hide the target as it is not needed for this task
-            physics.named.model.geom_rgba["target", 3] = 0
-            physics.named.model.geom_rgba["targetPointer", 3] = 0
+            if self.task == "move_from_origin":
 
-        elif self.task == "move_in_direction":
+                # Hide the target orientation as it is not needed for this task
+                physics.named.model.geom_rgba["targetPointer", 3] = 0
 
-            # Randomize target orientation
-            physics.named.model.body_quat["target"] = np.array([
-                np.cos(yaw / 2), 0, 0, 1 * np.sin(yaw / 2)
-            ])
+            elif self.task == "face_direction":
 
-        elif self.task == "move_to_position":
+                # Randomize target orientation
+                physics.named.model.body_quat["target"] = np.array([
+                    np.cos(yaw / 2), 0, 0, 1 * np.sin(yaw / 2)
+                ])
 
-            # Hide the target orientation indicator as it is not needed
-            physics.named.model.geom_rgba["targetPointer", 3] = 0
+            elif self.task == "move_in_direction":
 
-            # Randomize target position
-            physics.named.model.body_pos["target", "x"] = radius * np.sin(angle)
-            physics.named.model.body_pos["target", "y"] = radius * np.cos(angle)
+                # Randomize target orientation
+                physics.named.model.body_quat["target"] = np.array([
+                    np.cos(yaw / 2), 0, 0, 1 * np.sin(yaw / 2)
+                ])
 
-        elif self.task == "move_to_pose":
+            elif self.task == "move_to_position":
 
-            # Randomize full target pose
-            radius = 0.01
-            physics.named.model.body_pos["target", "x"] = radius * np.sin(angle)
-            physics.named.model.body_pos["target", "y"] = radius * np.cos(angle)
-            physics.named.model.body_quat["target"] = np.array([
-                np.cos(yaw / 2), 0, 0, 1 * np.sin(yaw / 2)
-            ])
+                # Hide the target orientation indicator as it is not needed
+                physics.named.model.geom_rgba["targetPointer", 3] = 0
 
-        else:
-            raise ValueError("Invalid task {}".format(self.task))
+                # Randomize target position
+                physics.named.model.body_pos["target", "x"] = radius * np.sin(angle)
+                physics.named.model.body_pos["target", "y"] = radius * np.cos(angle)
+
+            elif self.task == "move_to_pose":
+
+                # Randomize full target pose
+                physics.named.model.body_pos["target", "x"] = radius * np.sin(angle)
+                physics.named.model.body_pos["target", "y"] = radius * np.cos(angle)
+                physics.named.model.body_quat["target"] = np.array([
+                    np.cos(yaw / 2), 0, 0, 1 * np.sin(yaw / 2)
+                ])
+
+            else:
+                raise ValueError("Invalid task {}".format(self.task))
 
         super(Jitterbug, self).initialize_episode(physics)
 
@@ -304,6 +333,15 @@ class Jitterbug(base.Task):
 
             # Jitterbug position is a sufficient observation for this task
             pass
+
+        elif self.task == "face_direction":
+
+            # Store the relative goal direction vector X, Y components
+            target_yaw = physics.angle_jitterbug_to_target()
+            obs['target_direction'] = np.array([
+                np.cos(target_yaw),
+                np.sin(target_yaw)
+            ])
 
         elif self.task == "move_in_direction":
 
@@ -321,30 +359,53 @@ class Jitterbug(base.Task):
 
         elif self.task == "move_to_pose":
 
-            # Store the goal X, Y position and yaw
-            obs['target_position'] = np.concatenate((
-                physics.target_position_xyz()[:2],
-                [physics.target_position_yaw()]
-                ),
-                axis=0
-            )
+            # Store the goal X, Y position and yaw X, Y components
+            target_yaw = physics.angle_jitterbug_to_target()
+            obs['target_position'] = physics.target_position_xyz()[:2]
+            obs['target_direction'] = np.array([
+                np.cos(target_yaw),
+                np.sin(target_yaw)
+            ])
 
         else:
             raise ValueError("Invalid task {}".format(self.task))
 
         return obs
 
+    def face_direction_reward(self, physics):
+        """Compute a reward for facing a certain direction
+
+        See https://www.desmos.com/calculator/iaczzkaplq for a plot of the
+        reward function.
+
+        Returns:
+            (float): Angular reward on [0, 1] as you face the target direction
+        """
+        angle_to_target = physics.angle_jitterbug_to_target()
+        return 2 / (np.abs(angle_to_target) / np.pi + 1) - 1
+
+    def move_to_position_reward(self, physics):
+        """Compute a reward for moving to a certain position
+
+        See https://www.desmos.com/calculator/cppbhrtxlj for a plot of the
+        reward function.
+
+        Returns:
+            (float): Position reward on [0, 1], grows larger as you approach the
+                the goal, asymptoting to 0 at an infinite distance
+        """
+        dist_to_target = np.linalg.norm(physics.vec_jitterbug_to_target())
+        return 1 / (10 * dist_to_target + 1)
+
     def get_reward(self, physics):
 
         if self.task == "move_from_origin":
 
-            # Reward is bounded by [0, 1] and grows larger as you move away
-            # from the origin, asymptoting to 1 at infinite distance
-            # https://www.desmos.com/calculator/021e5m4cwr
-            dist_from_origin = np.linalg.norm(
-                physics.jitterbug_position_xyz()[:2]
-            )
-            return 1 - 1 / (20 * dist_from_origin + 1)
+            return (1 - self.move_to_position_reward(physics))
+
+        elif self.task == "face_direction":
+
+            return self.face_direction_reward(physics)
 
         elif self.task == "move_in_direction":
 
@@ -352,30 +413,21 @@ class Jitterbug(base.Task):
 
         elif self.task == "move_to_position":
 
-            # Reward is bounded by [0, 1] and grows larger as you approach the
-            # target, asymptoting to 0 as infinite distance
-            # https://www.desmos.com/calculator/r1ijdhubd3
-            dist_to_target = np.linalg.norm(physics.vec_jitterbug_to_target())
-            return 1 / (5 * dist_to_target + 1)
+            return self.move_to_position_reward(physics)
 
         elif self.task == "move_to_pose":
 
-            dist_to_target = np.linalg.norm(physics.vec_jitterbug_to_target())
-            angle_to_target = physics.angle_jitterbug_to_target()
+            # Use multiplicitive reward
+            # return (
+            #     self.move_to_position_reward(physics) *
+            #     self.face_direction_reward(physics)
+            # )
 
-            # Distance is rewarded on [0, 1] as you approach the target
-            # https://www.desmos.com/calculator/r1ijdhubd3
-            dist_reward = 1 / (5 * dist_to_target + 1)
-
-            # Angle is rewarded on [0, 1] as you face the target direction
-            # https://www.desmos.com/calculator/iaczzkaplq
-
-            angle_to_target = physics.angle_jitterbug_to_target()
-            angle_reward = 2 / (np.abs(angle_to_target) / np.pi + 1) - 1
-
-            # Combine the two rewards
-            #return dist_reward * angle_reward
-            return 0.5 * (dist_reward + angle_reward)
+            # Use mean reward
+            return 0.5 * (
+                self.move_to_position_reward(physics) +
+                self.face_direction_reward(physics)
+            )
 
         else:
             raise ValueError("Invalid task {}".format(self.task))

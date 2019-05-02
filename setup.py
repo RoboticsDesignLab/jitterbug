@@ -12,5 +12,5 @@ setup(
     include_package_data=True,
     author='Aaron Snoswell',
     author_email='aaron.snoswell@uqconnect.edu.au',
-    url='https://github.com/aaronsnoswell/jitterbug-dm'
+    url='https://github.com/aaronsnoswell/jitterbug-dmc'
 )

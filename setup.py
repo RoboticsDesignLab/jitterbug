@@ -13,5 +13,12 @@ setup(
     include_package_data=True,
     author='Aaron Snoswell',
     author_email='aaron.snoswell@uqconnect.edu.au',
-    url='https://github.com/aaronsnoswell/jitterbug-dmc'
+    url='https://github.com/aaronsnoswell/jitterbug-dmc',
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Natural Language :: English',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence'
+    ]
 )

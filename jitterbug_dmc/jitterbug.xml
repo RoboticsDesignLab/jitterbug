@@ -29,11 +29,14 @@
         <geom name="floor" pos="0 0 0" size="0.5 0.5 0.01" type="plane" material="grid1cm" />
 
         <!-- ============= Camera ============ -->
-        <camera name="fixed" pos="0 0 .75" quat="1 0 0 0"/>
+        <camera name="Global" pos="0 0 1.2" quat="1 0 0 0"/>
+        <camera name="Spectator" pos="0 -0.8 0.6" mode="targetbodycom" target="jitterbug" />
 
         <!-- ============ Jitterbug ============ -->
         <body name="jitterbug" pos="0 0 0.035" quat="1 0 0 0" >
             <joint name="root" type="free"/>
+
+            <camera name="Tracker" pos="0 0 1.2" quat="1 0 0 0" mode="trackcom"/>
 
             <!-- ======= Core body ======= -->
             <!-- NB the boxes are not solid, hence we use a 10% and 50% density estimate here -->

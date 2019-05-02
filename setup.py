@@ -5,6 +5,7 @@ setup(
     version='0.0.1a',
     description='A Jitterbug dm_control Reinforcement Learning domain',
     license='MIT',
+    python_requires='>=3.5',
     packages=['jitterbug_dmc'],
     install_requires=[
         "dm_control"

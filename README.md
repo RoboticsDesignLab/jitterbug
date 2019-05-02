@@ -2,6 +2,8 @@
 
 A Jitterbug dm_control Reinforcement Learning domain
 
+![Jitterbug model](figures/jitterbug.jpg)
+
 # Installation
 
 This package is not distributed on PyPI - you will have to install it from

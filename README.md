@@ -67,7 +67,7 @@ viewer.launch(env, policy=random_policy)
 This Reinforcement Learning domain contains several distinct tasks.
 All tasks require the jitterbug to remain upright at all times.
 
- - `move_from_origin` (easy): The jitterbug must move away from the origin.
+ - `move_from_origin` (easy): The jitterbug must move away from the origin
  - `face_direction` (easy): The jitterbug must rotate to face a certain direction
  - `move_in_direction` (easy): The jitterbug must achieve a positive velocity in a certain direction
  - `move_to_position` (hard): The jitterbug must move to a certain cartesian positon 

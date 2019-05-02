@@ -19,4 +19,13 @@ To test the installation:
 $> cd ~
 $> python
 >>> import jitterbug_dmc
+>>> jitterbug_dmc.demo()
 ```
+
+# Requirements
+
+This package is designed for Python 3.6+ (but may also work with Python 3.5) 
+under Windows, Mac or Linux.
+
+The only pre-requisite package is
+[`dm_control`](https://github.com/deepmind/dm_control).

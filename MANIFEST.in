@@ -1,0 +1,2 @@
+include jitterbug_dmc/*.xml
+include jitterbug_dmc/common/*.xml

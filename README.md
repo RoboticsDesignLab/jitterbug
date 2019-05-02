@@ -10,7 +10,7 @@ source:
 ```bash
 $> git clone github.com/aaronsnoswell/jitterbug-dmc
 $> cd jitterbug-dmc
-$> pip install -e .
+$> pip install .
 ```
 
 To test the installation:

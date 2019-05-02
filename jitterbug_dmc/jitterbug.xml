@@ -27,7 +27,7 @@
 
         <!-- ============= Camera ============ -->
         <camera name="Global" pos="0 0 1.2" quat="1 0 0 0"/>
-        <camera name="Spectator" pos="0 -0.8 0.6" mode="targetbodycom" target="jitterbug" />
+        <camera name="Spectator" pos="0 -0.8 0.6" mode="targetbodycom" target="jitterbug" fovy="20" />
 
         <!-- ============ Jitterbug ============ -->
         <body name="jitterbug" pos="0 0 0.035" quat="1 0 0 0" >

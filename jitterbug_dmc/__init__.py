@@ -47,3 +47,5 @@ from jitterbug_dmc.jitterbug import (
     Jitterbug,
     demo
 )
+
+from jitterbug_dmc.gym_wrapper import JitterbugGymEnv

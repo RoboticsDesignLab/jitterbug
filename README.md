@@ -1,6 +1,9 @@
 # jitterbug-dmc
 
-A 'Jitterbug' under-actuated continuous control Reinforcement Learning domain, implemented using the [MuJoCo](http://mujoco.org/) physics engine and distributed as an extension to the [Deep Mind Control suite (`dm_control`)](https://github.com/deepmind/dm_control).
+A 'Jitterbug' under-actuated continuous control Reinforcement Learning domain,
+implemented using the [MuJoCo](http://mujoco.org/) physics engine and
+distributed as an extension to the
+[Deep Mind Control suite (`dm_control`)](https://github.com/deepmind/dm_control).
 
 ![Jitterbug model](figures/jitterbug.jpg)
 
@@ -34,7 +37,8 @@ The only pre-requisite package is
 
 ## Usage
 
-Upon importing `jitterbug_dmc`, the domain and tasks are added to the standard [`dm_control`](https://github.com/deepmind/dm_control) suite.
+Upon importing `jitterbug_dmc`, the domain and tasks are added to the standard
+[`dm_control`](https://github.com/deepmind/dm_control) suite.
 For example, the `move_from_origin` task can be instantiated as follows;
 
 ```python
@@ -62,13 +66,45 @@ def random_policy(time_step):
 viewer.launch(env, policy=random_policy)
 ```
 
+## OpenAI Gym Interface
+
+For convenience, we also provide an [OpenAI Gym](https://gym.openai.com/docs/)
+compatible interface to this environment using the
+[`dm2gym`](https://github.com/zuoxingdong/dm2gym) library.
+
+```python
+from dm_control import suite
+import jitterbug_dmc
+
+env = JitterbugGymEnv(
+    suite.load(
+        domain_name="jitterbug",
+        task_name="move_from_origin",
+        visualize_reward=True
+    )
+)
+
+# Test the gym interface
+env.reset()
+for t in range(1000):
+    observation, reward, done, info = env.step(
+        env.action_space.sample()
+    )
+    env.render()
+env.close()
+```
+
 ## Tasks
 
 This Reinforcement Learning domain contains several distinct tasks.
 All tasks require the jitterbug to remain upright at all times.
 
  - `move_from_origin` (easy): The jitterbug must move away from the origin
- - `face_direction` (easy): The jitterbug must rotate to face a certain direction
- - `move_in_direction` (easy): The jitterbug must achieve a positive velocity in a certain direction
- - `move_to_position` (hard): The jitterbug must move to a certain cartesian positon 
- - `move_to_pose` (hard): The jitterbug must move to a certain cartesian position and face in a certain direction 
+ - `face_direction` (easy): The jitterbug must rotate to face a certain
+   direction
+ - `move_in_direction` (easy): The jitterbug must achieve a positive velocity in
+   a certain direction
+ - `move_to_position` (hard): The jitterbug must move to a certain cartesian
+   position 
+ - `move_to_pose` (hard): The jitterbug must move to a certain cartesian
+   position and face in a certain direction 

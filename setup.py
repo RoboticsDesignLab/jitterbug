@@ -9,6 +9,7 @@ setup(
     packages=['jitterbug_dmc'],
     install_requires=[
         "dm_control"
+        "dm2gym @ git+https://github.com/aaronsnoswell/dm2gym@opencv-render-window"
     ],
     include_package_data=True,
     author='Aaron Snoswell',

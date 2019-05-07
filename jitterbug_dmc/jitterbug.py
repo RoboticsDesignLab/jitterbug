@@ -376,6 +376,18 @@ class Jitterbug(base.Task):
             else:
                 raise ValueError("Invalid task {}".format(self.task))
 
+            # Randomize Jitterbug orientation to break symmetries
+            rotation_angle = np.random.random() * 2 * np.pi
+            rotation_axis = np.concatenate((
+                np.random.random(size=2) * 0.05 - 0.025,
+                (1.0, )
+            ))
+            rotation_axis /= np.linalg.norm(rotation_axis)
+            physics.named.data.qpos["root"][3:] = np.concatenate((
+                (np.cos(rotation_angle / 2), ),
+                np.sin(rotation_angle / 2) * rotation_axis
+            ))
+
         super(Jitterbug, self).initialize_episode(physics)
 
     def get_observation(self, physics):

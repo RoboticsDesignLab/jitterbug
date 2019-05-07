@@ -47,7 +47,7 @@ def demo():
     env = JitterbugGymEnv(
         suite.load(
             domain_name="jitterbug",
-            task_name="face_direction",
+            task_name="move_from_origin",
             visualize_reward=True
         )
     )

@@ -42,10 +42,12 @@ from dm_control.utils import io as resources
 from dm_control.mujoco.wrapper.mjbindings import mjlib
 
 
-# Constants
+# Load the suite so we can add to it
 SUITE = containers.TaggedTasks()
-_DEFAULT_TIME_LIMIT = 20
 
+# Environment constants
+DEFAULT_TIME_LIMIT = 10
+DEFAULT_CONTROL_TIMESTEP = 0.01
 
 def get_model_and_assets():
     """Returns a tuple containing the model XML string and a dict of assets"""
@@ -60,7 +62,8 @@ def get_model_and_assets():
 
 @SUITE.add("benchmarking", "easy")
 def move_from_origin(
-        time_limit=_DEFAULT_TIME_LIMIT,
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
         environment_kwargs=None
 ):
@@ -72,13 +75,15 @@ def move_from_origin(
         physics,
         task,
         time_limit=time_limit,
+        control_timestep=control_timestep,
         **environment_kwargs
     )
 
 
 @SUITE.add("benchmarking", "easy")
 def face_direction(
-        time_limit=_DEFAULT_TIME_LIMIT,
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
         environment_kwargs=None
 ):
@@ -90,12 +95,14 @@ def face_direction(
         physics,
         task,
         time_limit=time_limit,
+        control_timestep=control_timestep,
         **environment_kwargs
     )
 
 @SUITE.add("benchmarking", "easy")
 def move_in_direction(
-        time_limit=_DEFAULT_TIME_LIMIT,
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
         environment_kwargs=None
 ):
@@ -107,13 +114,15 @@ def move_in_direction(
         physics,
         task,
         time_limit=time_limit,
+        control_timestep=control_timestep,
         **environment_kwargs
     )
 
 
 @SUITE.add("benchmarking", "hard")
 def move_to_position(
-        time_limit=_DEFAULT_TIME_LIMIT,
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
         environment_kwargs=None
 ):
@@ -125,13 +134,15 @@ def move_to_position(
         physics,
         task,
         time_limit=time_limit,
+        control_timestep=control_timestep,
         **environment_kwargs
     )
 
 
 @SUITE.add("benchmarking", "hard")
 def move_to_pose(
-        time_limit=_DEFAULT_TIME_LIMIT,
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
         environment_kwargs=None
 ):
@@ -143,6 +154,7 @@ def move_to_pose(
         physics,
         task,
         time_limit=time_limit,
+        control_timestep=control_timestep,
         **environment_kwargs
     )
 
@@ -496,12 +508,12 @@ def demo():
     # Load the Jitterbug face_direction task
     env = suite.load(
         domain_name="jitterbug",
-        task_name="move_from_origin",
+        task_name="face_direction",
         visualize_reward=True
     )
 
     # Use a constant policy
-    policy = lambda ts: 0.8
+    policy = lambda ts: -0.8
 
     # Dance, jitterbug, dance!
     viewer.launch(env, policy=policy)

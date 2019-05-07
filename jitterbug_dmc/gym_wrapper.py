@@ -6,7 +6,7 @@ import dm2gym
 class JitterbugGymEnv(dm2gym.DMControlEnv):
     """A renderer with customized settings for the Jitterbug domain"""
 
-    def __init__(self, env, *, render_every=100):
+    def __init__(self, env, *, render_every=1):
         """Constructor
 
         Args:
@@ -47,14 +47,14 @@ def demo():
     env = JitterbugGymEnv(
         suite.load(
             domain_name="jitterbug",
-            task_name="move_in_direction",
+            task_name="face_direction",
             visualize_reward=True
         )
     )
 
     # Test the gym interface
     env.reset()
-    for t in range(1000 * 40):
+    for t in range(1000):
         observation, reward, done, info = env.step(0.9)
         env.render()
 

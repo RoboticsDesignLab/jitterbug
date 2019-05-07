@@ -118,6 +118,10 @@
 
     </worldbody>
 
+    <sensor>
+        <framelinvel name="jitterbug_framelinvel" objtype="body" objname="jitterbug"/>
+    </sensor>
+
     <actuator>
 
         <!-- Velocity servo -->

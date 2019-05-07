@@ -49,6 +49,8 @@ SUITE = containers.TaggedTasks()
 DEFAULT_TIME_LIMIT = 10
 DEFAULT_CONTROL_TIMESTEP = 0.01
 
+TARGET_SPEED = 0.1
+
 def get_model_and_assets():
     """Returns a tuple containing the model XML string and a dict of assets"""
     return (
@@ -62,10 +64,10 @@ def get_model_and_assets():
 
 @SUITE.add("benchmarking", "easy")
 def move_from_origin(
-        time_limit=DEFAULT_TIME_LIMIT,
-        control_timestep=DEFAULT_CONTROL_TIMESTEP,
-        random=None,
-        environment_kwargs=None
+    time_limit=DEFAULT_TIME_LIMIT,
+    control_timestep=DEFAULT_CONTROL_TIMESTEP,
+    random=None,
+    environment_kwargs=None
 ):
     """Move the Jitterbug away from the origin"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -82,10 +84,10 @@ def move_from_origin(
 
 @SUITE.add("benchmarking", "easy")
 def face_direction(
-        time_limit=DEFAULT_TIME_LIMIT,
-        control_timestep=DEFAULT_CONTROL_TIMESTEP,
-        random=None,
-        environment_kwargs=None
+    time_limit=DEFAULT_TIME_LIMIT,
+    control_timestep=DEFAULT_CONTROL_TIMESTEP,
+    random=None,
+    environment_kwargs=None
 ):
     """Move the Jitterbug to face a certain yaw angle"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -101,10 +103,10 @@ def face_direction(
 
 @SUITE.add("benchmarking", "easy")
 def move_in_direction(
-        time_limit=DEFAULT_TIME_LIMIT,
-        control_timestep=DEFAULT_CONTROL_TIMESTEP,
-        random=None,
-        environment_kwargs=None
+    time_limit=DEFAULT_TIME_LIMIT,
+    control_timestep=DEFAULT_CONTROL_TIMESTEP,
+    random=None,
+    environment_kwargs=None
 ):
     """Move the Jitterbug in a certain direction"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -121,10 +123,10 @@ def move_in_direction(
 
 @SUITE.add("benchmarking", "hard")
 def move_to_position(
-        time_limit=DEFAULT_TIME_LIMIT,
-        control_timestep=DEFAULT_CONTROL_TIMESTEP,
-        random=None,
-        environment_kwargs=None
+    time_limit=DEFAULT_TIME_LIMIT,
+    control_timestep=DEFAULT_CONTROL_TIMESTEP,
+    random=None,
+    environment_kwargs=None
 ):
     """Move the Jitterbug to a certain XYZ position"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -141,10 +143,10 @@ def move_to_position(
 
 @SUITE.add("benchmarking", "hard")
 def move_to_pose(
-        time_limit=DEFAULT_TIME_LIMIT,
-        control_timestep=DEFAULT_CONTROL_TIMESTEP,
-        random=None,
-        environment_kwargs=None
+    time_limit=DEFAULT_TIME_LIMIT,
+    control_timestep=DEFAULT_CONTROL_TIMESTEP,
+    random=None,
+    environment_kwargs=None
 ):
     """Move the Jitterbug to a certain XYZRPY pose"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -181,7 +183,7 @@ class Physics(mujoco.Physics):
             (float): Yaw angle of the Jitterbug in radians on the range
                 [-pi, pi]
         """
-        mat = np.zeros((9))
+        mat = np.zeros(9)
         mjlib.mju_quat2Mat(mat, self.jitterbug_position_quat())
         mat = mat.reshape((3, 3))
         yaw = np.arctan2(mat[1, 0], mat[0, 0])
@@ -205,8 +207,17 @@ class Physics(mujoco.Physics):
         return self.jitterbug_velocity()[3:]
 
     def motor_position(self):
-        """Get the motor angular position"""
-        return self.named.data.qpos["jointMass"]
+        """Get the motor angular position
+
+        Returns:
+            (float): The motor position in radians on the range [-pi, pi]
+        """
+        angle = self.named.data.qpos["jointMass"]
+        while angle > np.pi:
+            angle -= 2*np.pi
+        while angle <= -np.pi:
+            angle += 2*np.pi
+        return angle
 
     def motor_velocity(self):
         """Get the motor angular velocity"""
@@ -236,23 +247,37 @@ class Physics(mujoco.Physics):
             (float): Yaw angle of the target in radians on the range
                 [-pi, pi]
         """
-        mat = np.zeros((9))
+        mat = np.zeros(9)
         mjlib.mju_quat2Mat(mat, self.target_position_quat())
         mat = mat.reshape((3, 3))
         yaw = np.arctan2(mat[1, 0], mat[0, 0])
         return yaw
 
-    def target_direction_vec2(self):
-        """Get the target heading as a global 2-vector"""
-        target_yaw = self.target_direction_yaw()
-        return np.array([
-            np.cos(target_yaw),
-            np.sin(target_yaw)
-        ])
+    def target_position_in_jitterbug_frame(self):
+        """Find XYZ position of the target in the Jitterbug frame"""
 
-    def vec3_jitterbug_to_target(self):
-        """Gets an XYZ vector from jitterbug to the target"""
-        return self.target_position_xyz() - self.jitterbug_position_xyz()
+        # Find target position
+        target_pos = self.target_position_xyz() - self.jitterbug_position_xyz()
+
+        # Get the Jitterbug frame rotation matrix
+        jitterbug_rot_mat = np.zeros(9)
+        mjlib.mju_quat2Mat(jitterbug_rot_mat, self.jitterbug_position_quat())
+
+        return jitterbug_rot_mat.reshape((3, 3)) @ target_pos
+
+    def jitterbug_velocity_in_target_frame(self):
+        """Find the XYZ velocity of the Jitterbug in the target frame"""
+
+        # Get the Jitterbug global frame velocity
+        jitterbug_vel = self.named.data.sensordata['jitterbug_framelinvel']
+
+        # Get the target frame rotation matrix
+        target_rot_mat = np.zeros(9)
+        mjlib.mju_quat2Mat(target_rot_mat, self.target_position_quat())
+
+        return -1 * (
+            target_rot_mat.reshape((3, 3)) @ jitterbug_vel
+        )
 
     def angle_jitterbug_to_target(self):
         """Gets the relative yaw angle from Jitterbug heading to the target
@@ -267,14 +292,6 @@ class Physics(mujoco.Physics):
         while angle <= -np.pi:
             angle += 2*np.pi
         return angle
-
-    def vec2_direction_to_target(self):
-        """Get the relative XY yaw direction vector to the target"""
-        target_yaw = self.angle_jitterbug_to_target()
-        return np.array([
-            np.cos(target_yaw),
-            np.sin(target_yaw)
-        ])
 
 
 class Jitterbug(base.Task):
@@ -335,6 +352,7 @@ class Jitterbug(base.Task):
             elif self.task == "move_in_direction":
 
                 # Randomize target orientation
+                yaw = -np.pi/2
                 physics.named.model.body_quat["target"] = np.array([
                     np.cos(yaw / 2), 0, 0, 1 * np.sin(yaw / 2)
                 ])
@@ -379,66 +397,87 @@ class Jitterbug(base.Task):
 
         elif self.task == "face_direction":
 
-            # Store the relative target direction vector
-            obs['target_direction'] = physics.vec2_direction_to_target()
+            # Store the relative target yaw angle
+            obs['angle_to_target'] = physics.angle_jitterbug_to_target()
 
         elif self.task == "move_in_direction":
 
-            # Store the relative target direction vector
-            obs['target_direction'] = physics.vec2_direction_to_target()
+            # Store the speed in the target frame
+            obs['speed_in_target_frame'] = (
+                physics.jitterbug_velocity_in_target_frame()[0]
+            )
 
         elif self.task == "move_to_position":
 
-            # Store the relative target XYZ position
-            obs['target_position'] = physics.vec3_jitterbug_to_target()
+            # Store the relative target XYZ position in JB frame
+            obs['target_in_jitterbug_frame'] = (
+                physics.target_position_in_jitterbug_frame()
+            )
 
         elif self.task == "move_to_pose":
 
-            # Store the relative target XYZ position
-            obs['target_position'] = physics.vec3_jitterbug_to_target()
+            # Store the relative target XYZ position in JB frame
+            obs['target_in_jitterbug_frame'] = (
+                physics.target_position_in_jitterbug_frame()
+            )
 
-            # Store the relative target direction vector
-            obs['target_direction'] = physics.vec2_direction_to_target()
+            # Store the relative target yaw angle
+            obs['angle_to_target'] = physics.angle_jitterbug_to_target()
 
         else:
             raise ValueError("Invalid task {}".format(self.task))
 
         return obs
 
-    def face_direction_reward(self, physics):
+    def heading_reward(self, physics):
         """Compute a reward for facing a certain direction
 
-        See https://www.desmos.com/calculator/iaczzkaplq for a plot of the
-        reward function.
+        Returns:
+            (float): Angular reward on [0, 1]
+        """
+        return rewards.tolerance(
+            physics.angle_jitterbug_to_target(),
+            bounds=(0, 0),
+            margin=np.pi/2,
+            value_at_margin=0,
+            sigmoid='cosine'
+        )
+
+    def velocity_reward(self, physics):
+        """Compute a reward for moving in a certain direction
 
         Returns:
-            (float): Angular reward on [0, 1] as you face the target direction
+            (float): Velocity reward on [0, 1]
         """
-        angle_to_target = physics.angle_jitterbug_to_target()
-        return 2 / (np.abs(angle_to_target) / np.pi + 1) - 1
+        return rewards.tolerance(
+            physics.jitterbug_velocity_in_target_frame()[0],
+            bounds=(TARGET_SPEED, float('inf')),
+            margin=TARGET_SPEED,
+            value_at_margin=0,
+            sigmoid='cosine'
+        )
 
-    def move_to_position_reward(self, physics):
+    def position_reward(self, physics):
         """Compute a reward for moving to a certain position
 
-        See https://www.desmos.com/calculator/cppbhrtxlj for a plot of the
-        reward function.
-
         Returns:
-            (float): Position reward on [0, 1], grows larger as you approach the
-                the goal, asymptoting to 0 at an infinite distance
+            (float): Position reward on [0, 1]
         """
-        dist_to_target = np.linalg.norm(physics.vec3_jitterbug_to_target())
-        return 1 / (10 * dist_to_target + 1)
+        return rewards.tolerance(
+            np.linalg.norm(
+                physics.target_position_in_jitterbug_frame()
+            ),
+            bounds=(0, 0),
+            margin=0.1
+        )
 
     def upright_reward(self, physics):
         """Reward Jitterbug for remaining upright"""
-        return min(
-            max(
-                0,
-                # Dot product of the Jitterbug Z axis with the global Z
-                physics.named.data.xmat['jitterbug', 'zz']
-            ),
-            1
+        return rewards.tolerance(
+            # Dot product of the Jitterbug Z axis with the global Z
+            physics.named.data.xmat['jitterbug', 'zz'],
+            bounds=(1, 1),
+            margin=0.5
         )
 
     def get_reward(self, physics):
@@ -447,43 +486,26 @@ class Jitterbug(base.Task):
 
         if self.task == "move_from_origin":
 
-            r = (1 - self.move_to_position_reward(physics))
+            r = (1 - self.position_reward(physics))
 
         elif self.task == "face_direction":
 
-            r = self.face_direction_reward(physics)
+            r = self.heading_reward(physics)
 
         elif self.task == "move_in_direction":
 
-            # Jitterbug is rewarded for moving in a given target direction
-            max_speed_per_step = 0.3
-            jitterbug_vel = physics.jitterbug_velocity_xyz()[0:2]
-            target_vel = 1.0 * physics.target_direction_vec2()
-
-            r = min(
-                max(
-                    0.0,
-                    jitterbug_vel @ target_vel
-                ) / max_speed_per_step,
-                1.0
-            )
+            r = self.velocity_reward(physics)
 
         elif self.task == "move_to_position":
 
-            r = self.move_to_position_reward(physics)
+            r = self.position_reward(physics)
 
         elif self.task == "move_to_pose":
 
-            # # Use mean reward
-            # r = 0.5 * (
-            #     self.move_to_position_reward(physics) +
-            #     self.face_direction_reward(physics)
-            # )
-
-            # Use multiplicitive reward
+            # Use multiplicative reward
             r = (
-                self.move_to_position_reward(physics) *
-                self.face_direction_reward(physics)
+                    self.position_reward(physics) *
+                    self.heading_reward(physics)
             )
 
         else:
@@ -505,15 +527,18 @@ def demo():
     # Add the jitterbug tasks to the suite
     import jitterbug_dmc
 
-    # Load the Jitterbug face_direction task
+    # Load the Jitterbug domain
     env = suite.load(
         domain_name="jitterbug",
-        task_name="face_direction",
-        visualize_reward=True
+        task_name="move_from_origin",
+        visualize_reward=True,
+        task_kwargs={
+            #"time_limit": float("inf")
+        }
     )
 
     # Use a constant policy
-    policy = lambda ts: -0.8
+    policy = lambda ts: 0.8
 
     # Dance, jitterbug, dance!
     viewer.launch(env, policy=policy)

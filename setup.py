@@ -8,7 +8,7 @@ setup(
     python_requires='>=3.5',
     packages=['jitterbug_dmc'],
     install_requires=[
-        "dm_control"
+        "dm_control @ git+https://github.com/deepmind/dm_control",
         "dm2gym @ git+https://github.com/aaronsnoswell/dm2gym@opencv-render-window"
     ],
     include_package_data=True,

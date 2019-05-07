@@ -61,8 +61,6 @@ def move_in_direction(ts, *, angle_threshold=np.deg2rad(20)):
             rotate towards the target or move towards the target
     """
 
-    print(ts.observation['speed_in_target_frame'])
-
     angle_to_target = ts.observation['angle_to_target']
 
     if np.abs(angle_to_target) > angle_threshold:

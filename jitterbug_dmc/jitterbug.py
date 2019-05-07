@@ -45,10 +45,9 @@ from dm_control.mujoco.wrapper.mjbindings import mjlib
 # Load the suite so we can add to it
 SUITE = containers.TaggedTasks()
 
-# Environment constants
+# Task constants
 DEFAULT_TIME_LIMIT = 10
 DEFAULT_CONTROL_TIMESTEP = 0.01
-
 TARGET_SPEED = 0.1
 
 def get_model_and_assets():

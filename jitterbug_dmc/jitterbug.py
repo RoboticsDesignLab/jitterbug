@@ -260,16 +260,21 @@ class Physics(mujoco.Physics):
         return yaw
 
     def target_position_in_jitterbug_frame(self):
-        """Find XYZ position of the target in the Jitterbug frame"""
+        """Find XYZ position of the target in the Jitterbug frame
 
-        # Find target position
+        NB: +X in Jitterbug frame is to the LHS, +Y in Jitterbug frame is
+        backwards
+        """
+
+        # Find relative target position
         target_pos = self.target_position_xyz() - self.jitterbug_position_xyz()
 
         # Get the Jitterbug frame rotation matrix
         jitterbug_rot_mat = np.zeros(9)
         mjlib.mju_quat2Mat(jitterbug_rot_mat, self.jitterbug_position_quat())
 
-        return jitterbug_rot_mat.reshape((3, 3)) @ target_pos
+        # Apply inverse transform to put target in JB frame
+        return np.linalg.inv(jitterbug_rot_mat.reshape((3, 3))) @ target_pos
 
     def jitterbug_velocity_in_target_frame(self):
         """Find the XYZ velocity of the Jitterbug in the target frame"""
@@ -281,9 +286,8 @@ class Physics(mujoco.Physics):
         target_rot_mat = np.zeros(9)
         mjlib.mju_quat2Mat(target_rot_mat, self.target_position_quat())
 
-        return -1 * (
-            target_rot_mat.reshape((3, 3)) @ jitterbug_vel
-        )
+        # Apply inverse rotation to put velocity in target frame
+        return np.linalg.inv(target_rot_mat.reshape((3, 3))) @ jitterbug_vel
 
     def angle_jitterbug_to_target(self):
         """Gets the relative yaw angle from Jitterbug heading to the target

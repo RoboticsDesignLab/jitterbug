@@ -307,7 +307,12 @@ class Physics(mujoco.Physics):
 class Jitterbug(base.Task):
     """A jitterbug `Task`"""
 
-    def __init__(self, random=None, task="move_from_origin"):
+    def __init__(
+        self,
+        random=None,
+        task="move_from_origin",
+        random_pose=True
+    ):
         """Initialize an instance of the `Jitterbug` domain
 
         Args:
@@ -321,6 +326,8 @@ class Jitterbug(base.Task):
                 - move_in_direction
                 - move_to_position
                 - move_to_pose
+            random_pose (bool): If true, initialize the Jitterbug with a random
+                pose to break symmetries
         """
 
         # Reflect to get task names from the current module
@@ -333,6 +340,7 @@ class Jitterbug(base.Task):
             "Invalid task {}, options are {}".format(task, self.task_names)
 
         self.task = task
+        self.random_pose = random_pose
         super(Jitterbug, self).__init__(random=random)
 
     def initialize_episode(self, physics):
@@ -387,17 +395,19 @@ class Jitterbug(base.Task):
             else:
                 raise ValueError("Invalid task {}".format(self.task))
 
-            # Randomize Jitterbug orientation to break symmetries
-            rotation_angle = np.random.random() * 2 * np.pi
-            rotation_axis = np.concatenate((
-                np.random.random(size=2) * 0.05 - 0.025,
-                (1.0, )
-            ))
-            rotation_axis /= np.linalg.norm(rotation_axis)
-            physics.named.data.qpos["root"][3:] = np.concatenate((
-                (np.cos(rotation_angle / 2), ),
-                np.sin(rotation_angle / 2) * rotation_axis
-            ))
+            if self.random_pose:
+
+                # Randomize Jitterbug orientation to break symmetries
+                rotation_angle = np.random.random() * 2 * np.pi
+                rotation_axis = np.concatenate((
+                    np.random.random(size=2) * 0.05 - 0.025,
+                    (1.0, )
+                ))
+                rotation_axis /= np.linalg.norm(rotation_axis)
+                physics.named.data.qpos["root"][3:] = np.concatenate((
+                    (np.cos(rotation_angle / 2), ),
+                    np.sin(rotation_angle / 2) * rotation_axis
+                ))
 
         super(Jitterbug, self).initialize_episode(physics)
 

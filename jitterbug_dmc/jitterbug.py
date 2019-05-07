@@ -551,7 +551,11 @@ def demo():
     policy = lambda ts: 0.8
 
     # Dance, jitterbug, dance!
-    viewer.launch(env, policy=policy)
+    viewer.launch(
+        env,
+        policy=policy,
+        title="Jitterbug Demo"
+    )
 
 
 if __name__ == '__main__':

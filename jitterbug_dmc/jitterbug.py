@@ -433,6 +433,9 @@ class Jitterbug(base.Task):
 
         elif self.task == "move_in_direction":
 
+            # Store the relative target yaw angle
+            obs['angle_to_target'] = physics.angle_jitterbug_to_target()
+
             # Store the speed in the target frame
             obs['speed_in_target_frame'] = (
                 physics.jitterbug_velocity_in_target_frame()[0]

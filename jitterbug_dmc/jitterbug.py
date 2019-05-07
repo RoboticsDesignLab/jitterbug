@@ -208,14 +208,21 @@ class Physics(mujoco.Physics):
     def motor_position(self):
         """Get the motor angular position
 
+        NB: This function artificially rotates the motor frame so that 0deg is
+        facing forwards on the Jitterbug
+
         Returns:
             (float): The motor position in radians on the range [-pi, pi]
         """
-        angle = self.named.data.qpos["jointMass"]
+
+        # Offset motor so 0deg is facing forwards on the jitterbug
+        angle = self.named.data.qpos["jointMass"] + np.pi / 2
+
         while angle > np.pi:
             angle -= 2*np.pi
         while angle <= -np.pi:
             angle += 2*np.pi
+
         return angle
 
     def motor_velocity(self):

@@ -49,3 +49,4 @@ from jitterbug_dmc.jitterbug import (
 )
 
 from jitterbug_dmc.gym_wrapper import JitterbugGymEnv
+import jitterbug_dmc.heuristic_policies

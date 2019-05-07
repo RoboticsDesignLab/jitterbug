@@ -94,6 +94,11 @@ for t in range(1000):
 env.close()
 ```
 
+## Heuristic Policies
+
+We provide a heuristic reference policy for each task in the module
+[`jitterbug_dmc.heuristic_policies`(jitterbug_dmc/heuristic_policies.py). 
+
 ## Tasks
 
 This Reinforcement Learning domain contains several distinct tasks.

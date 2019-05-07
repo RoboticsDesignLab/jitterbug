@@ -380,14 +380,14 @@ class Jitterbug(base.Task):
                 physics.named.model.geom_rgba["targetPointer", 3] = 0
 
                 # Randomize target position
-                physics.named.model.body_pos["target", "x"] = radius * np.sin(angle)
-                physics.named.model.body_pos["target", "y"] = radius * np.cos(angle)
+                physics.named.model.body_pos["target", "x"] = radius * np.cos(angle)
+                physics.named.model.body_pos["target", "y"] = radius * np.sin(angle)
 
             elif self.task == "move_to_pose":
 
                 # Randomize full target pose
-                physics.named.model.body_pos["target", "x"] = radius * np.sin(angle)
-                physics.named.model.body_pos["target", "y"] = radius * np.cos(angle)
+                physics.named.model.body_pos["target", "x"] = radius * np.cos(angle)
+                physics.named.model.body_pos["target", "y"] = radius * np.sin(angle)
                 physics.named.model.body_quat["target"] = np.array([
                     np.cos(yaw / 2), 0, 0, 1 * np.sin(yaw / 2)
                 ])

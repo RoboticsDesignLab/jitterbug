@@ -351,7 +351,6 @@ class Jitterbug(base.Task):
             elif self.task == "move_in_direction":
 
                 # Randomize target orientation
-                yaw = -np.pi/2
                 physics.named.model.body_quat["target"] = np.array([
                     np.cos(yaw / 2), 0, 0, 1 * np.sin(yaw / 2)
                 ])

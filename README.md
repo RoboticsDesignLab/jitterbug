@@ -37,6 +37,8 @@ The only pre-requisite package is
 
 ## Usage
 
+### DeepMind control Interface
+
 Upon importing `jitterbug_dmc`, the domain and tasks are added to the standard
 [`dm_control`](https://github.com/deepmind/dm_control) suite.
 For example, the `move_from_origin` task can be instantiated as follows;
@@ -66,7 +68,7 @@ def random_policy(time_step):
 viewer.launch(env, policy=random_policy)
 ```
 
-## OpenAI Gym Interface
+### OpenAI Gym Interface
 
 For convenience, we also provide an [OpenAI Gym](https://gym.openai.com/docs/)
 compatible interface to this environment using the
@@ -94,12 +96,12 @@ for t in range(1000):
 env.close()
 ```
 
-## Heuristic Policies
+### Heuristic Policies
 
 We provide a heuristic reference policy for each task in the module
 [`jitterbug_dmc.heuristic_policies`](jitterbug_dmc/heuristic_policies.py). 
 
-## Tasks
+### Tasks
 
 This Reinforcement Learning domain contains several distinct tasks.
 All tasks require the jitterbug to remain upright at all times.

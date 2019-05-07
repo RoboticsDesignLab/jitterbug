@@ -352,7 +352,7 @@ class Jitterbug(base.Task):
 
             # Configure target based on task
             angle = self.random.uniform(0, 2 * np.pi)
-            radius = self.random.uniform(.05, 0.3)
+            radius = self.random.uniform(.05, 0.2)
             yaw = np.random.uniform(0, 2 * np.pi)
 
             if self.task == "move_from_origin":

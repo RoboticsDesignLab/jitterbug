@@ -7,7 +7,7 @@ from rl.processors import WhiteningNormalizerProcessor
 
 
 class JitterbugProcessor(WhiteningNormalizerProcessor):
-    """A processor to convert Jitterbug observations and actions"""
+    """A processor to convert Jitterbug `things` to keras-rl format"""
 
     def process_observation(self, observation):
         """Convert the Dict space observation to a flat vector"""

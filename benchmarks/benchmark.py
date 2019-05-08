@@ -52,9 +52,9 @@ def train_ddpg_agent(*, task="move_from_origin", random_seed=None):
     # Build an actor network
     actor = Sequential()
     actor.add(Flatten(input_shape=(1, num_observations)))
-    actor.add(Dense(400))
-    actor.add(Activation('relu'))
     actor.add(Dense(300))
+    actor.add(Activation('relu'))
+    actor.add(Dense(200))
     actor.add(Activation('relu'))
     actor.add(Dense(num_actions))
     actor.add(Activation('tanh'))
@@ -82,12 +82,12 @@ def train_ddpg_agent(*, task="move_from_origin", random_seed=None):
     print()
 
     # Configure and compile the agent
-    memory = SequentialMemory(limit=100000, window_length=1)
+    memory = SequentialMemory(limit=int(1e6), window_length=1)
     random_process = OrnsteinUhlenbeckProcess(
         size=num_actions,
         theta=0.15,
-        mu=0.0,
-        sigma=0.1
+        mu=0.3,
+        sigma=0.3
     )
     agent = DDPGAgent(
         nb_actions=num_actions,
@@ -95,17 +95,20 @@ def train_ddpg_agent(*, task="move_from_origin", random_seed=None):
         critic=critic,
         critic_action_input=action_input,
         memory=memory,
+        batch_size=64,
+        delta_clip=1,
         nb_steps_warmup_critic=1000,
         nb_steps_warmup_actor=1000,
         random_process=random_process,
-        gamma=.99,
+        gamma=0.99,
         target_model_update=1e-3,
         processor=JitterbugProcessor()
     )
+    lr = 1e-4
     agent.compile(
         [
-            Adam(lr=1e-4),
-            Adam(lr=1e-3)
+            Adam(lr=lr),
+            Adam(lr=lr)
         ],
         metrics=['mae']
     )

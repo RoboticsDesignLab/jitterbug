@@ -488,7 +488,7 @@ class Jitterbug(base.Task):
             bounds=(TARGET_SPEED, float('inf')),
             margin=TARGET_SPEED,
             value_at_margin=0,
-            sigmoid='cosine'
+            sigmoid='linear'
         )
 
     def position_reward(self, physics):

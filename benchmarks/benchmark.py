@@ -151,14 +151,15 @@ def train_ddpg_agent(env, agent, weights_path, *, num_steps=int(1e8)):
     )
 
 
-def eval_ddpg_agent(env, agent):
+def eval_ddpg_agent(env, agent, *, visualise=True):
     """Evaluate a trained agent"""
 
     # Get a policy function for the trained agent
     policy = agent.get_policy()
 
     # Preview the trained policy
-    viewer.launch(env, policy=policy)
+    if visualise:
+        viewer.launch(env, policy=policy)
 
     # Evaluate the trained policy
     rewards = benchmarks.evaluate_policy(
@@ -218,7 +219,7 @@ def demo(*, random_seed=123, task="face_direction"):
     agent.load_weights(agent_weights_path)
 
     # Evaluate the trained agent
-    eval_ddpg_agent(env, agent)
+    eval_ddpg_agent(env, agent, visualise=False)
 
     print("Done")
 

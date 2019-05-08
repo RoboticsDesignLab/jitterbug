@@ -218,7 +218,8 @@ def train_ddpg_agent(*, task="move_from_origin", random_seed=None):
     plt.show()
 
 
-def eval_ddpg_agent()
+def eval_ddpg_agent():
+    pass
 
 
 if __name__ == '__main__':

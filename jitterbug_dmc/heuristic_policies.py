@@ -110,7 +110,7 @@ def move_to_pose(ts, *, angle_threshold=np.deg2rad(20)):
 
 
 def demo():
-    """Demonstrate the hueristic policies
+    """Demonstrate the heuristic policies
     """
 
     # Get some imports

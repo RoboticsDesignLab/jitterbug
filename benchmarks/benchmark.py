@@ -120,7 +120,7 @@ def train_ddpg_agent(*, task="move_from_origin", random_seed=None):
     # Train the agent
     agent.fit(
         env,
-        nb_steps=int(1e6),
+        nb_steps=int(1e8),
         visualize=False,
         verbose=1
     )
@@ -137,6 +137,6 @@ if __name__ == '__main__':
 
     # Train an agent
     train_ddpg_agent(
-        task="move_to_pose",
-        random_seed=None
+        task="face_direction",
+        random_seed=123
     )

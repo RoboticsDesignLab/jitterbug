@@ -1,3 +1,6 @@
+"""Various support classes for using jitterbug-dmc with keras-rl"""
+
+import pickle
 import collections
 import numpy as np
 
@@ -33,14 +36,21 @@ class AgentCheckpointCallback(Callback):
         """C-tor"""
         self.agent = agent
         self.model_weights_path = model_weights_path
+        self.training_progress_path = "{}.trainingepisoderewards.pkl".format(
+            model_weights_path
+        )
+        self.episode_rewards = []
         super().__init__()
 
     def save(self):
-        """Save the agent"""
+        """Save the agent weights and training progress"""
         self.agent.save_weights(self.model_weights_path, overwrite=True)
+        with open(self.training_progress_path, "wb") as file:
+            pickle.dump(self.episode_rewards, file)
 
     def on_episode_end(self, episode, logs):
         """Save the agent at the end of every episode"""
+        self.episode_rewards.append(logs['episode_reward'])
         self.save()
 
     def on_train_end(self, logs):

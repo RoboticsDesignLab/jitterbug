@@ -55,7 +55,7 @@ def demo():
     # Test the gym interface
     env.reset()
     for t in range(1000):
-        observation, reward, done, info = env.step(0.9)
+        observation, reward, done, info = env.step(0.8)
         env.render()
 
     return

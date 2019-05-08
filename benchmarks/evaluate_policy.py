@@ -21,6 +21,7 @@ def evaluate_policy(task, policy, *, num_repeats=20, **kwargs):
             rewards attained
     """
 
+    # Construct environment so we can query step limit
     env = suite.load(
         domain_name="jitterbug",
         task_name=task,
@@ -32,7 +33,15 @@ def evaluate_policy(task, policy, *, num_repeats=20, **kwargs):
     results = np.empty((num_repeats, int(env._step_limit - 1)))
     for repeat in range(num_repeats):
         print("Run {} / {}".format(repeat+1, num_repeats))
+
+        # Re-construct environment ensure a random new seed
+        env = suite.load(
+            domain_name="jitterbug",
+            task_name=task,
+            **kwargs
+        )
         ts = env.reset()
+
         for i in range(int(env._step_limit - 1)):
             action = policy(ts)
             ts = env.step(action)
@@ -44,7 +53,7 @@ def demo():
     """Demo"""
 
     # Evaluate policy
-    task = "move_to_pose"
+    task = "face_direction"
     rewards = evaluate_policy(
         task,
         eval(f"jitterbug_dmc.heuristic_policies.{task}")
@@ -69,6 +78,7 @@ def demo():
         alpha=0.1,
         label='5th-95th Percentiles'
     )
+    plt.plot(x, x, 'r--', label='Maximum')
     plt.xlim(0, 1000)
     plt.ylim(0, 1000)
     plt.xlabel("Timestep")

@@ -1,6 +1,7 @@
 """Evaluate a policy on a Jitterbug task"""
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from dm_control import suite
 import jitterbug_dmc
@@ -49,36 +50,45 @@ def evaluate_policy(task, policy, *, num_repeats=20, **kwargs):
 
     return results
 
-def demo():
-    """Demo"""
 
-    # Evaluate policy
-    task = "face_direction"
-    rewards = evaluate_policy(
-        task,
-        eval(f"jitterbug_dmc.heuristic_policies.{task}")
-    )
+def plot_policy_returns(rewards, **kwargs):
+    """Plots 5th percentile, median and 95th percentile returns
 
-    # Convert rewards to returns
+    Args:
+        rewards (numpy array): NxM numpy array of rewards during N episodes of
+            length M
+
+        kwargs: Optional keyword arguments for the plot call
+    """
     returns = np.cumsum(rewards, axis=1)
-
-    # Find the 5th, Median and 95th percentiles
     lower, median, upper = np.percentile(returns, (5, 50, 95), axis=0)
-
-    # Plot the results
-    import matplotlib.pyplot as plt
     x = range(1, len(median) + 1)
-    plt.figure(figsize=(9, 6))
-    p1 = plt.plot(x, median, '-', label='Median')
+    p1 = plt.gca().plot(x, median, '-', **kwargs)
     plt.fill_between(
         x,
         lower,
         upper,
         color=p1[0].get_color(),
-        alpha=0.1,
-        label='5th-95th Percentiles'
+        alpha=0.1
     )
-    plt.plot(x, x, 'r--', label='Maximum')
+
+
+def demo():
+    """Demo"""
+
+    # Evaluate policy
+    task = "move_to_position"
+    rewards = evaluate_policy(
+        task,
+        eval(f"jitterbug_dmc.heuristic_policies.{task}"),
+        num_repeats=10
+    )
+
+    # Plot the results
+    plt.figure(figsize=(9, 6))
+    plot_policy_returns(rewards, label=f"Heuristic")
+    x = range(1, 1000 + 1)
+    plt.plot(x, x, 'r--')
     plt.xlim(0, 1000)
     plt.ylim(0, 1000)
     plt.xlabel("Timestep")

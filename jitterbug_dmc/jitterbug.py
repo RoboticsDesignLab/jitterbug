@@ -301,7 +301,7 @@ class Physics(mujoco.Physics):
             angle -= 2*np.pi
         while angle <= -np.pi:
             angle += 2*np.pi
-        return angle
+        return np.array([angle])
 
 
 class Jitterbug(base.Task):

@@ -1,10 +1,7 @@
 """Code to reproduce benchmarking results from the jitterbug paper"""
 
-from keras_rl_processor import (
-    JitterbugProcessor
-)
-
-from keras_rl_agent_checkpoint_callback import (
+from keras_rl_helpers import (
+    JitterbugProcessor,
     AgentCheckpointCallback
 )
 

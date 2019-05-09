@@ -7,42 +7,26 @@ from dm_control import suite
 import jitterbug_dmc
 
 
-def evaluate_policy(task, policy, *, num_repeats=20, **kwargs):
+def evaluate_policy(env, policy, *, num_repeats=20):
     """Evaluate a policy many times on a given task
 
     Args:
-        task (str): Jitterbug task string
+        env (dm_control Environment): Jitterbug environment to evaluate on
         policy (function): Policy function
 
         num_repeats (int): Number of policy evaluations to return
-        **kwargs: Optional extra arguments to pass to suite.load
 
     Returns:
         (numpy array): num_repeats x env._step_limit-1 numpy array of policy
             rewards attained
     """
 
-    # Construct environment so we can query step limit
-    env = suite.load(
-        domain_name="jitterbug",
-        task_name=task,
-        **kwargs
-    )
-
-    print("Evaluating {} on {}".format(policy, task))
+    print("Evaluating {} on {}".format(policy, env.task.task))
 
     results = np.empty((num_repeats, int(env._step_limit - 1)))
     for repeat in range(num_repeats):
         print("Run {} / {}".format(repeat+1, num_repeats))
-
-        # Re-construct environment ensure a random new seed
-        env = suite.load(
-            domain_name="jitterbug",
-            task_name=task,
-            **kwargs
-        )
         ts = env.reset()
-
         for i in range(int(env._step_limit - 1)):
             action = policy(ts)
             ts = env.step(action)
@@ -77,9 +61,10 @@ def demo():
     """Demo"""
 
     # Evaluate policy
-    task = "move_to_position"
+    task = "move_from_origin"
+    env = suite.load(domain_name="jitterbug", task_name=task)
     rewards = evaluate_policy(
-        task,
+        env,
         eval(f"jitterbug_dmc.heuristic_policies.{task}"),
         num_repeats=10
     )

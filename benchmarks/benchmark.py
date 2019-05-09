@@ -1,6 +1,7 @@
 """Evaluates various RL algorithms on the Jitterbug task suite"""
 
 import os
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -163,11 +164,8 @@ def eval_ddpg_agent(env, agent, *, visualise=True):
 
     # Evaluate the trained policy
     rewards = benchmarks.evaluate_policy(
-        "face_direction",
-        policy,
-        environment_kwargs={
-            "flat_observation": True
-        }
+        env,
+        policy
     )
 
     # Plot the results
@@ -186,8 +184,45 @@ def eval_ddpg_agent(env, agent, *, visualise=True):
     plt.show()
 
 
-def demo(*, random_seed=123, task="face_direction"):
+def plot_training_progress(training_progress_filename):
+
+    with open(training_progress_filename, "rb") as file:
+        data = np.array(pickle.load(file))
+
+    # Re-shape episode rewards into iterations (10 episodes each)
+    data = data[:((len(data) // 10) * 10)]
+    data = data.reshape(-1, 10)
+
+    # Find mean reward per iteration
+    mean_reward = np.mean(data, axis=1)
+    x = np.arange(0, len(mean_reward)) * 10 * 1000
+
+    plt.figure()
+    plt.plot(
+        x,
+        mean_reward,
+        label='Mean Iteration Reward'
+    )
+    plt.xlabel("Timestep")
+    plt.ylabel("Reward")
+    plt.title(training_progress_filename)
+    plt.ylim((0, 1000))
+    plt.legend()
+    plt.grid()
+    plt.gca().get_xaxis().get_major_formatter().set_powerlimits((-1, 1))
+    plt.tight_layout()
+    plt.show()
+
+
+
+def demo(task, *, random_seed=123):
     """Train and evaluate a DDPG agent"""
+
+    # plot_training_progress(
+    #     #"ddpg.face_direction.weights.h5f.trainingepisoderewards.pkl"
+    #     "ddpg.move_to_position.weights.h5f.trainingepisoderewards.pkl"
+    # )
+    # return
 
     np.random.seed(random_seed)
 
@@ -212,16 +247,16 @@ def demo(*, random_seed=123, task="face_direction"):
         num_observations=env.observation_spec()['observations'].shape[0]
     )
 
-    # Train the agent
-    train_ddpg_agent(env, agent, agent_weights_path)
+    # # Train the agent
+    # train_ddpg_agent(env, agent, agent_weights_path)
 
     # Load pre-trained agent weights
     agent.load_weights(agent_weights_path)
 
     # Evaluate the trained agent
-    eval_ddpg_agent(env, agent, visualise=False)
+    eval_ddpg_agent(env, agent, visualise=True)
 
     print("Done")
 
 if __name__ == '__main__':
-    demo()
+    demo("move_to_position")

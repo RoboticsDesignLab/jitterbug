@@ -245,8 +245,8 @@ def demo(task, *, random_seed=123):
         num_observations=env.observation_spec()['observations'].shape[0]
     )
 
-    # # Train the agent
-    # train_ddpg_agent(env, agent, agent_weights_path)
+    # Train the agent
+    train_ddpg_agent(env, agent, agent_weights_path)
 
     # Load pre-trained agent weights
     agent.load_weights(agent_weights_path)

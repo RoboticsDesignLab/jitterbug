@@ -497,13 +497,13 @@ class Jitterbug(base.Task):
         Returns:
             (float): Position reward on [0, 1]
         """
-        return rewards.tolerance(
+        return np.array([rewards.tolerance(
             np.linalg.norm(
                 physics.target_position_in_jitterbug_frame()
             ),
             bounds=(0, 0),
-            margin=0.1
-        )
+            margin=0.05
+        )])
 
     def upright_reward(self, physics):
         """Reward Jitterbug for remaining upright"""

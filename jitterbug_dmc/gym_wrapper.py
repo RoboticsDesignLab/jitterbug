@@ -17,7 +17,7 @@ class JitterbugGymEnv(dm2gym.DMControlEnv):
         """
         self.frame_count = 0
         self.render_every = render_every
-        super().__init__(env, render_window_mode="opencv")
+        super().__init__(env)
 
     def render(self, mode='human', **kwargs):
         """Render with nicer settings for the Jitterbug domain"""
@@ -35,7 +35,7 @@ class JitterbugGymEnv(dm2gym.DMControlEnv):
             if 'camera_id' not in kwargs:
                 kwargs["camera_id"] = 1
 
-            super().render(mode, **kwargs)
+            super().render(mode, render_window_mode='opencv', **kwargs)
 
 
 def demo():

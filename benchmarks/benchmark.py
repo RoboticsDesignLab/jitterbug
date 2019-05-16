@@ -219,8 +219,7 @@ def demo(task, *, random_seed=123):
     """Train and evaluate a DDPG agent"""
 
     # plot_training_progress(
-    #     #"ddpg.face_direction.weights.h5f.trainingepisoderewards.pkl"
-    #     "ddpg.move_to_position.weights.h5f.trainingepisoderewards.pkl"
+    #     f"ddpg.{task}.weights.h5f.trainingepisoderewards.pkl"
     # )
     # return
 

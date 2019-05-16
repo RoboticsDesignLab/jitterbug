@@ -129,7 +129,7 @@ class JitterbugDDPGAgent(DDPGAgent):
         return policy
 
 
-def train_ddpg_agent(env, agent, weights_path, *, num_steps=int(1e8)):
+def train_ddpg_agent(env, agent, weights_path, *, num_steps=int(2e7)):
     """Train a DDPG agent on the given dm_control environment
 
     Args:

@@ -214,7 +214,6 @@ def plot_training_progress(training_progress_filename):
     plt.show()
 
 
-
 def demo(task, *, random_seed=123):
     """Train and evaluate a DDPG agent"""
 

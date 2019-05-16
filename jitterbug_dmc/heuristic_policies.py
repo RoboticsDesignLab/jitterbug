@@ -120,7 +120,7 @@ def demo():
     # Add the jitterbug tasks to the suite
     import jitterbug_dmc
 
-    task = "move_to_pose"
+    task = "move_to_position"
     viewer.launch(
         suite.load(
             domain_name="jitterbug",
@@ -128,7 +128,7 @@ def demo():
             visualize_reward=True
         ),
         policy=eval(task),
-        title="Jitterbug Policy Demo"
+        title=f"Jitterbug Heuristic Policy: {task}"
     )
 
 

@@ -483,13 +483,13 @@ class Jitterbug(base.Task):
         Returns:
             (float): Velocity reward on [0, 1]
         """
-        return rewards.tolerance(
+        return np.array([rewards.tolerance(
             physics.jitterbug_velocity_in_target_frame()[0],
             bounds=(TARGET_SPEED, float('inf')),
             margin=TARGET_SPEED,
             value_at_margin=0,
             sigmoid='linear'
-        )
+        )])
 
     def position_reward(self, physics):
         """Compute a reward for moving to a certain position

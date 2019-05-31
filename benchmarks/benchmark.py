@@ -6,7 +6,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Uncomment to disable GPU training in tensorflow (must be before keras imports)
-import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 from keras.models import Sequential, Model
@@ -129,7 +128,14 @@ class JitterbugDDPGAgent(DDPGAgent):
         return policy
 
 
-def train_ddpg_agent(env, agent, weights_path, *, num_steps=int(2e7)):
+def train_ddpg_agent(
+        env,
+        agent,
+        weights_path,
+        training_progress_path,
+        *,
+        num_steps=int(2e7)
+):
     """Train a DDPG agent on the given dm_control environment
 
     Args:
@@ -147,7 +153,11 @@ def train_ddpg_agent(env, agent, weights_path, *, num_steps=int(2e7)):
         visualize=False,
         verbose=1,
         callbacks=[
-            benchmarks.AgentCheckpointCallback(agent, weights_path)
+            benchmarks.AgentCheckpointCallback(
+                agent,
+                weights_path,
+                training_progress_path
+            )
         ]
     )
 
@@ -184,43 +194,8 @@ def eval_ddpg_agent(env, agent, *, visualise=True):
     plt.show()
 
 
-def plot_training_progress(training_progress_filename):
-
-    with open(training_progress_filename, "rb") as file:
-        data = np.array(pickle.load(file))
-
-    # Re-shape episode rewards into iterations (10 episodes each)
-    data = data[:((len(data) // 10) * 10)]
-    data = data.reshape(-1, 10)
-
-    # Find mean reward per iteration
-    mean_reward = np.mean(data, axis=1)
-    x = np.arange(0, len(mean_reward)) * 10 * 1000
-
-    plt.figure()
-    plt.plot(
-        x,
-        mean_reward,
-        label='Mean Iteration Reward'
-    )
-    plt.xlabel("Timestep")
-    plt.ylabel("Reward")
-    plt.title(training_progress_filename)
-    plt.ylim((0, 1000))
-    plt.legend()
-    plt.grid()
-    plt.gca().get_xaxis().get_major_formatter().set_powerlimits((-1, 1))
-    plt.tight_layout()
-    plt.show()
-
-
 def demo(task, *, random_seed=123):
     """Train and evaluate a DDPG agent"""
-
-    # plot_training_progress(
-    #     f"ddpg.{task}.weights.h5f.trainingepisoderewards.pkl"
-    # )
-    # return
 
     np.random.seed(random_seed)
 
@@ -241,12 +216,22 @@ def demo(task, *, random_seed=123):
 
     # Construct a DDPG agent
     agent_weights_path = f"ddpg.{task}.weights.h5f"
+    agent_training_progress_path = f"ddpg.{task}.training_progress.pkl"
     agent = JitterbugDDPGAgent(
         num_observations=env.observation_spec()['observations'].shape[0]
     )
 
+    # # Load pre-trained agent weights
+    # if os.path.exists(agent_weights_path):
+    #     agent.load_weights(agent_weights_path)
+
     # Train the agent
-    train_ddpg_agent(env, agent, agent_weights_path)
+    train_ddpg_agent(
+        env,
+        agent,
+        agent_weights_path,
+        agent_training_progress_path
+    )
 
     # Load pre-trained agent weights
     agent.load_weights(agent_weights_path)
@@ -256,5 +241,6 @@ def demo(task, *, random_seed=123):
 
     print("Done")
 
+
 if __name__ == '__main__':
-    demo("move_to_position")
+    demo("move_to_pose")

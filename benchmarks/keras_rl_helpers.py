@@ -1,8 +1,11 @@
 """Various support classes for using jitterbug-dmc with keras-rl"""
 
+import os
 import pickle
 import collections
 import numpy as np
+
+import jitterbug_dmc
 
 from rl.processors import WhiteningNormalizerProcessor
 from rl.callbacks import Callback
@@ -32,14 +35,29 @@ class JitterbugProcessor(WhiteningNormalizerProcessor):
 class AgentCheckpointCallback(Callback):
     """A keras-rl callback class to save the agent weights during training"""
 
-    def __init__(self, agent, model_weights_path):
+    def __init__(self, agent, model_weights_path, training_progress_path):
         """C-tor"""
         self.agent = agent
         self.model_weights_path = model_weights_path
-        self.training_progress_path = "{}.trainingepisoderewards.pkl".format(
-            model_weights_path
-        )
+        self.training_progress_path = training_progress_path
+
+        # if os.path.exists(self.training_progress_path):
+        #     # Load an in-progress training session
+        #     with open(self.training_progress_path, "rb") as file:
+        #         self.episode_rewards = pickle.load(file)
+        #         print("Loaded in-progress training data from {}".format(
+        #             self.training_progress_path
+        #         ))
+        #         num_episode_steps = (
+        #             jitterbug_dmc.jitterbug.DEFAULT_TIME_LIMIT /
+        #             jitterbug_dmc.jitterbug.DEFAULT_CONTROL_TIMESTEP
+        #         )
+        #         agent.step = len(self.episode_rewards) * num_episode_steps
+        # else:
+#            self.episode_rewards = []
+
         self.episode_rewards = []
+
         super().__init__()
 
     def save(self):

@@ -124,3 +124,6 @@ videos/
 
 # Ignore pickles
 *pkl
+
+# Ignore h5f weight files
+*.h5f

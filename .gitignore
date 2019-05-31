@@ -118,3 +118,9 @@ dmypy.json
 
 # PyCharm project folder
 .idea/
+
+# Ignore videos
+videos/
+
+# Ignore pickles
+*pkl

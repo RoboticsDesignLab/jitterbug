@@ -40,35 +40,20 @@ def move_forward(ts, *, kick_angle=np.deg2rad(45), speed=0.3, orientation="forwa
 	motor_vel = ts.observation['motor_velocity'][0]
 
 	offset = 0
-	if orientation!="backward":	
-		if orientation=="left":
-			offset = np.pi/2
-		elif orientation=="right":
-			offset = -np.pi/2
-		#print(motor_angle)
-		#print((offset-kick_angle)%np.pi)
-		if motor_angle < offset-kick_angle:
-			return speed
-		elif motor_angle > offset+kick_angle:
-			return -speed
-		else:
-			if motor_vel > 0:
-				return speed
-			else:
-				return -speed
+	if orientation=="left":
+		offset = np.pi/2
+	elif orientation=="right":
+		offset = -np.pi/2
 
+	if motor_angle < offset-kick_angle:
+		return speed
+	elif motor_angle > offset+kick_angle:
+		return -speed
 	else:
-		offset = np.pi
-		kick_angle = np.deg2rad(60)
-		if motor_angle < offset-kick_angle and motor_angle>=0:
+		if motor_vel > 0:
 			return speed
-		elif motor_angle > -offset+kick_angle and motor_angle<0:
-			return -speed
 		else:
-			if motor_vel > 0:
-				return speed
-			else:
-				return -speed
+			return -speed
 
 
 def move_from_origin(ts):
@@ -140,19 +125,14 @@ def optimal_orientation_to_move(ts,*,angle_to_target):
 	orientation="None"
 	if angle_to_target>=-45*np.pi/180 and angle_to_target<=45*np.pi/180:
 		orientation = "forward"
-	elif angle_to_target>45*np.pi/180 and angle_to_target<=135*np.pi/180:
+	elif angle_to_target>45*np.pi/180 and angle_to_target<=np.pi:
 		orientation = "left"
 		angle_to_target = abs(abs(angle_to_target)-90*np.pi/180)
 
-	elif angle_to_target>=-135*np.pi/180 and angle_to_target<-45*np.pi/180:
+	elif angle_to_target>=-np.pi and angle_to_target<-45*np.pi/180:
 		orientation = "right"
 		angle_to_target = -abs(abs(angle_to_target)-90*np.pi/180)
-	elif angle_to_target>135:
-		orientation = "backward"
-		angle_to_target =abs(abs(angle_to_target)-np.pi)
-	else:
-		orientation = "backward"
-		angle_to_target =-abs(abs(angle_to_target)-np.pi)
+
 	return [angle_to_target,orientation]
 
 

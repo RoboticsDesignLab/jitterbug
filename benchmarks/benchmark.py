@@ -363,10 +363,11 @@ def demoA2C(task, *, random_seed=123):
         )
    
    # Construct the A2C agent
-    agent = JitterbugA2CAgent(policy="MlpPolicy",
+    agent = JitterbugA2CAgent(
+        policy="MlpPolicy",
         env=env,
         policy_kwargs=policy_kwargs
-        )
+    )
 
     path_trained_agent = f"a2c.{task}.model_parameters.pkl"
     agent.train(

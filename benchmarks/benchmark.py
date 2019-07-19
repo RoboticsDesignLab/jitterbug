@@ -32,15 +32,24 @@ from baselines.run import build_env
 from baselines.a2c.a2c import Model as A2CModel
 from baselines.common.policies import build_policy
 from baselines.common.cmd_util import make_mujoco_env
-from stable_baselines.common.vec_env import DummyVecEnv,SubprocVecEnv
+from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv
 
-from baselines.common.cmd_util import common_arg_parser, parse_unknown_args, make_vec_env, make_env
+from baselines.common.cmd_util import (
+    common_arg_parser,
+    parse_unknown_args,
+    make_vec_env,
+    make_env
+)
 
 from gym.envs.registration import register, make
 
 from stable_baselines.a2c.a2c import A2C
-from stable_baselines.common.policies import FeedForwardPolicy, ActorCriticPolicy
+from stable_baselines.common.policies import (
+    FeedForwardPolicy,
+    ActorCriticPolicy
+)
 from stable_baselines.results_plotter import load_results, ts2xy
+
 
 class JitterbugDDPGAgent(DDPGAgent):
     """A DDPG agent for the Jitterbug task"""
@@ -143,6 +152,36 @@ class JitterbugDDPGAgent(DDPGAgent):
         return policy
 
 
+class JitterbugA2CAgent(A2C):
+    """An A2C agent for the Jitterbug task"""
+
+    def __init__(self, policy, env, policy_kwargs=None):
+
+        # Make the environment compatible with stable_baselines package
+        env_gym = jitterbug_dmc.JitterbugGymEnv(env)
+        env_gym.num_envs = 1
+        env_gym.observation_space = env_gym.observation_space["observations"]
+        env_vec = DummyVecEnv([lambda: env_gym])
+
+        super().__init__(
+            policy=policy,
+            env=env_vec,
+            policy_kwargs=policy_kwargs
+        )
+
+
+    def train(self, nb_steps, callback=None):
+        """Train the A2C agent.
+
+        Args:
+            nb_steps (int): total number of steps used for training
+        """
+
+        self.learn(total_timesteps=nb_steps,
+            #callback=callback
+        )
+
+
 def train_ddpg_agent(
         env,
         agent,
@@ -209,39 +248,6 @@ def eval_ddpg_agent(env, agent, *, visualise=True):
     plt.show()
 
 
-
-
-class JitterbugA2CAgent(A2C):
-    """An A2C agent for the Jitterbug task"""
-
-    def __init__(self, policy, env, policy_kwargs=None):
-
-        # Make the environment compatible with stable_baselines package
-        env_gym = jitterbug_dmc.JitterbugGymEnv(env)
-        env_gym.num_envs = 1
-        env_gym.observation_space = env_gym.observation_space["observations"]
-        env_vec = DummyVecEnv([lambda: env_gym])
-
-        super().__init__(
-            policy=policy,
-            env=env_vec,
-            policy_kwargs=policy_kwargs
-        )
-
-
-    def train(self, nb_steps, callback=None):
-        """Train the A2C agent.
-
-        Args:
-            nb_steps (int): total number of steps used for training
-        """
-
-        self.learn(total_timesteps=nb_steps,
-            #callback=callback
-        )
-
-
-
 def demo(task, *, random_seed=123):
     """Train and evaluate a DDPG agent"""
 
@@ -290,12 +296,11 @@ def demo(task, *, random_seed=123):
     print("Done")
 
 
-
-
 # Create log dir
 log_dir = "/tmp/gym/"
 os.makedirs(log_dir, exist_ok=True)
 best_mean_reward, n_steps= -np.inf, 0
+
 
 def callback(_locals, _globals):
   """
@@ -332,10 +337,10 @@ def demoA2C(task, *, random_seed=123):
 
     random_seed=123
 
-    #Load the environment
+    # Load the environment
     np.random.seed(random_seed)
 
-    env =  suite.load(
+    env = suite.load(
         domain_name="jitterbug",
         task_name=task,
         visualize_reward=True,
@@ -349,23 +354,25 @@ def demoA2C(task, *, random_seed=123):
         }
     )
 
-    #Define the architecture of the NN
+    # Define the architecture of the NN
     policy_kwargs = dict(act_fun=tf.nn.tanh, 
         net_arch=[32, 32]
         )
    
-   #Construct the A2C agent
+   # Construct the A2C agent
     agent = JitterbugA2CAgent(policy="MlpPolicy",
         env=env,
         policy_kwargs=policy_kwargs
         )
 
     path_trained_agent = f"a2c.{task}.model_parameters.pkl"
-    agent.train(1000,
+    agent.train(
+        1000,
         #callback=callback
-        )
+    )
 
     agent.save(path_trained_agent)
+
 
 if __name__ == '__main__':
     demoA2C("move_in_direction")

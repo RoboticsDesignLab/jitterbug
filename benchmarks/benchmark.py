@@ -22,7 +22,10 @@ from dm_control import viewer
 
 # Add root folder to path so we can access benchmarks module
 import sys
-sys.path.append("/home/jeremy/jitterbug-dmc")
+sys.path.append(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    ".."
+))
 
 import jitterbug_dmc
 import benchmarks

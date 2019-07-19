@@ -12,3 +12,5 @@ numpy >= 1.14.5
 keras >= 2.2.4
 keras-rl >= 0.4.2
 
+# Stable-baselines for RL agent implementations
+stable-baselines >= 2.6.0

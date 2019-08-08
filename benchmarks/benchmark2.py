@@ -80,7 +80,7 @@ def callback(_locals, _globals):
 
     global n_steps_monitor, best_mean_reward
     # Print stats every 1000 calls
-    if (n_steps_monitor + 1) % 100 == 0:
+    if (n_steps_monitor + 1) % 1000 == 0:
         # Evaluate policy training performance
         x, y = ts2xy(load_results(log_dir), 'timesteps')
         # print(x)
@@ -262,21 +262,21 @@ def demoDDPG(task,
                                index=index
                                )
 
-    # Train the DDPG agent
-    # agent.train(1e4,
-    #			#callback=callback
-    #			)
+    #Train the DDPG agent
+    agent.train(1e4,
+    			callback=callback
+    			)
 
     # Save the DDPG agent
     path_trained_agent = f"./trained_ddpg_{task}"
     # agent.save(path_trained_agent)
 
     # Use the DDPG agent
-    use_trained_agent("./ddpg-results/1/best_model",
-                      env,
-                      nb_steps=1000,
-                      policy=CustomPolicy
-                      )
+    #use_trained_agent("./ddpg-results/1/best_model",
+    #                  env,
+    #                  nb_steps=1000,
+    #                  policy=CustomPolicy
+    #                  )
 
 
 def demoA2C(task,
@@ -329,7 +329,7 @@ def demoA2C(task,
     path_trained_agent = f"a2c.{task}.model_parameters.pkl"
 
     # Train the A2C agent
-    agent.train(int(5e6),
+    agent.train(int(1e4),
                 callback=callback
                 )
 
@@ -395,10 +395,10 @@ def demoPPO2(task,
     print(f"n_envs = {agent.n_envs}")
     print(f"n_batch = {agent.n_batch}")
 
-    # Train the PPO2 agent
-    # agent.train(int(1e4),
-    #			#callback=callback
-    #			)
+    #Train the PPO2 agent
+    agent.train(int(1e4),
+    			callback=callback
+    			)
 
     # Save the PPO2 agent
     path_trained_agent = f"./trained_ppo_{task}"
@@ -413,9 +413,9 @@ def demoPPO2(task,
 
 
 if __name__ == '__main__':
-    i = 0
+    i = 200
     n_steps_i = 32
     log_dir = "/tmp/gym/ddpg/" + str(i) + "/"
     os.makedirs(log_dir, exist_ok=True)
     best_mean_reward, n_steps_monitor = -np.inf, 0
-    demoDDPG("face_direction",index=i)
+    demoPPO2("face_direction",index=i)

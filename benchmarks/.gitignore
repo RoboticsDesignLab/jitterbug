@@ -1,0 +1,6 @@
+
+# Ignore policy parameter files
+*.h5f
+
+# Ignore any benchmarking images in this directory
+*.png

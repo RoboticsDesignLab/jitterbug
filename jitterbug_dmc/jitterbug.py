@@ -41,6 +41,7 @@ from dm_control.utils import containers
 from dm_control.utils import io as resources
 from dm_control.mujoco.wrapper.mjbindings import mjlib
 
+import pickle
 
 # Load the suite so we can add to it
 SUITE = containers.TaggedTasks()
@@ -222,7 +223,6 @@ class Physics(mujoco.Physics):
             angle -= 2*np.pi
         while angle <= -np.pi:
             angle += 2*np.pi
-
         return angle
 
     def motor_velocity(self):
@@ -343,6 +343,41 @@ class Jitterbug(base.Task):
         self.random_pose = random_pose
         super(Jitterbug, self).__init__(random=random)
 
+        #self.pickleFile = open("observations.pkl", "wb")
+        self.principalVectors = np.array([[0.0049, 0.0171, -0.0001, -0.0001, 0.0003, 0, 0, 0],
+                                         [0.0242, -0.0042, -0.0002, 0.0001, 0.0001, 0, 0, 0],
+                                         [-0.0002, -0.0001, 0.0003, 0, 0, 0, 0, 0],
+                                         [0.1224, 0.9907, 0.0519, -0.0072, 0.0094, -0.0001, 0.0001, 0.0001],
+                                         [-0.0019, 0.0201, 0.0014, -0.0006, 0.0003, 0, -0.0002, 0],
+                                         [0.0224, -0.0022, -0.0009, 0, -0.0001, -0.0003, 0, 0],
+                                         [0.9918, -0.1215, -0.0179, 0.0052, 0.0022, 0, -0.0001, -0.0002],
+                                         [0.0014, 0.0043, 0.0001, 0.0003, 0.0001, 0.0002, 0.0001, 0],
+                                         [0.0066, -0.0011, 0.0001, -0.0002, 0, 0.0001, -0.0001, 0],
+                                         [0.0001, 0, -0.0002, 0.0001, -0.0001, 0.0012, 0, 0],
+                                         [-0.0002, 0, 0.0004, 0.0284, 0.0096, -0.9995, -0.0035, -0.0003],
+                                         [-0.0003, 0.0004, -0.0014, 0.0766, 0.0141, -0.0011, 0.997, 0.0007],
+                                         [0.0038, 0.0067, 0.0441, 0, -0.9988, -0.0096, 0.0142, -0.0046],
+                                         [0.0043, -0.0079, 0.0022, -0.9966, 0.0014, -0.0286, 0.0765, 0],
+                                         [0.0002, -0.0004, 0.0057, -0.0001, -0.0044, -0.0003, -0.0007, 1],
+                                         [-0.0113, 0.054, -0.9975, -0.0027, -0.0438, -0.0009, -0.0006, 0.0055]])
+
+        self.principalVectors4dim = np.array([[0.0003, 0, 0, 0],
+                                          [0.0001, 0, 0, 0],
+                                          [0, 0, 0, 0],
+                                          [0.0094, -0.0001, 0.0001, 0.0001],
+                                          [0.0003, 0, -0.0002, 0],
+                                          [-0.0001, -0.0003, 0, 0],
+                                          [0.0022, 0, -0.0001, -0.0002],
+                                          [0.0001, 0.0002, 0.0001, 0],
+                                          [0, 0.0001, -0.0001, 0],
+                                          [-0.0001, 0.0012, 0, 0],
+                                          [0.0096, -0.9995, -0.0035, -0.0003],
+                                          [0.0141, -0.0011, 0.997, 0.0007],
+                                          [-0.9988, -0.0096, 0.0142, -0.0046],
+                                          [0.0014, -0.0286, 0.0765, 0],
+                                          [-0.0044, -0.0003, -0.0007, 1],
+                                          [-0.0438, -0.0009, -0.0006, 0.0055]])
+
     def initialize_episode(self, physics):
         """Sets the state of the environment at the start of each episode
         """
@@ -420,7 +455,6 @@ class Jitterbug(base.Task):
         obs['velocity'] = physics.jitterbug_velocity()
         obs['motor_position'] = physics.motor_position()
         obs['motor_velocity'] = physics.motor_velocity()
-
         if self.task == "move_from_origin":
 
             # Jitterbug position is a sufficient observation for this task
@@ -460,7 +494,8 @@ class Jitterbug(base.Task):
 
         else:
             raise ValueError("Invalid task {}".format(self.task))
-
+        #pickle.dump(obs, self.pickleFile)
+        #new_obs = self.PCA(obs)
         return obs
 
     def heading_reward(self, physics):
@@ -470,7 +505,7 @@ class Jitterbug(base.Task):
             (float): Angular reward on [0, 1]
         """
         return rewards.tolerance(
-            physics.angle_jitterbug_to_target(),
+            physics.angle_jitterbug_to_target()[0],
             bounds=(0, 0),
             margin=np.pi/2,
             value_at_margin=0,
@@ -497,13 +532,13 @@ class Jitterbug(base.Task):
         Returns:
             (float): Position reward on [0, 1]
         """
-        return np.array([rewards.tolerance(
+        return rewards.tolerance(
             np.linalg.norm(
                 physics.target_position_in_jitterbug_frame()
             ),
             bounds=(0, 0),
             margin=0.05
-        )])
+        )
 
     def upright_reward(self, physics):
         """Reward Jitterbug for remaining upright"""
@@ -547,8 +582,13 @@ class Jitterbug(base.Task):
 
         # Reward Jitterbug for staying upright
         r *= self.upright_reward(physics)
-
+        #print(r)
         return r
+
+    def PCA(self, obs):
+        obsArray = np.concatenate((obs['position'],obs['velocity'],obs['motor_position'],obs['motor_velocity'],obs['angle_to_target']))
+        return {'observations':np.dot(obsArray,self.principalVectors4dim)}
+
 
 
 def demo():
@@ -573,7 +613,6 @@ def demo():
 
     # Use a constant policy
     policy = lambda ts: 0.8
-
     # Dance, jitterbug, dance!
     viewer.launch(
         env,

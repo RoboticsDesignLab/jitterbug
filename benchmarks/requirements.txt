@@ -1,0 +1,16 @@
+
+# DeepMind Control Suite
+git+https://github.com/deepmind/dm_control
+
+# Matplotlib for plots
+matplotlib >= 3.0.2
+
+# Numpy for array manipulation
+numpy >= 1.14.5
+
+# Keras for ML models
+keras >= 2.2.4
+keras-rl >= 0.4.2
+
+# Stable-baselines for RL agent implementations
+stable-baselines >= 2.6.0

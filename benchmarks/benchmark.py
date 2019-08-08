@@ -4,6 +4,7 @@ import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+import tensorflow as tf
 
 # Uncomment to disable GPU training in tensorflow (must be before keras imports)
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
@@ -21,10 +22,36 @@ from dm_control import viewer
 
 # Add root folder to path so we can access benchmarks module
 import sys
-sys.path.append("E:\\Development\\jitterbug-dmc")
+sys.path.append(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    ".."
+))
 
 import jitterbug_dmc
 import benchmarks
+
+# Baselines module
+from baselines.run import build_env
+from baselines.a2c.a2c import Model as A2CModel
+from baselines.common.policies import build_policy
+from baselines.common.cmd_util import make_mujoco_env
+from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv
+
+from baselines.common.cmd_util import (
+    common_arg_parser,
+    parse_unknown_args,
+    make_vec_env,
+    make_env
+)
+
+from gym.envs.registration import register, make
+
+from stable_baselines.a2c.a2c import A2C
+from stable_baselines.common.policies import (
+    FeedForwardPolicy,
+    ActorCriticPolicy
+)
+from stable_baselines.results_plotter import load_results, ts2xy
 
 
 class JitterbugDDPGAgent(DDPGAgent):
@@ -38,7 +65,7 @@ class JitterbugDDPGAgent(DDPGAgent):
         """
 
         num_actions = 1
-
+        print(target_model_update)
         # Build an actor network
         actor = Sequential()
         actor.add(Flatten(input_shape=(1, num_observations)))
@@ -128,13 +155,43 @@ class JitterbugDDPGAgent(DDPGAgent):
         return policy
 
 
+class JitterbugA2CAgent(A2C):
+    """An A2C agent for the Jitterbug task"""
+
+    def __init__(self, policy, env, policy_kwargs=None):
+
+        # Make the environment compatible with stable_baselines package
+        env_gym = jitterbug_dmc.JitterbugGymEnv(env)
+        env_gym.num_envs = 1
+        env_gym.observation_space = env_gym.observation_space["observations"]
+        env_vec = DummyVecEnv([lambda: env_gym])
+
+        super().__init__(
+            policy=policy,
+            env=env_vec,
+            policy_kwargs=policy_kwargs
+        )
+
+
+    def train(self, nb_steps, callback=None):
+        """Train the A2C agent.
+
+        Args:
+            nb_steps (int): total number of steps used for training
+        """
+
+        self.learn(total_timesteps=nb_steps,
+            #callback=callback
+        )
+
+
 def train_ddpg_agent(
         env,
         agent,
         weights_path,
         training_progress_path,
         *,
-        num_steps=int(2e7)
+        num_steps=int(2e6)
 ):
     """Train a DDPG agent on the given dm_control environment
 
@@ -242,5 +299,84 @@ def demo(task, *, random_seed=123):
     print("Done")
 
 
+# Create log dir
+log_dir = "/tmp/gym/"
+os.makedirs(log_dir, exist_ok=True)
+best_mean_reward, n_steps= -np.inf, 0
+
+
+def callback(_locals, _globals):
+  """
+  Callback called at each step (for DQN an others) or after n steps (see ACER or PPO2)
+  :param _locals: (dict)
+  :param _globals: (dict)
+  """
+  
+  global n_steps, best_mean_reward
+  #print(n_steps)
+  #print(n_steps)
+  # Print stats every 1000 calls
+  if (n_steps + 1) % 1000 == 0:
+      # Evaluate policy training performance
+      x, y = ts2xy(load_results(log_dir), 'timesteps')
+      print(x)
+      if len(x) > 0:
+          mean_reward = np.mean(y[-100:])
+          print(x[-1], 'timesteps')
+          print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(best_mean_reward, mean_reward))
+
+          # New best model, you could save the agent here
+          if mean_reward > best_mean_reward:
+              best_mean_reward = mean_reward
+              # Example for saving best model
+              print("Saving new best model")
+              _locals['self'].save(log_dir + 'best_model.pkl')
+  n_steps += 1
+  return True
+
+
+def demoA2C(task, *, random_seed=123):
+    """Train and evaluate A2C agent"""
+
+    random_seed=123
+
+    # Load the environment
+    np.random.seed(random_seed)
+
+    env = suite.load(
+        domain_name="jitterbug",
+        task_name=task,
+        visualize_reward=True,
+        task_kwargs={
+            "random": random_seed
+        },
+
+        # Important: the keras-rl DDPG agent needs flat observations
+        environment_kwargs={
+            "flat_observation": True
+        }
+    )
+
+    # Define the architecture of the NN
+    policy_kwargs = dict(act_fun=tf.nn.tanh, 
+        net_arch=[32, 32]
+        )
+   
+   # Construct the A2C agent
+    agent = JitterbugA2CAgent(
+        policy="MlpPolicy",
+        env=env,
+        policy_kwargs=policy_kwargs
+    )
+
+    path_trained_agent = f"a2c.{task}.model_parameters.pkl"
+    agent.train(
+        1000,
+        #callback=callback
+    )
+
+    agent.save(path_trained_agent)
+
+
 if __name__ == '__main__':
-    demo("move_to_pose")
+    demoA2C("move_in_direction")

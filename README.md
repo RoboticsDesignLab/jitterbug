@@ -35,6 +35,13 @@ under Windows, Mac or Linux.
 The only pre-requisite package is
 [`dm_control`](https://github.com/deepmind/dm_control).
 
+If you're using Ubuntu 16.04, you may have problems with the GLFW dirvers.
+Switching to osmesa (software rendering) may fix this,
+
+```bash
+export MUJOCO_GL=osmesa
+```
+
 ## Usage
 
 ### DeepMind control Interface

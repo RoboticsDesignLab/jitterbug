@@ -30,7 +30,11 @@ import sys
 import inspect
 import collections
 
+# Uncomment to disable GPU training in tensorflow (must be before keras imports)
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
 import numpy as np
+import tensorflow as tf
 
 from dm_control import mujoco
 from dm_control.rl import control
@@ -41,6 +45,7 @@ from dm_control.utils import containers
 from dm_control.utils import io as resources
 from dm_control.mujoco.wrapper.mjbindings import mjlib
 
+import autoencoder
 import pickle
 
 # Load the suite so we can add to it
@@ -50,6 +55,7 @@ SUITE = containers.TaggedTasks()
 DEFAULT_TIME_LIMIT = 10
 DEFAULT_CONTROL_TIMESTEP = 0.01
 TARGET_SPEED = 0.1
+
 
 def get_model_and_assets():
     """Returns a tuple containing the model XML string and a dict of assets"""
@@ -64,10 +70,10 @@ def get_model_and_assets():
 
 @SUITE.add("benchmarking", "easy")
 def move_from_origin(
-    time_limit=DEFAULT_TIME_LIMIT,
-    control_timestep=DEFAULT_CONTROL_TIMESTEP,
-    random=None,
-    environment_kwargs=None
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
+        random=None,
+        environment_kwargs=None
 ):
     """Move the Jitterbug away from the origin"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -84,10 +90,10 @@ def move_from_origin(
 
 @SUITE.add("benchmarking", "easy")
 def face_direction(
-    time_limit=DEFAULT_TIME_LIMIT,
-    control_timestep=DEFAULT_CONTROL_TIMESTEP,
-    random=None,
-    environment_kwargs=None
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
+        random=None,
+        environment_kwargs=None
 ):
     """Move the Jitterbug to face a certain yaw angle"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -101,12 +107,13 @@ def face_direction(
         **environment_kwargs
     )
 
+
 @SUITE.add("benchmarking", "easy")
 def move_in_direction(
-    time_limit=DEFAULT_TIME_LIMIT,
-    control_timestep=DEFAULT_CONTROL_TIMESTEP,
-    random=None,
-    environment_kwargs=None
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
+        random=None,
+        environment_kwargs=None
 ):
     """Move the Jitterbug in a certain direction"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -123,10 +130,10 @@ def move_in_direction(
 
 @SUITE.add("benchmarking", "hard")
 def move_to_position(
-    time_limit=DEFAULT_TIME_LIMIT,
-    control_timestep=DEFAULT_CONTROL_TIMESTEP,
-    random=None,
-    environment_kwargs=None
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
+        random=None,
+        environment_kwargs=None
 ):
     """Move the Jitterbug to a certain XYZ position"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -143,10 +150,10 @@ def move_to_position(
 
 @SUITE.add("benchmarking", "hard")
 def move_to_pose(
-    time_limit=DEFAULT_TIME_LIMIT,
-    control_timestep=DEFAULT_CONTROL_TIMESTEP,
-    random=None,
-    environment_kwargs=None
+        time_limit=DEFAULT_TIME_LIMIT,
+        control_timestep=DEFAULT_CONTROL_TIMESTEP,
+        random=None,
+        environment_kwargs=None
 ):
     """Move the Jitterbug to a certain XYZRPY pose"""
     physics = Physics.from_xml_string(*get_model_and_assets())
@@ -220,9 +227,9 @@ class Physics(mujoco.Physics):
         angle = self.named.data.qpos["jointMass"] + np.pi / 2
 
         while angle > np.pi:
-            angle -= 2*np.pi
+            angle -= 2 * np.pi
         while angle <= -np.pi:
-            angle += 2*np.pi
+            angle += 2 * np.pi
         return angle
 
     def motor_velocity(self):
@@ -232,9 +239,9 @@ class Physics(mujoco.Physics):
     def target_position(self):
         """Get the full target pose vector"""
         return np.concatenate((
-                self.target_position_xyz(),
-                self.target_position_quat()
-            ),
+            self.target_position_xyz(),
+            self.target_position_quat()#data gathering while learning the task move_in_direction with ddpg
+        ),
             axis=0
         )
 
@@ -298,9 +305,9 @@ class Physics(mujoco.Physics):
         """
         angle = self.target_direction_yaw() - self.jitterbug_direction_yaw()
         while angle > np.pi:
-            angle -= 2*np.pi
+            angle -= 2 * np.pi
         while angle <= -np.pi:
-            angle += 2*np.pi
+            angle += 2 * np.pi
         return np.array([angle])
 
 
@@ -308,10 +315,10 @@ class Jitterbug(base.Task):
     """A jitterbug `Task`"""
 
     def __init__(
-        self,
-        random=None,
-        task="move_from_origin",
-        random_pose=True
+            self,
+            random=None,
+            task="move_from_origin",
+            random_pose=True,
     ):
         """Initialize an instance of the `Jitterbug` domain
 
@@ -336,7 +343,7 @@ class Jitterbug(base.Task):
             for obj in inspect.getmembers(sys.modules[__name__])
             if inspect.isfunction(obj[1]) and obj[0] in SUITE._tasks
         ]
-        assert task in self.task_names,\
+        assert task in self.task_names, \
             "Invalid task {}, options are {}".format(task, self.task_names)
 
         self.task = task
@@ -345,38 +352,81 @@ class Jitterbug(base.Task):
 
         #self.pickleFile = open("observations.pkl", "wb")
         self.principalVectors = np.array([[0.0049, 0.0171, -0.0001, -0.0001, 0.0003, 0, 0, 0],
-                                         [0.0242, -0.0042, -0.0002, 0.0001, 0.0001, 0, 0, 0],
-                                         [-0.0002, -0.0001, 0.0003, 0, 0, 0, 0, 0],
-                                         [0.1224, 0.9907, 0.0519, -0.0072, 0.0094, -0.0001, 0.0001, 0.0001],
-                                         [-0.0019, 0.0201, 0.0014, -0.0006, 0.0003, 0, -0.0002, 0],
-                                         [0.0224, -0.0022, -0.0009, 0, -0.0001, -0.0003, 0, 0],
-                                         [0.9918, -0.1215, -0.0179, 0.0052, 0.0022, 0, -0.0001, -0.0002],
-                                         [0.0014, 0.0043, 0.0001, 0.0003, 0.0001, 0.0002, 0.0001, 0],
-                                         [0.0066, -0.0011, 0.0001, -0.0002, 0, 0.0001, -0.0001, 0],
-                                         [0.0001, 0, -0.0002, 0.0001, -0.0001, 0.0012, 0, 0],
-                                         [-0.0002, 0, 0.0004, 0.0284, 0.0096, -0.9995, -0.0035, -0.0003],
-                                         [-0.0003, 0.0004, -0.0014, 0.0766, 0.0141, -0.0011, 0.997, 0.0007],
-                                         [0.0038, 0.0067, 0.0441, 0, -0.9988, -0.0096, 0.0142, -0.0046],
-                                         [0.0043, -0.0079, 0.0022, -0.9966, 0.0014, -0.0286, 0.0765, 0],
-                                         [0.0002, -0.0004, 0.0057, -0.0001, -0.0044, -0.0003, -0.0007, 1],
-                                         [-0.0113, 0.054, -0.9975, -0.0027, -0.0438, -0.0009, -0.0006, 0.0055]])
+                                          [0.0242, -0.0042, -0.0002, 0.0001, 0.0001, 0, 0, 0],
+                                          [-0.0002, -0.0001, 0.0003, 0, 0, 0, 0, 0],
+                                          [0.1224, 0.9907, 0.0519, -0.0072, 0.0094, -0.0001, 0.0001, 0.0001],
+                                          [-0.0019, 0.0201, 0.0014, -0.0006, 0.0003, 0, -0.0002, 0],
+                                          [0.0224, -0.0022, -0.0009, 0, -0.0001, -0.0003, 0, 0],
+                                          [0.9918, -0.1215, -0.0179, 0.0052, 0.0022, 0, -0.0001, -0.0002],
+                                          [0.0014, 0.0043, 0.0001, 0.0003, 0.0001, 0.0002, 0.0001, 0],
+                                          [0.0066, -0.0011, 0.0001, -0.0002, 0, 0.0001, -0.0001, 0],
+                                          [0.0001, 0, -0.0002, 0.0001, -0.0001, 0.0012, 0, 0],
+                                          [-0.0002, 0, 0.0004, 0.0284, 0.0096, -0.9995, -0.0035, -0.0003],
+                                          [-0.0003, 0.0004, -0.0014, 0.0766, 0.0141, -0.0011, 0.997, 0.0007],
+                                          [0.0038, 0.0067, 0.0441, 0, -0.9988, -0.0096, 0.0142, -0.0046],
+                                          [0.0043, -0.0079, 0.0022, -0.9966, 0.0014, -0.0286, 0.0765, 0],
+                                          [0.0002, -0.0004, 0.0057, -0.0001, -0.0044, -0.0003, -0.0007, 1],
+                                          [-0.0113, 0.054, -0.9975, -0.0027, -0.0438, -0.0009, -0.0006, 0.0055]])
 
         self.principalVectors4dim = np.array([[0.0003, 0, 0, 0],
-                                          [0.0001, 0, 0, 0],
-                                          [0, 0, 0, 0],
-                                          [0.0094, -0.0001, 0.0001, 0.0001],
-                                          [0.0003, 0, -0.0002, 0],
-                                          [-0.0001, -0.0003, 0, 0],
-                                          [0.0022, 0, -0.0001, -0.0002],
-                                          [0.0001, 0.0002, 0.0001, 0],
-                                          [0, 0.0001, -0.0001, 0],
-                                          [-0.0001, 0.0012, 0, 0],
-                                          [0.0096, -0.9995, -0.0035, -0.0003],
-                                          [0.0141, -0.0011, 0.997, 0.0007],
-                                          [-0.9988, -0.0096, 0.0142, -0.0046],
-                                          [0.0014, -0.0286, 0.0765, 0],
-                                          [-0.0044, -0.0003, -0.0007, 1],
-                                          [-0.0438, -0.0009, -0.0006, 0.0055]])
+                                              [0.0001, 0, 0, 0],
+                                              [0, 0, 0, 0],
+                                              [0.0094, -0.0001, 0.0001, 0.0001],
+                                              [0.0003, 0, -0.0002, 0],
+                                              [-0.0001, -0.0003, 0, 0],
+                                              [0.0022, 0, -0.0001, -0.0002],
+                                              [0.0001, 0.0002, 0.0001, 0],
+                                              [0, 0.0001, -0.0001, 0],
+                                              [-0.0001, 0.0012, 0, 0],
+                                              [0.0096, -0.9995, -0.0035, -0.0003],
+                                              [0.0141, -0.0011, 0.997, 0.0007],
+                                              [-0.9988, -0.0096, 0.0142, -0.0046],
+                                              [0.0014, -0.0286, 0.0765, 0],
+                                              [-0.0044, -0.0003, -0.0007, 1],
+                                              [-0.0438, -0.0009, -0.0006, 0.0055]])
+
+        self.use_autoencoder = False
+        self.use_several_autoencoders = False
+
+        if self.use_autoencoder:
+            sess = tf.get_default_session()
+            if sess == None:
+                sess = tf.Session()
+            self.session = sess
+            self.jitterbug_autoencoder = autoencoder.Autoencoder(feature_dimension=16,
+                                                                 lr=0.0005,
+                                                                 sess=self.session
+                                                                 )
+            i=19
+            self.jitterbug_autoencoder.load_autoencoder(f"./autoencoder_model{i}.ckpt")
+            print(f"load autoencoder {i} from file ./autoencoder_model{i}.ckpt")
+
+
+        if self.use_several_autoencoders:
+            self.index_list = [11,15,16,17,18]
+            self.num_autoencoders = len(self.index_list)
+            self.autoencoder_list = []
+            self.session_list = []
+            for i in self.index_list:
+                #Generate a session for each autoencoder
+                g_i = tf.Graph()
+                with g_i.as_default():
+                    session_i = tf.Session(graph=g_i)
+                    self.session_list.append(session_i)
+                    jitterbug_autoencoder_i = autoencoder.Autoencoder(feature_dimension=16,
+                                                                      lr=0.0005,
+                                                                      sess=session_i
+                                                                      )
+                    print(f"load autoencoder {i} from file ./autoencoder_model{i}.ckpt")
+                    jitterbug_autoencoder_i.load_autoencoder(f"./autoencoder_model{i}.ckpt")
+                    self.autoencoder_list.append(jitterbug_autoencoder_i)
+
+
+        self.extremum = np.array([[float('Inf'),-float('Inf')]]*16)
+        self.N_features =len(self.extremum)
+
+
+
 
     def initialize_episode(self, physics):
         """Sets the state of the environment at the start of each episode
@@ -431,16 +481,15 @@ class Jitterbug(base.Task):
                 raise ValueError("Invalid task {}".format(self.task))
 
             if self.random_pose:
-
                 # Randomize Jitterbug orientation to break symmetries
                 rotation_angle = np.random.random() * 2 * np.pi
                 rotation_axis = np.concatenate((
                     np.random.random(size=2) * 0.05 - 0.025,
-                    (1.0, )
+                    (1.0,)
                 ))
                 rotation_axis /= np.linalg.norm(rotation_axis)
                 physics.named.data.qpos["root"][3:] = np.concatenate((
-                    (np.cos(rotation_angle / 2), ),
+                    (np.cos(rotation_angle / 2),),
                     np.sin(rotation_angle / 2) * rotation_axis
                 ))
 
@@ -449,7 +498,6 @@ class Jitterbug(base.Task):
     def get_observation(self, physics):
         """Returns an observation of the state and the target position
         """
-
         obs = collections.OrderedDict()
         obs['position'] = physics.jitterbug_position()
         obs['velocity'] = physics.jitterbug_velocity()
@@ -495,7 +543,9 @@ class Jitterbug(base.Task):
         else:
             raise ValueError("Invalid task {}".format(self.task))
         #pickle.dump(obs, self.pickleFile)
-        #new_obs = self.PCA(obs)
+        # new_obs = self.PCA(obs)
+        if self.use_autoencoder or self.use_several_autoencoders:
+            obs = self.encode_obs(obs)
         return obs
 
     def heading_reward(self, physics):
@@ -507,7 +557,7 @@ class Jitterbug(base.Task):
         return rewards.tolerance(
             physics.angle_jitterbug_to_target()[0],
             bounds=(0, 0),
-            margin=np.pi/2,
+            margin=np.pi / 2,
             value_at_margin=0,
             sigmoid='cosine'
         )
@@ -582,14 +632,37 @@ class Jitterbug(base.Task):
 
         # Reward Jitterbug for staying upright
         r *= self.upright_reward(physics)
-        #print(r)
+        # print(r)
         return r
 
+    def encode_obs(self, obs):
+        obsArray = np.concatenate(
+            (obs['position'], obs['velocity'], obs['motor_position'], obs['motor_velocity'], obs['angle_to_target']))
+        if self.use_autoencoder:
+            norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))]
+            #print("###############")
+            #print(norm_obs)
+            encoded_obs = self.jitterbug_autoencoder.encode(norm_obs)
+            #print(encoded_obs)
+            encoded_obs_dict = {'observations': np.array(encoded_obs)}
+        elif self.use_several_autoencoders:
+            encoded_list = []
+            norm_obs = [np.array(self.autoencoder_list[0].normalize_obs(obsArray))]
+            #print("###############")
+            #print(norm_obs)
+            for i in range(self.num_autoencoders):
+                encoded_list.append(np.array(self.autoencoder_list[i].encode(norm_obs)))
+            encoded_obs = sum(encoded_list)/self.num_autoencoders
+            #print(encoded_obs)
+            encoded_obs_dict = {'observations': encoded_obs}
+        return encoded_obs_dict
+
+
+
     def PCA(self, obs):
-        obsArray = np.concatenate((obs['position'],obs['velocity'],obs['motor_position'],obs['motor_velocity'],obs['angle_to_target']))
-        return {'observations':np.dot(obsArray,self.principalVectors4dim)}
-
-
+        obsArray = np.concatenate(
+            (obs['position'], obs['velocity'], obs['motor_position'], obs['motor_velocity'], obs['angle_to_target']))
+        return {'observations': np.dot(obsArray, self.principalVectors4dim)}
 
 def demo():
     """Demonstrate the Jitterbug domain"""
@@ -607,7 +680,7 @@ def demo():
         task_name="move_from_origin",
         visualize_reward=True,
         task_kwargs={
-            #"time_limit": float("inf")
+            # "time_limit": float("inf")
         }
     )
 

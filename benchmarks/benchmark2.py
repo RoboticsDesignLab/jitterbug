@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     ".."
 ))
-
+import tensorflow as tf
 import jitterbug_dmc
 
 # stable-baselines modules
@@ -22,6 +22,7 @@ from stable_baselines.common.vec_env import DummyVecEnv
 from stable_baselines.a2c.a2c import A2C
 from stable_baselines.ppo2.ppo2 import PPO2
 from stable_baselines.ddpg.ddpg import DDPG
+from stable_baselines.trpo_mpi.trpo_mpi import TRPO
 from stable_baselines.common.policies import register_policy
 from stable_baselines.results_plotter import load_results, ts2xy
 from stable_baselines.bench import Monitor
@@ -34,7 +35,10 @@ import numpy as np
 def use_trained_agent(load_path,
                       env,
                       nb_steps=1000,
-                      policy=None
+                      nb_epochs=5000,
+                      monitor_path="/tmp/gym/",
+                      policy=None,
+                      render=False
                       ):
     """Use an Agent which is already trained to perform a task.
 
@@ -42,16 +46,22 @@ def use_trained_agent(load_path,
         load_path (str): path where the parameters of the model are saved
         env (suite environment): environment
         nb_steps (int): number of steps used to render
+        nb_epochs (int): number of epochs
+        monitor_path (str): path where the monitor saves the data gathered while performing the task
         policy (None): policy. If the agent uses a custom policy, it has to
                        be passed explicitly to be able to load the model
+        render (bool): whether to show or not the agent training
         """
-    env_vec = make_compatible_environment(env, "/tmp/gym/ddpg/")
+    env_vec = make_compatible_environment(env, monitor_path)
     agent = DDPG.load(load_path=load_path, policy=policy, env=env_vec)
     obs = env_vec.reset()
-    for i in range(nb_steps):
-        action, _states = agent.predict(obs)
-        obs, rewards, dones, info = env_vec.step(action)
-        env_vec.render()
+    for i in range(nb_epochs):
+        for t in range(nb_steps):
+            action, _states = agent.predict(obs)
+            obs, rewards, dones, info = env_vec.step(action)
+            if render:
+                env_vec.render()
+        print(str(nb_steps*(i+1))+" steps completed")
 
 
 def make_compatible_environment(env, path):
@@ -64,6 +74,7 @@ def make_compatible_environment(env, path):
     env_gym = jitterbug_dmc.JitterbugGymEnv(env)
     env_gym.num_envs = 1
     log_dir = path
+    print(log_dir)
     os.makedirs(log_dir, exist_ok=True)
     env_mon = Monitor(env_gym, log_dir, allow_early_resets=True)
     env_flat = gym.wrappers.FlattenDictWrapper(env_mon, dict_keys=["observations"])
@@ -219,6 +230,49 @@ class JitterbugPPO2Agent(PPO2):
                    callback=callback
                    )
 
+class JitterbugTRPOAgent(TRPO):
+    """An A2C agent for the Jitterbug task"""
+
+    def __init__(self,
+                 policy,
+                 env,
+                 verbose=1,
+                 index=0,
+                 cg_damping=1e-2,
+                 cg_iters=10,
+                 vf_stepsize=3e-4,
+                 vf_iters=3,
+                 lam=0.98,
+                 entcoeff=0.0,
+                 timesteps_per_batch=1024):
+        # Make the environment compatible with stable_baselines package
+        log_dir = "/tmp/gym/trpo/" + str(index) + "/"
+        env_vec = make_compatible_environment(env, log_dir)
+
+        super().__init__(
+            policy=policy,
+            env=env_vec,
+            verbose=verbose,
+            cg_damping=cg_damping,
+            cg_iters=cg_iters,
+            vf_stepsize=vf_stepsize,
+            vf_iters=vf_iters,
+            lam=lam,
+            entcoeff=entcoeff,
+            timesteps_per_batch=timesteps_per_batch
+        )
+
+    def train(self, nb_steps, callback=None):
+        """Train the A2C agent.
+
+        Args:
+            nb_steps (int): total number of steps used for training
+            callback (callable): callback function to monitor the learning process
+        """
+        self.learn(total_timesteps=nb_steps,
+                   callback=callback
+                   )
+
 def demoDDPG(task,
              *,
              random_seed=123,
@@ -236,19 +290,20 @@ def demoDDPG(task,
     random_seed = 123
 
     # Load the environment
-    np.random.seed(random_seed)
+    #np.random.seed(random_seed)
+    np.random.seed()
 
     env = suite.load(
         domain_name="jitterbug",
         task_name=task,
         visualize_reward=True,
-        task_kwargs={
-            "random": random_seed
-        },
+        #task_kwargs={
+        #    "random": random_seed
+        #},
 
         # Important: the keras-rl DDPG agent needs flat observations
         environment_kwargs={
-            "flat_observation": True
+            "flat_observation": True,
         }
     )
 
@@ -263,7 +318,7 @@ def demoDDPG(task,
                                )
 
     #Train the DDPG agent
-    agent.train(1e4,
+    agent.train(5e6,
     			callback=callback
     			)
 
@@ -272,11 +327,14 @@ def demoDDPG(task,
     # agent.save(path_trained_agent)
 
     # Use the DDPG agent
-    #use_trained_agent("./ddpg-results/1/best_model",
-    #                  env,
-    #                  nb_steps=1000,
-    #                  policy=CustomPolicy
-    #                  )
+    #use_trained_agent(load_path="./ddpg-results/6/best_model",
+     #                 env=env,
+     #                 nb_steps=1000,
+     #                 policy=CustomPolicy,
+     #                 monitor_path="/tmp/ddpg/13/",
+     #                 render=False,
+     #                 nb_epochs=5000
+     #                 )
 
 
 def demoA2C(task,
@@ -412,10 +470,79 @@ def demoPPO2(task,
     #                 )
 
 
+def demoTRPO(task,
+            *,
+            random_seed=123,
+            index=0,
+            cg_damping=1e-2,
+            cg_iters=10,
+            vf_stepsize=3e-4,
+            vf_iters=3,
+            lam=0.98,
+            entcoeff=0.0,
+            timesteps_per_batch=1024
+            ):
+    """Train and evaluate A2C agent"""
+    from customPolicy import CustomPolicy
+    # Register the policy, it will check that the name is not already taken
+    register_policy('CustomPolicy', CustomPolicy)
+
+    random_seed = random_seed
+
+    # Load the environment
+    np.random.seed(random_seed)
+
+    env = suite.load(
+        domain_name="jitterbug",
+        task_name=task,
+        visualize_reward=True,
+        task_kwargs={
+            "random": random_seed
+        },
+
+        # Important: the keras-rl DDPG agent needs flat observations
+        environment_kwargs={
+            "flat_observation": True
+        }
+    )
+
+    # Construct the TRPO agent
+    agent = JitterbugTRPOAgent(policy=CustomPolicy,
+                              env=env,
+                              verbose=1,
+                              index=index,
+                              cg_damping=cg_damping,
+                              cg_iters=cg_iters,
+                              vf_stepsize=vf_stepsize,
+                              vf_iters=vf_iters,
+                              lam=lam,
+                              entcoeff=entcoeff,
+                              timesteps_per_batch=timesteps_per_batch
+                              )
+
+    path_trained_agent = f"a2c.{task}.model_parameters.pkl"
+
+    # Train the TRPO agent
+    agent.train(int(5e6),
+                callback=callback
+                )
+
+    # Save the TRPO agent
+    path_trained_agent = f"./trained_dqn_{task}"
+    # agent.save(path_trained_agent)
+
+    # Use the TRPO agent
+    #use_trained_agent("./dqn-results/",
+    #                  env,
+    #                  nb_steps=1000,
+    #                  policy=CustomPolicy
+    #                 )
+
 if __name__ == '__main__':
-    i = 200
-    n_steps_i = 32
+    i = 0
     log_dir = "/tmp/gym/ddpg/" + str(i) + "/"
     os.makedirs(log_dir, exist_ok=True)
     best_mean_reward, n_steps_monitor = -np.inf, 0
-    demoPPO2("face_direction",index=i)
+    demoDDPG("move_in_direction",
+             index=i
+             )

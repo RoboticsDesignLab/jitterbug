@@ -46,6 +46,7 @@ from dm_control.utils import io as resources
 from dm_control.mujoco.wrapper.mjbindings import mjlib
 
 import autoencoder
+import denoising_autoencoder
 import pickle
 
 # Load the suite so we can add to it
@@ -387,20 +388,47 @@ class Jitterbug(base.Task):
 
         self.use_autoencoder = False
         self.use_several_autoencoders = False
+        self.use_denoising_autoencoder = False
+        self.train_autoencoder = True
 
         if self.use_autoencoder:
-            sess = tf.get_default_session()
-            if sess == None:
-                sess = tf.Session()
-            self.session = sess
-            self.jitterbug_autoencoder = autoencoder.Autoencoder(feature_dimension=16,
-                                                                 lr=0.0005,
-                                                                 sess=self.session
-                                                                 )
-            i=19
-            self.jitterbug_autoencoder.load_autoencoder(f"./autoencoder_model{i}.ckpt")
-            print(f"load autoencoder {i} from file ./autoencoder_model{i}.ckpt")
+            g = tf.Graph()
+            with g.as_default():
+                sess = tf.Session(graph=g)
 
+                self.session = sess
+                self.jitterbug_autoencoder = autoencoder.Autoencoder(feature_dimension=16,
+                                                                     lr=0.0005,
+                                                                     sess=self.session
+                                                                     )
+                i=20
+                self.jitterbug_autoencoder.load_autoencoder(f"./autoencoder_model{i}.ckpt")
+                print(f"load autoencoder {i} from file ./autoencoder_model{i}.ckpt")
+
+        if self.use_denoising_autoencoder:
+            g = tf.Graph()
+            with g.as_default():
+                sess = tf.Session(graph=g)
+
+                self.session = sess
+                self.jitterbug_autoencoder = denoising_autoencoder.Autoencoder(feature_dimension=16,
+                                                                     lr=0.0005,
+                                                                     sess=self.session
+                                                                     )
+                i=21
+                self.jitterbug_autoencoder.load_autoencoder(f"./autoencoder_model{i}.ckpt")
+                print(f"load autoencoder {i} from file ./autoencoder_model{i}.ckpt")
+
+        if self.train_autoencoder:
+            g = tf.Graph()
+            with g.as_default():
+                sess = tf.Session(graph=g)
+
+                self.session = sess
+                self.jitterbug_autoencoder = autoencoder.Autoencoder(feature_dimension=16,
+                                                                            lr=0.001,
+                                                                            sess=self.session
+                                                                            )
 
         if self.use_several_autoencoders:
             self.index_list = [11,15,16,17,18]
@@ -426,6 +454,10 @@ class Jitterbug(base.Task):
         self.N_features =len(self.extremum)
 
 
+        self.counter = 0
+        self.observation_buffer = []
+        self.batch_size = 1000
+        self.buffer_size = int(1e4)
 
 
     def initialize_episode(self, physics):
@@ -544,8 +576,11 @@ class Jitterbug(base.Task):
             raise ValueError("Invalid task {}".format(self.task))
         #pickle.dump(obs, self.pickleFile)
         # new_obs = self.PCA(obs)
-        if self.use_autoencoder or self.use_several_autoencoders:
+        self.counter += 1
+        if self.use_autoencoder or self.use_several_autoencoders or self.use_denoising_autoencoder or self.train_autoencoder:
             obs = self.encode_obs(obs)
+
+        #print(obs['position'])
         return obs
 
     def heading_reward(self, physics):
@@ -638,13 +673,28 @@ class Jitterbug(base.Task):
     def encode_obs(self, obs):
         obsArray = np.concatenate(
             (obs['position'], obs['velocity'], obs['motor_position'], obs['motor_velocity'], obs['angle_to_target']))
-        if self.use_autoencoder:
+
+        if self.train_autoencoder:
             norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))]
+            self.observation_buffer.insert(0, norm_obs[0]) #Add observation to buffer
+
+            while len(self.observation_buffer)>self.buffer_size:
+                self.observation_buffer.pop() #Remove the oldest observations from the buffer
+
+            encoded_obs = self.jitterbug_autoencoder.encode(norm_obs)
+            encoded_obs_dict = {'observations': np.array(encoded_obs)}
+            if self.counter % self.batch_size == 0:
+                self.update_autoencoder()
+
+        if self.use_autoencoder or self.use_denoising_autoencoder:
+            norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))]
+            self.batch.append(norm_obs[0])
             #print("###############")
             #print(norm_obs)
             encoded_obs = self.jitterbug_autoencoder.encode(norm_obs)
             #print(encoded_obs)
             encoded_obs_dict = {'observations': np.array(encoded_obs)}
+
         elif self.use_several_autoencoders:
             encoded_list = []
             norm_obs = [np.array(self.autoencoder_list[0].normalize_obs(obsArray))]
@@ -656,6 +706,14 @@ class Jitterbug(base.Task):
             #print(encoded_obs)
             encoded_obs_dict = {'observations': encoded_obs}
         return encoded_obs_dict
+
+
+    def update_autoencoder(self):
+        self.jitterbug_autoencoder.train_autoencoder(training_data=self.observation_buffer,
+                                                     num_epoch=1,
+                                                     batch_size=self.batch_size,
+                                                     )
+        print("Autoencoder updated")
 
 
 

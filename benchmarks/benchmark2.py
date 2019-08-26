@@ -279,13 +279,14 @@ def demoDDPG(task,
              batch_size=64,
              actor_lr=1e-4,
              critic_lr=1e-4,
-             index=0
+             index=0,
+             path_autoencoder=None
              ):
     """Train and evaluate DDPG agent"""
     from customPolicy_ddpg import CustomPolicy
 
     # Register the policy, it will check that the name is not already taken
-    register_policy('CustomPolicy', CustomPolicy)
+    #  register_policy('CustomPolicy', CustomPolicy)
 
     random_seed = 123
 
@@ -308,7 +309,7 @@ def demoDDPG(task,
     )
 
     # Construct the DDPG agent
-    agent = JitterbugDDPGAgent(policy='CustomPolicy',
+    agent = JitterbugDDPGAgent(policy= CustomPolicy,
                                env=env,
                                verbose=1,
                                batch_size=batch_size,
@@ -323,6 +324,10 @@ def demoDDPG(task,
     			)
 
     # Save the DDPG agent
+    if path_autoencoder != None:
+        env.task.jitterbug_autoencoder.save_autoencoder(path_autoencoder)
+
+
     path_trained_agent = f"./trained_ddpg_{task}"
     # agent.save(path_trained_agent)
 
@@ -539,10 +544,13 @@ def demoTRPO(task,
     #                 )
 
 if __name__ == '__main__':
-    i = 0
-    log_dir = "/tmp/gym/ddpg/" + str(i) + "/"
-    os.makedirs(log_dir, exist_ok=True)
-    best_mean_reward, n_steps_monitor = -np.inf, 0
-    demoDDPG("move_in_direction",
-             index=i
-             )
+    # Run 10 simulatuions of ddpg agent performing the move_in_direction task with different random seeds
+
+    path_autoencoder = "./autoencoder_model22.ckpt"
+    for i in range(3,10):
+        log_dir = "/tmp/gym/ddpg/" + str(i) + "/"
+        os.makedirs(log_dir, exist_ok=True)
+        best_mean_reward, n_steps_monitor = -np.inf, 0
+        demoDDPG("move_in_direction",
+                 index=i
+                 )

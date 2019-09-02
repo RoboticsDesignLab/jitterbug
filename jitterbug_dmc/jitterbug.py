@@ -405,13 +405,15 @@ class Jitterbug(base.Task):
                                               [-0.0044, -0.0003, -0.0007, 1],
                                               [-0.0438, -0.0009, -0.0006, 0.0055]])
 
-        self.use_autoencoder = False
+        self.use_autoencoder = True
         self.use_several_autoencoders = False
         self.use_denoising_autoencoder = False
         self.train_autoencoder = False
         self.use_denoising_autoencoder15 = False
         self.use_autoencoder15=False
         self.use_autoencoder13=False
+
+        self.normalize01 = True
 
         if self.use_autoencoder:
             g = tf.Graph()
@@ -423,7 +425,7 @@ class Jitterbug(base.Task):
                                                                      lr=0.0005,
                                                                      sess=self.session
                                                                      )
-                i=31
+                i=32
                 self.jitterbug_autoencoder.load_autoencoder(f"./autoencoder_model{i}.ckpt")
                 print(f"load autoencoder {i} from file ./autoencoder_model{i}.ckpt")
 
@@ -449,7 +451,7 @@ class Jitterbug(base.Task):
                 self.session = sess
                 self.jitterbug_autoencoder = denoising_autoencoder.Autoencoder(feature_dimension=15,
                                                                      lr=0.0005,
-                                                                     sess=self.session
+                                                                     sess=self.session,
                                                                      )
                 i=28
                 self.jitterbug_autoencoder.load_autoencoder(f"./autoencoder_model{i}.ckpt")
@@ -643,6 +645,7 @@ class Jitterbug(base.Task):
         #pickle.dump(obs, self.pickleFile)
         # new_obs = self.PCA(obs)
         self.counter += 1
+
         if self.use_autoencoder or self.use_several_autoencoders or self.use_denoising_autoencoder or self.train_autoencoder or self.use_denoising_autoencoder15 or self.use_autoencoder15 or self.use_autoencoder13:
             obs = self.encode_obs(obs)
         #print(obs)
@@ -740,7 +743,10 @@ class Jitterbug(base.Task):
         obsArray = np.concatenate(
             (obs['position'], obs['velocity'], obs['motor_position'], obs['motor_velocity'], obs['angle_to_target']))
         if self.train_autoencoder:
-            norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))]
+            if self.normalize01:
+                norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs01(obsArray))]
+            else:
+                norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))]
             self.observation_buffer.insert(0, norm_obs[0]) #Add observation to buffer
 
             while len(self.observation_buffer)>self.buffer_size:
@@ -752,7 +758,10 @@ class Jitterbug(base.Task):
                 self.update_autoencoder()
 
         if self.use_autoencoder or self.use_denoising_autoencoder:
-            norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))]
+            if self.normalize01:
+                norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs01(obsArray))]
+            else:
+                norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))]
             #print("###############")
             #print(norm_obs)
             encoded_obs = self.jitterbug_autoencoder.encode(norm_obs)
@@ -760,7 +769,10 @@ class Jitterbug(base.Task):
             encoded_obs_dict = {'observations': np.array(encoded_obs)}
 
         if self.use_denoising_autoencoder15 or self.use_autoencoder15:
-            norm_obs = np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))
+            if self.normalize01:
+                norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs01(obsArray))]
+            else:
+                norm_obs = np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))
             #print("###############")
             #print(norm_obs)
             angle_to_target_norm = norm_obs[15]
@@ -771,7 +783,10 @@ class Jitterbug(base.Task):
             encoded_obs_dict = {'observations': np.array(encoded_obs)}
 
         if self.use_autoencoder13:
-            norm_obs = np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))
+            if self.normalize01:
+                norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs01(obsArray))]
+            else:
+                norm_obs = np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))
             #print("###############")
             #print(norm_obs)
             unchanged_features_norm = norm_obs[13:]

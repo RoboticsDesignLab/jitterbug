@@ -31,6 +31,8 @@ from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 import gym
 import numpy as np
 
+import time
+
 
 def use_trained_agent(load_path,
                       env,
@@ -38,7 +40,7 @@ def use_trained_agent(load_path,
                       nb_epochs=5000,
                       monitor_path="/tmp/gym/",
                       policy=None,
-                      render=False
+                      render=False,
                       ):
     """Use an Agent which is already trained to perform a task.
 
@@ -55,8 +57,10 @@ def use_trained_agent(load_path,
     env_vec = make_compatible_environment(env, monitor_path)
     agent = DDPG.load(load_path=load_path, policy=policy, env=env_vec)
     obs = env_vec.reset()
+
     for i in range(nb_epochs):
         for t in range(nb_steps):
+            time.sleep(0.05)
             action, _states = agent.predict(obs)
             obs, rewards, dones, info = env_vec.step(action)
             if render:
@@ -279,7 +283,8 @@ def demoDDPG(task,
              batch_size=64,
              actor_lr=1e-4,
              critic_lr=1e-4,
-             index=0
+             index=0,
+             path_autoencoder=None
              ):
     """Train and evaluate DDPG agent"""
     from customPolicy_ddpg import CustomPolicy
@@ -323,18 +328,22 @@ def demoDDPG(task,
     			)
 
     # Save the DDPG agent
+    if path_autoencoder != None:
+        env.task.jitterbug_autoencoder.save_autoencoder(path_autoencoder)
+
+
     path_trained_agent = f"./trained_ddpg_{task}"
     # agent.save(path_trained_agent)
 
     # Use the DDPG agent
-    #use_trained_agent(load_path="./ddpg-results/6/best_model",
-     #                 env=env,
-     #                 nb_steps=1000,
-     #                 policy=CustomPolicy,
-     #                 monitor_path="/tmp/ddpg/13/",
-     #                 render=False,
-     #                 nb_epochs=5000
-     #                 )
+    #use_trained_agent(load_path="./ddpg-results/ddpg_10seeds/0/best_model",
+    #                  env=env,
+    #                  nb_steps=1000,
+    #                  policy=CustomPolicy,
+    #                  monitor_path="/tmp/ddpg/0/",
+    #                  render=True,
+    #                  nb_epochs=10,
+    #                  )
 
 
 def demoA2C(task,
@@ -539,11 +548,11 @@ def demoTRPO(task,
     #                 )
 
 if __name__ == '__main__':
-    # Run 1 simulation of ddpg agent performing the move_in_direction task with random seed and autoencoder 22 (NN=12,10,12)
-    i=51
+    # Run 1 simulation of ddpg agent performing the move_in_direction task with autoencoder 32 (NN=12 transpose 01)
+    i=102
     log_dir = "/tmp/gym/ddpg/" + str(i) + "/"
     os.makedirs(log_dir, exist_ok=True)
     best_mean_reward, n_steps_monitor = -np.inf, 0
     demoDDPG("move_in_direction",
              index=i
-             )
+            )

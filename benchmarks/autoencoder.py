@@ -34,7 +34,7 @@ def normalize(data,fileName):
         extrema.append([Xmin,Xmax])
 
         for line2 in range(N_lines): #normalize between -1 and 1
-            normalized_data[line2][col] = -1+2*(data[line2][col]-Xmin)/(Xmax-Xmin)
+            normalized_data[line2][col] = (data[line2][col]-Xmin)/(Xmax-Xmin)
     print(extrema)
 
     pickle.dump(extrema,extremaFile)
@@ -58,10 +58,12 @@ class Autoencoder():
         # Build the autoencoder
         num_inputs = feature_dimension
         num_hid1 = 12
-        #num_hid2 = 12
-        #num_hid3 = 16
-        #num_hid4 = 14
+        #num_hid2 = 16
+        #num_hid3 = 14
+        #num_hid4 = 12
         #num_hid5 = 14
+        #num_hid6 = 16
+        #num_hid7 = 16
         num_outputs = num_inputs
         #actf = tf.nn.relu
         #actf = tf.keras.activations.linear
@@ -73,30 +75,34 @@ class Autoencoder():
                                                    )
 
         w1 = tf.Variable(initializer([num_inputs, num_hid1]), dtype=tf.float32)
-        w2 = tf.Variable(initializer([num_hid1, num_outputs]), dtype=tf.float32)
+        w2 = tf.transpose(w1)
         #w3 = tf.Variable(initializer([num_hid2, num_hid3]), dtype=tf.float32)
-        #w4 = tf.Variable(initializer([num_hid3, num_outputs]), dtype=tf.float32)
-        #w5 = tf.Variable(initializer([num_hid4, num_hid5]), dtype=tf.float32)
-        #w6 = tf.Variable(initializer([num_hid5, num_outputs]), dtype=tf.float32)
-
+        #w4 = tf.Variable(initializer([num_hid3, num_hid4]), dtype=tf.float32)
+        #w5 = tf.transpose(w4)
+        #w6 = tf.transpose(w3)
+        #w7 = tf.transpose(w2)
+        #w8 = tf.transpose(w1)
 
         #initializer_constant = tf.constant(np.identity(num_inputs), dtype=tf.float32)
         #w1 = tf.get_variable("w1", initializer=initializer_constant, dtype=tf.float32)
         #w2 = tf.get_variable("w2", initializer=initializer_constant, dtype=tf.float32)
 
-
         b1 = tf.Variable(tf.zeros(num_hid1))
         b2 = tf.Variable(tf.zeros(num_outputs))
         #b3 = tf.Variable(tf.zeros(num_hid3))
-        #b4 = tf.Variable(tf.zeros(num_outputs))
+        #b4 = tf.Variable(tf.zeros(num_hid4))
         #b5 = tf.Variable(tf.zeros(num_hid5))
-        #b6 = tf.Variable(tf.zeros(num_outputs))
+        #b6 = tf.Variable(tf.zeros(num_hid6))
+        #b7 = tf.Variable(tf.zeros(num_hid7))
+        #b8 = tf.Variable(tf.zeros(num_outputs))
 
         self.hid_layer1 = actf(tf.matmul(self.X, w1) + b1)
         #self.hid_layer2 = actf(tf.matmul(self.hid_layer1, w2) + b2)
         #self.hid_layer3 = actf(tf.matmul(self.hid_layer2, w3) + b3)
         #self.hid_layer4 = actf(tf.matmul(self.hid_layer3, w4) + b4)
         #self.hid_layer5 = actf(tf.matmul(self.hid_layer4, w5) + b5)
+        #self.hid_layer6 = actf(tf.matmul(self.hid_layer5, w6) + b6)
+        #self.hid_layer7 = actf(tf.matmul(self.hid_layer6, w7) + b7)
         self.output_layer = actf(tf.matmul(self.hid_layer1, w2) + b2)
 
         #self.hid_layer1 = tf.matmul(self.X, w1) + b1
@@ -117,7 +123,8 @@ class Autoencoder():
         self.saver = tf.train.Saver()
 
         #File that contains the extrema to normalize the observations
-        fileName = './observations4_move_in_direction_normalized_extrema.pkl'
+        #fileName = './observations4_move_in_direction_normalized_extrema.pkl'
+        fileName = './observations5_use_policy_normalized_extrema.pkl'
         extrema = []
         with (open(fileName, "rb")) as openfile:
             while True:
@@ -240,6 +247,22 @@ class Autoencoder():
 
         return normalized_obs
 
+    def normalize_obs01(self,obs):
+        """Normalize the observation so that its features vary between 0 and 1
+
+               Args:
+                   obs (array): observation to normalize
+
+               Returns:
+                   normalized_observation (array): normalized observation"""
+        N_col = len(self.extrema)
+        normalized_obs = [0.] * N_col
+        for col in range(N_col):
+            Xmin, Xmax = self.extrema[col]
+            normalized_obs[col] = (obs[col] - Xmin) / (Xmax - Xmin)
+
+        return normalized_obs
+
     def save_autoencoder(self, save_path):
         """Save the autoencoder model.
 
@@ -250,40 +273,44 @@ class Autoencoder():
 
 if __name__ == '__main__':
     # Retrieve data
-    mat = sio.loadmat('observations3_random_normalized.mat')
+    mat = sio.loadmat('observations3_random_normalized01.mat')
     data = mat['observations']
 
-    mat2 = sio.loadmat('observations4_move_in_direction_normalized.mat')
+    mat2 = sio.loadmat('observations4_move_in_direction_normalized01.mat')
     data2 = mat2['observations']
 
-    #data_conc = np.concatenate((data,data2),axis=0)
+    #mat3 = sio.loadmat('observations5_use_policy_normalized.mat')
+    #data3 = mat3['observations']
+
+    data_conc = np.concatenate((data,data2),axis=0)
     #print(data_conc)
-    #np.random.shuffle(data_conc)
+    np.random.shuffle(data_conc)
     #print(data_conc)
     #print(data)
-    N = len(data)
-    splitting_percentage = 0.8
+    N = len(data_conc)
+    print(N)
+    splitting_percentage = 0.7
 
     # Split the data into training and testing sets
     splitting_int = int(round(splitting_percentage * N, 0))
-    training_data = data[:splitting_int]
-    testing_data = data[splitting_int:]
+    training_data = data_conc[:splitting_int]
+    testing_data = data_conc[splitting_int:]
 
     #normalize(data,'observations3_random_normalized')
 
     with tf.Session() as sess:
         #Autoencoder saved: 1, 2, 3, 4, 5
         autoencoder = Autoencoder(feature_dimension=len(data[0]),
-                                  lr=0.0005,
+                                  lr=0.001,
                                   sess=sess
                                   )
         #autoencoder.normalize_obs()
         obs = [data[10]]
         #print(data[10])
         autoencoder.train_autoencoder(training_data=training_data,
-                                      num_epoch=1,
-                                      batch_size=8192,
-                                      save_path="./autoencoder_model22.ckpt"
+                                      num_epoch=200,
+                                      batch_size=65536,
+                                      save_path="./autoencoder_model000.ckpt"
                                       )
 
         #autoencoder.load_autoencoder(save_path="./autoencoder_model.ckpt")

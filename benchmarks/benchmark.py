@@ -33,6 +33,11 @@ import gym
 import numpy as np
 
 
+# Globals
+n_steps_monitor = 0
+best_mean_reward = -np.inf
+
+
 def use_trained_agent(
     load_path,
     env,
@@ -89,6 +94,7 @@ def callback(_locals, _globals):
     """
 
     global n_steps_monitor, best_mean_reward
+
     # Print stats every 1000 calls
     if (n_steps_monitor + 1) % 1000 == 0:
         # Evaluate policy training performance
@@ -106,7 +112,9 @@ def callback(_locals, _globals):
                 # Example for saving best model
                 print("Saving new best model")
                 _locals['self'].save(log_dir + 'best_model.pkl')
+
     n_steps_monitor += 1
+
     return True
 
 
@@ -166,19 +174,18 @@ class JitterbugA2CAgent(A2C):
         n_steps=16,
         log_dir="."
     ):
+        env_vec = make_compatible_environment(env, log_dir)
 
-    env_vec = make_compatible_environment(env, log_dir)
-
-    super().__init__(
-        policy=policy,
-        env=env_vec,
-        n_steps=n_steps,
-        verbose=verbose,
-        learning_rate=learning_rate,
-        lr_schedule="linear",
-        ent_coef=0.001,
-        max_grad_norm=max_grad_norm,
-    )
+        super().__init__(
+            policy=policy,
+            env=env_vec,
+            n_steps=n_steps,
+            verbose=verbose,
+            learning_rate=learning_rate,
+            lr_schedule="linear",
+            ent_coef=0.001,
+            max_grad_norm=max_grad_norm,
+        )
 
     def train(self, nb_steps, callback=None):
         """Train the A2C agent.
@@ -553,15 +560,17 @@ def demoTRPO(
 if __name__ == '__main__':
 
     # Prepare logging directory
+    index = 0
     log_dir = os.path.join(
-        #".",
-        "/",
+        ".",
+        #"/",
         "tmp",
         "gym",
         "ddpg",
-        str(0)
+        "{}".format(index)
     )
     os.makedirs(log_dir, exist_ok=True)
+    print("Logging to {}".format(log_dir))
 
     demoDDPG(
         "move_in_direction",

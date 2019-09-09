@@ -9,7 +9,8 @@ setup(
     packages=['jitterbug_dmc'],
     install_requires=[
         "dm_control @ git+https://github.com/deepmind/dm_control@09b27a0b7232c6a5a5045a2b7a608cbfc693f85a",
-        "dm2gym @ git+https://github.com/zuoxingdong/dm2gym@e16048a33a875943556a62b69bbf63e28c7f1d3c"
+        "dm2gym @ git+https://github.com/zuoxingdong/dm2gym@e16048a33a875943556a62b69bbf63e28c7f1d3c",
+        "stable-baselines>=2.6.4"
     ],
     include_package_data=True,
     author='Aaron Snoswell',

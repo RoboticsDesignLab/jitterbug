@@ -32,14 +32,15 @@ import gym
 import numpy as np
 
 
-def use_trained_agent(load_path,
-                      env,
-                      nb_steps=1000,
-                      nb_epochs=5000,
-                      monitor_path="/tmp/gym/",
-                      policy=None,
-                      render=False
-                      ):
+def use_trained_agent(
+    load_path,
+    env,
+    nb_steps=1000,
+    nb_epochs=5000,
+    monitor_path="/tmp/gym/",
+    policy=None,
+    render=False
+):
     """Use an Agent which is already trained to perform a task.
 
     Args:
@@ -64,18 +65,15 @@ def use_trained_agent(load_path,
         print(str(nb_steps*(i+1))+" steps completed")
 
 
-def make_compatible_environment(env, path):
+def make_compatible_environment(env, log_dir):
     """Make a suite environment compatible with stable-baselines.
 
     Args:
         env (suite environment): environment
-        path (str): path used to monitor the learning
+        log_dir (str): path used to monitor the learning
         """
     env_gym = jitterbug_dmc.JitterbugGymEnv(env)
     env_gym.num_envs = 1
-    log_dir = path
-    print(log_dir)
-    os.makedirs(log_dir, exist_ok=True)
     env_mon = Monitor(env_gym, log_dir, allow_early_resets=True)
     env_flat = gym.wrappers.FlattenDictWrapper(env_mon, dict_keys=["observations"])
     env_vec = DummyVecEnv([lambda: env_flat])
@@ -114,16 +112,17 @@ def callback(_locals, _globals):
 class JitterbugDDPGAgent(DDPG):
     """A DDPG agent for the Jitterbug task"""
 
-    def __init__(self,
-                 policy,
-                 env,
-                 verbose=1,
-                 batch_size=64,
-                 actor_lr=1e-4,
-                 critic_lr=1e-4,
-                 index=0):
-        # Make the environment compatible with stable_baselines package
-        log_dir = "/tmp/gym/ddpg/" + str(index) + "/"
+    def __init__(
+        self,
+        policy,
+        env,
+        verbose=1,
+        batch_size=64,
+        actor_lr=1e-4,
+        critic_lr=1e-4,
+        log_dir="."
+    ):
+
         env_vec = make_compatible_environment(env, log_dir)
 
         # Noise
@@ -156,28 +155,29 @@ class JitterbugDDPGAgent(DDPG):
 class JitterbugA2CAgent(A2C):
     """An A2C agent for the Jitterbug task"""
 
-    def __init__(self,
-                 policy,
-                 env,
-                 verbose=1,
-                 max_grad_norm=0.5,
-                 learning_rate=1e-4,
-                 n_steps=16,
-                 index=0):
-        # Make the environment compatible with stable_baselines package
-        log_dir = "/tmp/gym/a2c/" + str(index) + "/"
-        env_vec = make_compatible_environment(env, log_dir)
+    def __init__(
+        self,
+        policy,
+        env,
+        verbose=1,
+        max_grad_norm=0.5,
+        learning_rate=1e-4,
+        n_steps=16,
+        log_dir="."
+    ):
 
-        super().__init__(
-            policy=policy,
-            env=env_vec,
-            n_steps=n_steps,
-            verbose=verbose,
-            learning_rate=learning_rate,
-            lr_schedule="linear",
-            ent_coef=0.001,
-            max_grad_norm=max_grad_norm,
-        )
+    env_vec = make_compatible_environment(env, log_dir)
+
+    super().__init__(
+        policy=policy,
+        env=env_vec,
+        n_steps=n_steps,
+        verbose=verbose,
+        learning_rate=learning_rate,
+        lr_schedule="linear",
+        ent_coef=0.001,
+        max_grad_norm=max_grad_norm,
+    )
 
     def train(self, nb_steps, callback=None):
         """Train the A2C agent.
@@ -194,17 +194,18 @@ class JitterbugA2CAgent(A2C):
 class JitterbugPPO2Agent(PPO2):
     """A PPO2 agent for the Jitterbug task"""
 
-    def __init__(self,
-                 policy,
-                 env,
-                 verbose=1,
-                 n_steps=2048,
-                 nminibatches=32,
-                 noptepochs=10,
-                 cliprange=0.1,
-                 index=0):
-        # Make the environment compatible with stable_baselines package
-        log_dir = "/tmp/gym/ppo/" + str(index) + "/"
+    def __init__(
+        self,
+        policy,
+        env,
+        verbose=1,
+        n_steps=2048,
+        nminibatches=32,
+        noptepochs=10,
+        cliprange=0.1,
+        log_dir="."
+    ):
+
         env_vec = make_compatible_environment(env, log_dir)
 
         super().__init__(
@@ -230,6 +231,7 @@ class JitterbugPPO2Agent(PPO2):
                    callback=callback
                    )
 
+
 class JitterbugTRPOAgent(TRPO):
     """An A2C agent for the Jitterbug task"""
 
@@ -237,7 +239,7 @@ class JitterbugTRPOAgent(TRPO):
                  policy,
                  env,
                  verbose=1,
-                 index=0,
+                 log_dir=".",
                  cg_damping=1e-2,
                  cg_iters=10,
                  vf_stepsize=3e-4,
@@ -245,8 +247,7 @@ class JitterbugTRPOAgent(TRPO):
                  lam=0.98,
                  entcoeff=0.0,
                  timesteps_per_batch=1024):
-        # Make the environment compatible with stable_baselines package
-        log_dir = "/tmp/gym/trpo/" + str(index) + "/"
+
         env_vec = make_compatible_environment(env, log_dir)
 
         super().__init__(
@@ -273,16 +274,19 @@ class JitterbugTRPOAgent(TRPO):
                    callback=callback
                    )
 
-def demoDDPG(task,
-             *,
-             random_seed=123,
-             batch_size=64,
-             actor_lr=1e-4,
-             critic_lr=1e-4,
-             index=0,
-             path_autoencoder=None
-             ):
+
+def demoDDPG(
+    task,
+    log_dir,
+    *,
+    random_seed=None,
+    batch_size=64,
+    actor_lr=1e-4,
+    critic_lr=1e-4,
+    path_autoencoder=None
+):
     """Train and evaluate DDPG agent"""
+
     from customPolicy_ddpg import CustomPolicy
 
     # Register the policy, it will check that the name is not already taken
@@ -309,24 +313,25 @@ def demoDDPG(task,
     )
 
     # Construct the DDPG agent
-    agent = JitterbugDDPGAgent(policy= CustomPolicy,
-                               env=env,
-                               verbose=1,
-                               batch_size=batch_size,
-                               actor_lr=actor_lr,
-                               critic_lr=critic_lr,
-                               index=index
-                               )
+    agent = JitterbugDDPGAgent(
+        policy=CustomPolicy,
+        env=env,
+        verbose=1,
+        batch_size=batch_size,
+        actor_lr=actor_lr,
+        critic_lr=critic_lr,
+        log_dir=log_dir
+    )
 
     #Train the DDPG agent
-    agent.train(5e6,
-    			callback=callback
-    			)
+    agent.train(
+        5e6,
+        callback=callback
+    )
 
     # Save the DDPG agent
     if path_autoencoder != None:
         env.task.jitterbug_autoencoder.save_autoencoder(path_autoencoder)
-
 
     path_trained_agent = f"./trained_ddpg_{task}"
     # agent.save(path_trained_agent)
@@ -342,15 +347,16 @@ def demoDDPG(task,
      #                 )
 
 
-def demoA2C(task,
-            *,
-            random_seed=123,
-            max_grad_norm=0.5,
-            learning_rate=1e-4,
-            n_steps=16,
-            index=0,
-            n_envs=1
-            ):
+def demoA2C(
+    task,
+    log_dir,
+    *,
+    random_seed=123,
+    max_grad_norm=0.5,
+    learning_rate=1e-4,
+    n_steps=16,
+    n_envs=1
+):
     """Train and evaluate A2C agent"""
     from customPolicy import CustomPolicy
     # Register the policy, it will check that the name is not already taken
@@ -382,7 +388,7 @@ def demoA2C(task,
                               max_grad_norm=max_grad_norm,
                               learning_rate=learning_rate,
                               n_steps=n_steps,
-                              index=index
+                              log_dir=log_dir
                               )
 
     agent.n_envs = n_envs
@@ -408,16 +414,17 @@ def demoA2C(task,
     #                 )
 
 
-def demoPPO2(task,
-             *,
-             random_seed=123,
-             n_steps=2048,
-             index=0,
-             nminibatches=32,
-             noptepochs=10,
-             cliprange=0.1,
-             n_envs=1
-            ):
+def demoPPO2(
+    task,
+    log_dir,
+    *,
+    random_seed=123,
+    n_steps=2048,
+    nminibatches=32,
+    noptepochs=10,
+    cliprange=0.1,
+    n_envs=1
+):
     """Train and evaluate PPO2 agent"""
     from customPolicy import CustomPolicy
     # Register the policy, it will check that the name is not already taken
@@ -447,7 +454,7 @@ def demoPPO2(task,
                                env=env,
                                verbose=1,
                                n_steps=n_steps,
-                               index=index,
+                               log_dir=log_dir,
                                nminibatches=nminibatches,
                                noptepochs=noptepochs,
                                cliprange=cliprange,
@@ -460,8 +467,8 @@ def demoPPO2(task,
 
     #Train the PPO2 agent
     agent.train(int(1e4),
-    			callback=callback
-    			)
+                callback=callback
+                )
 
     # Save the PPO2 agent
     path_trained_agent = f"./trained_ppo_{task}"
@@ -475,18 +482,18 @@ def demoPPO2(task,
     #                 )
 
 
-def demoTRPO(task,
-            *,
-            random_seed=123,
-            index=0,
-            cg_damping=1e-2,
-            cg_iters=10,
-            vf_stepsize=3e-4,
-            vf_iters=3,
-            lam=0.98,
-            entcoeff=0.0,
-            timesteps_per_batch=1024
-            ):
+def demoTRPO(
+    task,
+    *,
+    random_seed=123,
+    cg_damping=1e-2,
+    cg_iters=10,
+    vf_stepsize=3e-4,
+    vf_iters=3,
+    lam=0.98,
+    entcoeff=0.0,
+    timesteps_per_batch=1024
+):
     """Train and evaluate A2C agent"""
     from customPolicy import CustomPolicy
     # Register the policy, it will check that the name is not already taken
@@ -515,7 +522,7 @@ def demoTRPO(task,
     agent = JitterbugTRPOAgent(policy=CustomPolicy,
                               env=env,
                               verbose=1,
-                              index=index,
+                              log_dir=log_dir,
                               cg_damping=cg_damping,
                               cg_iters=cg_iters,
                               vf_stepsize=vf_stepsize,
@@ -544,13 +551,19 @@ def demoTRPO(task,
     #                 )
 
 if __name__ == '__main__':
-    # Run 10 simulatuions of ddpg agent performing the move_in_direction task with different random seeds
 
-    path_autoencoder = "./autoencoder_model22.ckpt"
-    for i in range(3,10):
-        log_dir = "/tmp/gym/ddpg/" + str(i) + "/"
-        os.makedirs(log_dir, exist_ok=True)
-        best_mean_reward, n_steps_monitor = -np.inf, 0
-        demoDDPG("move_in_direction",
-                 index=i
-                 )
+    # Prepare logging directory
+    log_dir = os.path.join(
+        #".",
+        "/",
+        "tmp",
+        "gym",
+        "ddpg",
+        str(0)
+    )
+    os.makedirs(log_dir, exist_ok=True)
+
+    demoDDPG(
+        "move_in_direction",
+        log_dir
+    )

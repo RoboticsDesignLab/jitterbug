@@ -356,9 +356,9 @@ def demoDDPG(
         log_dir=log_dir
     )
 
-    #Train the DDPG agent
+    # Train the DDPG agent
     agent.train(
-        5e6,
+        20e6,
         callback=callback
     )
 

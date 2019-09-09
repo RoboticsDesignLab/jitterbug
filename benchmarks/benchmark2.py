@@ -1,6 +1,7 @@
 """Evaluates various RL algorithms on the Jitterbug task suite"""
 
 import os
+import random
 
 # Uncomment to disable GPU training in tensorflow (must be before keras imports)
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
@@ -292,11 +293,8 @@ def demoDDPG(
     # Register the policy, it will check that the name is not already taken
     #  register_policy('CustomPolicy', CustomPolicy)
 
-    random_seed = 123
-
-    # Load the environment
-    #np.random.seed(random_seed)
-    np.random.seed()
+    random.seed(random_seed)
+    np.random.seed(random_seed)
 
     env = suite.load(
         domain_name="jitterbug",
@@ -351,20 +349,20 @@ def demoA2C(
     task,
     log_dir,
     *,
-    random_seed=123,
+    random_seed=None,
     max_grad_norm=0.5,
     learning_rate=1e-4,
     n_steps=16,
     n_envs=1
 ):
     """Train and evaluate A2C agent"""
+
     from customPolicy import CustomPolicy
+
     # Register the policy, it will check that the name is not already taken
     register_policy('CustomPolicy', CustomPolicy)
 
-    random_seed = random_seed
-
-    # Load the environment
+    random.seed(random_seed)
     np.random.seed(random_seed)
 
     env = suite.load(
@@ -418,7 +416,7 @@ def demoPPO2(
     task,
     log_dir,
     *,
-    random_seed=123,
+    random_seed=None,
     n_steps=2048,
     nminibatches=32,
     noptepochs=10,
@@ -426,13 +424,13 @@ def demoPPO2(
     n_envs=1
 ):
     """Train and evaluate PPO2 agent"""
+
     from customPolicy import CustomPolicy
+
     # Register the policy, it will check that the name is not already taken
     register_policy('CustomPolicy', CustomPolicy)
 
-    random_seed = random_seed
-
-    # Load the environment
+    random.seed(random_seed)
     np.random.seed(random_seed)
 
     env = suite.load(
@@ -485,7 +483,7 @@ def demoPPO2(
 def demoTRPO(
     task,
     *,
-    random_seed=123,
+    random_seed=None,
     cg_damping=1e-2,
     cg_iters=10,
     vf_stepsize=3e-4,
@@ -495,13 +493,13 @@ def demoTRPO(
     timesteps_per_batch=1024
 ):
     """Train and evaluate A2C agent"""
+
     from customPolicy import CustomPolicy
+
     # Register the policy, it will check that the name is not already taken
     register_policy('CustomPolicy', CustomPolicy)
 
-    random_seed = random_seed
-
-    # Load the environment
+    random.seed(random_seed)
     np.random.seed(random_seed)
 
     env = suite.load(
@@ -519,18 +517,19 @@ def demoTRPO(
     )
 
     # Construct the TRPO agent
-    agent = JitterbugTRPOAgent(policy=CustomPolicy,
-                              env=env,
-                              verbose=1,
-                              log_dir=log_dir,
-                              cg_damping=cg_damping,
-                              cg_iters=cg_iters,
-                              vf_stepsize=vf_stepsize,
-                              vf_iters=vf_iters,
-                              lam=lam,
-                              entcoeff=entcoeff,
-                              timesteps_per_batch=timesteps_per_batch
-                              )
+    agent = JitterbugTRPOAgent(
+        policy=CustomPolicy,
+        env=env,
+        verbose=1,
+        log_dir=log_dir,
+        cg_damping=cg_damping,
+        cg_iters=cg_iters,
+        vf_stepsize=vf_stepsize,
+        vf_iters=vf_iters,
+        lam=lam,
+        entcoeff=entcoeff,
+        timesteps_per_batch=timesteps_per_batch
+    )
 
     path_trained_agent = f"a2c.{task}.model_parameters.pkl"
 
@@ -549,6 +548,7 @@ def demoTRPO(
     #                  nb_steps=1000,
     #                  policy=CustomPolicy
     #                 )
+
 
 if __name__ == '__main__':
 

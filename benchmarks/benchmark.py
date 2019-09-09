@@ -7,6 +7,7 @@ import random
 import numpy as np
 import tensorflow as tf
 
+from pprint import pprint
 from dm_control import suite
 
 import stable_baselines
@@ -319,9 +320,14 @@ def demoDDPG(
 ):
     """Train and evaluate DDPG agent"""
 
-    # Register the policy, it will check that the name is not already taken
-    #  register_policy('CustomPolicy', CustomPolicy)
+    # Cast args to types
+    if random_seed is not None:
+        random_seed = int(random_seed)
+    batch_size = int(batch_size)
+    actor_lr = float(actor_lr)
+    critic_lr = float(critic_lr)
 
+    # Fix random seed
     random.seed(random_seed)
     np.random.seed(random_seed)
 
@@ -386,6 +392,14 @@ def demoA2C(
 ):
     """Train and evaluate A2C agent"""
 
+    # Cast args to types
+    if random_seed is not None:
+        random_seed = int(random_seed)
+    max_grad_norm = float(max_grad_norm)
+    learning_rate = float(learning_rate)
+    n_steps = int(n_steps)
+    n_envs = int(n_envs)
+
     random.seed(random_seed)
     np.random.seed(random_seed)
 
@@ -448,6 +462,15 @@ def demoPPO2(
     n_envs=1
 ):
     """Train and evaluate PPO2 agent"""
+
+    # Cast args to types
+    if random_seed is not None:
+        random_seed = int(random_seed)
+    n_steps = int(n_steps)
+    nminibatches = int(nminibatches)
+    noptepochs = int(noptepochs)
+    cliprange = float(cliprange)
+    n_envs = int(n_envs)
 
     random.seed(random_seed)
     np.random.seed(random_seed)
@@ -513,6 +536,16 @@ def demoTRPO(
 ):
     """Train and evaluate A2C agent"""
 
+    # Cast args to types
+    if random_seed is not None:
+        random_seed = int(random_seed)
+    cg_damping = float(cg_damping)
+    cg_iters = int(cg_iters)
+    vf_iters = int(vf_iters)
+    lam = float(lam)
+    entcoeff = float(entcoeff)
+    timesteps_per_batch = int(timesteps_per_batch)
+
     random.seed(random_seed)
     np.random.seed(random_seed)
 
@@ -566,20 +599,32 @@ def demoTRPO(
 
 if __name__ == '__main__':
 
-    # Prepare logging directory
-    index = 0
-    log_dir = os.path.join(
-        ".",
-        #"/",
-        "tmp",
-        "gym",
-        "ddpg",
-        "{}".format(index)
-    )
-    os.makedirs(log_dir, exist_ok=True)
-    print("Logging to {}".format(log_dir))
+    # First arg is function to call
+    func = globals()[sys.argv[1]]
 
-    demoDDPG(
-        "move_in_direction",
+    # Second arg is task
+    task = sys.argv[2]
+
+    # Third arg is logging directory
+    log_dir = sys.argv[3]
+    os.makedirs(log_dir, exist_ok=True)
+
+    print("Training {} on {}, logging to {}".format(
+        func,
+        task,
         log_dir
+    ))
+
+    # Remainder of args are keyword parameters
+    kwargs = {
+        k: v
+        for k, v in zip(sys.argv[4::2], sys.argv[5::2])
+    }
+    print("Arguments are:")
+    pprint(kwargs)
+
+    func(
+        task=task,
+        log_dir=log_dir,
+        **kwargs
     )

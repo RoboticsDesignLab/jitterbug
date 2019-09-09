@@ -2,14 +2,13 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 
-\documentclass[letterpaper, 10 pt, conference]{ieeeconf}  % Comment this line out if you need a4paper
+\documentclass[letterpaper, 10 pt, conference]{ieeeconf}
+%\documentclass[a4paper, 10pt, conference]{ieeeconf}
 
-%\documentclass[a4paper, 10pt, conference]{ieeeconf}      % Use this line for a4 paper
+% This command is only needed if you want to use the \thanks command
+\IEEEoverridecommandlockouts
 
-\IEEEoverridecommandlockouts                              % This command is only needed if 
-                                                          % you want to use the \thanks command
-
-\overrideIEEEmargins                                      % Needed to meet printer requirements.
+\overrideIEEEmargins
 
 %In case you encounter the following error:
 %Error 1010 The PDF file may be corrupt (unable to open PDF file) OR
@@ -29,11 +28,15 @@
 %\usepackage{times} % assumes new font selection scheme installed
 %\usepackage{amsmath} % assumes amsmath package installed
 %\usepackage{amssymb}  % assumes amsmath package installed
+
 \usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage[margin=1cm]{caption}
+
 \usepackage{lipsum}
 
 \title{\LARGE \bf
-Jitterbug: a novel, under-actuated continuous control benchmark
+Jitterbug -- An Underactuated Continuous Control Benchmark
 }
 
 \author{
@@ -65,19 +68,9 @@ Jitterbug: a novel, under-actuated continuous control benchmark
 
 \lipsum[1]
 
-\begin{figure}[t]
-    \includegraphics[width=\columnwidth]{example-image-a}
-    \caption{A nice picture}
-    \label{fig:one}
-\end{figure}
-
-\section{RELATED WORK}
-
-\lipsum[1]
-
 \section{PRELIMINARIES}
 
-\lipsum[1]
+\section{RELATED WORK}
 
 \subsection{Reinforcement Learning}
 
@@ -91,6 +84,27 @@ Jitterbug: a novel, under-actuated continuous control benchmark
 
 \subsection{Under-actuated Control}
 
+\begin{figure}[ht]
+    
+    \centering
+    
+    \begin{minipage}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{katita}
+    \end{minipage}
+    \begin{minipage}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{jitterbug}
+    \end{minipage}
+    
+    \caption{
+        The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
+        In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor.
+    }
+    \label{fig:leader}
+    
+\end{figure}
+
 \section{METHOD}
 
 \lipsum[1]
@@ -103,11 +117,24 @@ Jitterbug: a novel, under-actuated continuous control benchmark
 
 \lipsum[1]
 
+\begin{figure*}[p]
+    
+    \centering
+    \includegraphics[width=\textwidth]{fig-rl-perf}
+    
+    \caption{
+        Comparison of DDPG, PPO and A2C agents over environment training steps.
+        We show mean and $\pm$ one standard deviation across XX random seeds in each figure.
+    }
+    
+    \label{fig:rl-perf}
+\end{figure*}
+
 \section{CONCLUSIONS}
 
 \lipsum[1]
 
-\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
+%\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
                                   % on the last page of the document manually. It shortens
                                   % the textheight of the last page by a suitable amount.
                                   % This command does not take effect until the next page
@@ -138,8 +165,6 @@ Jitterbug: a novel, under-actuated continuous control benchmark
 \bibitem{c1} G. O. Young, Synthetic structure of industrial plastics (Book style with paper title and editor), in Plastics, 2nd ed. vol. 3, J. Peters, Ed.  New York: McGraw-Hill, 1964, pp. 1564.
 
 \end{thebibliography}
-
-
 
 
 \end{document}

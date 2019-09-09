@@ -405,15 +405,15 @@ class Jitterbug(base.Task):
                                               [-0.0044, -0.0003, -0.0007, 1],
                                               [-0.0438, -0.0009, -0.0006, 0.0055]])
 
-        self.use_autoencoder = True
+        self.use_autoencoder = False
         self.use_several_autoencoders = False
         self.use_denoising_autoencoder = False
         self.train_autoencoder = False
         self.use_denoising_autoencoder15 = False
-        self.use_autoencoder15=False
-        self.use_autoencoder13=False
+        self.use_autoencoder15 = False
+        self.use_autoencoder13 = False
 
-        self.normalize01 = True
+        self.normalize01 = False
 
         if self.use_autoencoder:
             g = tf.Graph()

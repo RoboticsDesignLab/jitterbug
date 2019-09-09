@@ -4,3 +4,5 @@
 
 # Ignore any benchmarking images in this directory
 *.png
+
+tmp/*

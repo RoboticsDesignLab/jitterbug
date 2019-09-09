@@ -1,8 +1,11 @@
-import csv
-from matplotlib import pyplot as plt
-import numpy as np
 
-def simpleMovingAverage(data,window,mode):
+import sys
+import csv
+import numpy as np
+from matplotlib import pyplot as plt
+
+
+def simpleMovingAverage(data, window, mode):
     """Smooth the highly variable data by computing the simple moving
     average.
 
@@ -22,45 +25,61 @@ def simpleMovingAverage(data,window,mode):
     return data_smoothed
 
 
-reward = []
-with open('/tmp/gym/ddpg/10/monitor.csv','rt')as f:
-#with open('./ddpg-results/1/monitor.csv','rt') as f:
-  data = csv.reader(f)
-  i = 0
-  for row in data:
-    if i>1:
-        reward.append(float(row[0]))
-    i+=1
+def main(file, window):
+    """Plot model training progress"""
 
-#reward2 = []
-#with open('./ddpg-results/4/monitor.csv','rt') as f:
-#  data2 = csv.reader(f)
-#  i = 0
-#  for row in data2:
-#    if i>1:
-#        reward2.append(float(row[0]))
-#    i+=1
+    reward = []
+    with open(file, 'rt') as f:
+        data = csv.reader(f)
+        for ri, row in enumerate(data):
+
+            if ri < 2:
+                # Skip first two rows
+                continue
+
+            if len(row) == 0:
+                # Skip empty rows
+                continue
+
+            reward.append(float(row[0]))
+
+    y = np.array(reward, dtype=float)
+    y_smoothed = simpleMovingAverage(
+        y,
+        window,
+        'valid'
+    )
+    x_smoothed = np.array(list(range(0, len(y_smoothed))), dtype=int)
+    x = np.array(range(
+        -window//2,
+        -window//2 + len(y)
+    ))
+
+    p0 = plt.plot(
+        x_smoothed,
+        y_smoothed
+    )
+    plt.plot(
+        x,
+        y,
+        color=p0[0].get_color(),
+        alpha=0.1,
+        lw=1
+    )
+
+    plt.title(file)
+    plt.xlabel("1e3 timesteps")
+    plt.ylabel("Reward")
+    plt.ylim(-50, 1050)
+    plt.grid()
+    plt.tight_layout()
+    plt.show()
+    plt.close()
 
 
+if __name__ == '__main__':
 
-reward_smoothed = simpleMovingAverage(reward,100,'valid')
-x_smoothed = range(len(reward_smoothed))
-x = range(len(reward))
+    file = sys.argv[1]
+    window = int(sys.argv[2])
 
-
-#reward_smoothed2 = simpleMovingAverage(reward2,100,'valid')
-#x_smoothed2 = range(len(reward_smoothed2))
-#x2 = range(len(reward2))
-
-#plt.plot(x,reward_smoothed,x2,reward_smoothed2)
-p1 = plt.plot(x_smoothed,reward_smoothed, label="Input dimension = 16")
-p2 = plt.plot(x, reward, color=p1[0].get_color(), alpha=0.1)
-#p3 = plt.plot(x_smoothed2,reward_smoothed2, label="Input dimension = 8")
-#p4 = plt.plot(x2,reward2, color=p3[0].get_color(), alpha=0.1)
-plt.title("Training of a DDPG Jitterbug Agent for the move_in_direction task. Moving average window = 100")
-plt.xlabel("1e3 timesteps")
-
-plt.ylabel("Cumulative Reward")
-#plt.legend()
-plt.grid()
-plt.show()
+    main(file, window)

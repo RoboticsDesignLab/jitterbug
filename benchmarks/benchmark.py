@@ -1,41 +1,65 @@
 """Evaluates various RL algorithms on the Jitterbug task suite"""
 
 import os
+import sys
+import gym
 import random
-
-# Uncomment to disable GPU training in tensorflow (must be before keras imports)
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+import numpy as np
+import tensorflow as tf
 
 from dm_control import suite
 
-# Add root folder to path so we can access benchmarks module
-import sys
+import stable_baselines
+from stable_baselines.a2c.a2c import A2C
+from stable_baselines.ppo2.ppo2 import PPO2
 
+from stable_baselines.ddpg.ddpg import DDPG
+from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
+
+from stable_baselines.trpo_mpi.trpo_mpi import TRPO
+
+from stable_baselines.bench import Monitor
+from stable_baselines.common.policies import register_policy
+from stable_baselines.common.vec_env import DummyVecEnv
+from stable_baselines.results_plotter import load_results, ts2xy
+
+# Add root folder to path so we can access benchmarks module
 sys.path.insert(0, os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     ".."
 ))
-import tensorflow as tf
 import jitterbug_dmc
-
-# stable-baselines modules
-from stable_baselines.common.vec_env import DummyVecEnv
-from stable_baselines.a2c.a2c import A2C
-from stable_baselines.ppo2.ppo2 import PPO2
-from stable_baselines.ddpg.ddpg import DDPG
-from stable_baselines.trpo_mpi.trpo_mpi import TRPO
-from stable_baselines.common.policies import register_policy
-from stable_baselines.results_plotter import load_results, ts2xy
-from stable_baselines.bench import Monitor
-from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
-
-import gym
-import numpy as np
 
 
 # Globals
 n_steps_monitor = 0
 best_mean_reward = -np.inf
+
+
+class CustomPolicyDDPG(stable_baselines.ddpg.policies.FeedForwardPolicy):
+    """A DDPG specific FeedForward policy"""
+
+    def __init__(self, *args, **kwargs):
+        super(CustomPolicyDDPG, self).__init__(
+            *args,
+            **kwargs,
+            layers=[300,300,300],
+            feature_extraction="mlp",
+            act_fun=tf.nn.relu
+        )
+
+
+class CustomPolicyGeneral(stable_baselines.common.policies.FeedForwardPolicy):
+    """A general FeedForward policy"""
+
+    def __init__(self, *args, **kwargs):
+        super(CustomPolicyGeneral, self).__init__(
+            *args,
+            **kwargs,
+            net_arch=[256, 256, dict(vf=[256], pi=[256])],
+            feature_extraction="mlp",
+            act_fun=tf.nn.relu
+        )
 
 
 def use_trained_agent(
@@ -295,8 +319,6 @@ def demoDDPG(
 ):
     """Train and evaluate DDPG agent"""
 
-    from customPolicy_ddpg import CustomPolicy
-
     # Register the policy, it will check that the name is not already taken
     #  register_policy('CustomPolicy', CustomPolicy)
 
@@ -319,7 +341,7 @@ def demoDDPG(
 
     # Construct the DDPG agent
     agent = JitterbugDDPGAgent(
-        policy=CustomPolicy,
+        policy=CustomPolicyDDPG,
         env=env,
         verbose=1,
         batch_size=batch_size,
@@ -364,11 +386,6 @@ def demoA2C(
 ):
     """Train and evaluate A2C agent"""
 
-    from customPolicy import CustomPolicy
-
-    # Register the policy, it will check that the name is not already taken
-    register_policy('CustomPolicy', CustomPolicy)
-
     random.seed(random_seed)
     np.random.seed(random_seed)
 
@@ -387,7 +404,7 @@ def demoA2C(
     )
 
     # Construct the A2C agent
-    agent = JitterbugA2CAgent(policy=CustomPolicy,
+    agent = JitterbugA2CAgent(policy=CustomPolicyGeneral,
                               env=env,
                               verbose=1,
                               max_grad_norm=max_grad_norm,
@@ -432,11 +449,6 @@ def demoPPO2(
 ):
     """Train and evaluate PPO2 agent"""
 
-    from customPolicy import CustomPolicy
-
-    # Register the policy, it will check that the name is not already taken
-    register_policy('CustomPolicy', CustomPolicy)
-
     random.seed(random_seed)
     np.random.seed(random_seed)
 
@@ -455,7 +467,7 @@ def demoPPO2(
     )
 
     # Construct the PPO2 agent
-    agent = JitterbugPPO2Agent(policy='CustomPolicy',
+    agent = JitterbugPPO2Agent(policy=CustomPolicyGeneral,
                                env=env,
                                verbose=1,
                                n_steps=n_steps,
@@ -501,11 +513,6 @@ def demoTRPO(
 ):
     """Train and evaluate A2C agent"""
 
-    from customPolicy import CustomPolicy
-
-    # Register the policy, it will check that the name is not already taken
-    register_policy('CustomPolicy', CustomPolicy)
-
     random.seed(random_seed)
     np.random.seed(random_seed)
 
@@ -525,7 +532,7 @@ def demoTRPO(
 
     # Construct the TRPO agent
     agent = JitterbugTRPOAgent(
-        policy=CustomPolicy,
+        policy=CustomPolicyGeneral,
         env=env,
         verbose=1,
         log_dir=log_dir,

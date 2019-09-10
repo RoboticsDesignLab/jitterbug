@@ -2,6 +2,7 @@
 import sys
 import csv
 import glob
+import warnings
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -56,6 +57,11 @@ def plot_csv_glob(fileglob, window, **kwargs):
     """
 
     files = list(glob.glob(fileglob))
+
+    if len(files) == 0:
+        warnings.warn("Glob `{}` matched 0 files".format(fileglob))
+        return None
+
     print("Loading rewards from {} files".format(len(files)))
     rewards = [
         get_reward_from_csv(f)

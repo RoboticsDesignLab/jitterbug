@@ -1,16 +1,20 @@
 """Evaluates various RL algorithms on the Jitterbug task suite"""
 
+
+
 import os
 import sys
 import gym
 import random
 import numpy as np
-import tensorflow as tf
-
 from pprint import pprint
+
+# Important: the below 3 imports must be in this order, or the program
+# crashes under Ubuntu due to a protocol buffer version mismatch error
+import tensorflow as tf
+import stable_baselines
 from dm_control import suite
 
-import stable_baselines
 from stable_baselines.a2c.a2c import A2C
 from stable_baselines.ppo2.ppo2 import PPO2
 

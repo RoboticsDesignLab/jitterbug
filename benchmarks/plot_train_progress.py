@@ -102,6 +102,11 @@ def plot_csv_glob(fileglob, window, **kwargs):
 
 def main(fileglob, window, **kwargs):
     """Plot model training progress"""
+
+    # Ensure we are using a GUI frontend so X-Forwarding works
+    import matplotlib
+    matplotlib.use('tkagg')
+
     plt.figure()
     r = plot_csv_glob(fileglob, window, **kwargs)
     plt.title("{} ({} files)".format(fileglob, len(r)))

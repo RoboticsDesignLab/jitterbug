@@ -44,7 +44,7 @@ class CustomPolicyDDPG(stable_baselines.ddpg.policies.FeedForwardPolicy):
         super(CustomPolicyDDPG, self).__init__(
             *args,
             **kwargs,
-            layers=[300,300,300],
+            layers=[300, 300, 300],
             feature_extraction="mlp",
             act_fun=tf.nn.relu
         )
@@ -57,7 +57,8 @@ class CustomPolicyGeneral(stable_baselines.common.policies.FeedForwardPolicy):
         super(CustomPolicyGeneral, self).__init__(
             *args,
             **kwargs,
-            net_arch=[256, 256, dict(vf=[256], pi=[256])],
+            #net_arch=[300, 300, dict(vf=[300], pi=[300])],
+            net_arch=[300, 300, 300],
             feature_extraction="mlp",
             act_fun=tf.nn.relu
         )
@@ -418,14 +419,15 @@ def demoA2C(
     )
 
     # Construct the A2C agent
-    agent = JitterbugA2CAgent(policy=CustomPolicyGeneral,
-                              env=env,
-                              verbose=1,
-                              max_grad_norm=max_grad_norm,
-                              learning_rate=learning_rate,
-                              n_steps=n_steps,
-                              log_dir=log_dir
-                              )
+    agent = JitterbugA2CAgent(
+        policy=CustomPolicyGeneral,
+        env=env,
+        verbose=1,
+        max_grad_norm=max_grad_norm,
+        learning_rate=learning_rate,
+        n_steps=n_steps,
+        log_dir=log_dir
+    )
 
     agent.n_envs = n_envs
     agent.n_batch = agent.n_envs * agent.n_steps

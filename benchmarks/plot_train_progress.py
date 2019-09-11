@@ -41,6 +41,26 @@ def get_reward_from_csv(file):
                 # Skip empty rows
                 continue
 
+            """
+            XXX ajs 11/Sep/2019 There seems to be bug with
+            csv.DictWriter.writerow() as used in
+            stable_baselines/bench/monitor.py:98 - we occasionally see reward
+            values that are missing the mantissa, e.g.
+            'XXX.XXe-5' will simply appear as 'e-5' in the CSV cell.
+            To work-around this, we detect these cases and replace with 0
+            """
+            if row[0].split("e")[0] == '':
+                warnings.warn(
+                    "Got malformed reward (no mantissa) "
+                    "at line {} of {}: {}, replacing with 0.0".format(
+                        ri,
+                        file,
+                        row[0]
+                    )
+                )
+                reward.append(0.0)
+                continue
+
             reward.append(float(row[0]))
 
     return np.array(reward, dtype=float)

@@ -120,7 +120,8 @@ def plot_csv_glob(fileglob, window, *, quartiles=[25, 50, 75], **kwargs):
         q1,
         q3,
         color=p0[0].get_color(),
-        alpha=0.1
+        alpha=0.1,
+        lw=0
     )
 
     return rewards

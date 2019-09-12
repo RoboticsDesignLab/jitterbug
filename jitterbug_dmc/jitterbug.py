@@ -652,6 +652,81 @@ class Jitterbug(base.Task):
         #print(obs['position'])
         return obs
 
+    def obsdict2vec(self, obs):
+        """Convert an observation dictionary to vector
+
+        Args:
+            obs (dict): Observation dictionary
+
+        Returns:
+            (numpy array): Observation vector (size depends on task)
+            (list): Observation vector column names
+        """
+
+        # All tasks start with 15 dimensions
+        obs_vec = np.concatenate((
+            obs['position'],            # 3 dims (X, Y, Z, Qx, Qy, Qz, Qw)
+            obs['velocity'],            # 6 dims (Vx, Vy, Vz, r, p, y)
+            obs['motor_position'],      # 1 dim (angle)
+            obs['motor_velocity'],      # 1 dim (angular vel)
+        ))
+
+        columns = [
+            "X", "Y", "Z", "QuatX", "QuatY", "QuatZ", "QuatW",
+            "VelX", "VelY", "VelZ", "VelRoll", "VelPitch", "VelYaw",
+            "MotorYaw",
+            "MotorVelYaw"
+        ]
+
+        # The task definition adds 0 to 4 dimensions
+        if self.task == "move_from_origin":
+            # Jitterbug position is a sufficient observation for this task
+            pass
+
+        elif self.task == "face_direction":
+
+            obs_vec = np.concatenate((
+                obs_vec,
+                obs['angle_to_target'],                  # 1 dim (relative yaw angle)
+            ))
+            columns.append("TargetYaw")
+
+        elif self.task == "move_in_direction":
+
+            obs_vec = np.concatenate((
+                obs_vec,
+                obs['angle_to_target'],                  # 1 dim (relative yaw angle)
+                obs['speed_in_target_frame']             # 3 dims (relative Vx, Vy, Vz)
+            ))
+            columns.append("TargetYaw")
+            columns.append("TargetVelX")
+            columns.append("TargetVelY")
+            columns.append("TargetVelZ")
+
+        elif self.task == "move_to_position":
+
+            obs_vec = np.concatenate((
+                obs_vec,
+                obs['target_in_jitterbug_frame'],       # 3 dims (relative X, Y, Z)
+            ))
+            columns.append("TargetX")
+            columns.append("TargetY")
+            columns.append("TargetZ")
+
+        elif self.task == "move_to_pose":
+
+            obs_vec = np.concatenate((
+                obs_vec,
+                obs['target_in_jitterbug_frame'],       # 3 dims (relative X, Y, Z)
+                obs['angle_to_target']                  # 1 dim (relative yaw angle)
+            ))
+            columns.append("TargetX")
+            columns.append("TargetY")
+            columns.append("TargetZ")
+            columns.append("TargetYaw")
+
+        return obs_vec, columns
+
     def heading_reward(self, physics):
         """Compute a reward for facing a certain direction
 

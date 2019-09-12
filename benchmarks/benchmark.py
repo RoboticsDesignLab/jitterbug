@@ -165,7 +165,11 @@ class JitterbugDDPGAgent(DDPG):
         env_vec = make_compatible_environment(env, log_dir)
 
         # Noise
-        action_noise = OrnsteinUhlenbeckActionNoise(mean=np.array([0.3]), sigma=0.3, theta=0.15)
+        action_noise = OrnsteinUhlenbeckActionNoise(
+            mean=np.array([0.3]),
+            sigma=0.3,
+            theta=0.15
+        )
 
         super().__init__(
             policy=policy,

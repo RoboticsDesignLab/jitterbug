@@ -1,13 +1,19 @@
-"""Evaluates various RL algorithms on the Jitterbug task suite"""
-
-
+"""Evaluate RL algorithms on the Jitterbug task suite"""
 
 import os
 import sys
 import gym
+import time
+import pprint
 import random
+import warnings
+import multiprocessing
+
 import numpy as np
-from pprint import pprint
+
+# Suppress tensorflow deprecation warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="tensorflow")
+warnings.filterwarnings("ignore", category=FutureWarning, module="tensorboard")
 
 # Important: the below 3 imports must be in this order, or the program
 # crashes under Ubuntu due to a protocol buffer version mismatch error
@@ -15,17 +21,15 @@ import tensorflow as tf
 import stable_baselines
 from dm_control import suite
 
+# Import agents from stable_baselines
 from stable_baselines.a2c.a2c import A2C
 from stable_baselines.ppo2.ppo2 import PPO2
-
 from stable_baselines.ddpg.ddpg import DDPG
 from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 
-from stable_baselines.trpo_mpi.trpo_mpi import TRPO
-
+# Get some extra utilities
 from stable_baselines.bench import Monitor
-from stable_baselines.common.policies import register_policy
-from stable_baselines.common.vec_env import DummyVecEnv
+from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv
 from stable_baselines.results_plotter import load_results, ts2xy
 
 # Add root folder to path so we can access benchmarks module
@@ -36,11 +40,6 @@ sys.path.insert(0, os.path.join(
 import jitterbug_dmc
 
 
-# Globals
-n_steps_monitor = 0
-best_mean_reward = -np.inf
-
-
 class CustomPolicyDDPG(stable_baselines.ddpg.policies.FeedForwardPolicy):
     """A DDPG specific FeedForward policy"""
 
@@ -48,7 +47,7 @@ class CustomPolicyDDPG(stable_baselines.ddpg.policies.FeedForwardPolicy):
         super(CustomPolicyDDPG, self).__init__(
             *args,
             **kwargs,
-            layers=[300, 300, 300],
+            layers=[350, 250],
             feature_extraction="mlp",
             act_fun=tf.nn.relu
         )
@@ -61,465 +60,268 @@ class CustomPolicyGeneral(stable_baselines.common.policies.FeedForwardPolicy):
         super(CustomPolicyGeneral, self).__init__(
             *args,
             **kwargs,
-            #net_arch=[300, 300, dict(vf=[300], pi=[300])],
-            net_arch=[300, 300, 300],
+            net_arch=[350, 250],
             feature_extraction="mlp",
             act_fun=tf.nn.relu
         )
 
 
-def use_trained_agent(
-    load_path,
-    env,
-    nb_steps=1000,
-    nb_epochs=5000,
-    monitor_path="/tmp/gym/",
-    policy=None,
-    render=False
-):
-    """Use an Agent which is already trained to perform a task.
-
-    Args:
-        load_path (str): path where the parameters of the model are saved
-        env (suite environment): environment
-        nb_steps (int): number of steps used to render
-        nb_epochs (int): number of epochs
-        monitor_path (str): path where the monitor saves the data gathered while performing the task
-        policy (None): policy. If the agent uses a custom policy, it has to
-                       be passed explicitly to be able to load the model
-        render (bool): whether to show or not the agent training
-        """
-    env_vec = make_compatible_environment(env, monitor_path)
-    agent = DDPG.load(load_path=load_path, policy=policy, env=env_vec)
-    obs = env_vec.reset()
-    for i in range(nb_epochs):
-        for t in range(nb_steps):
-            action, _states = agent.predict(obs)
-            obs, rewards, dones, info = env_vec.step(action)
-            if render:
-                env_vec.render()
-        print(str(nb_steps*(i+1))+" steps completed")
-
-
-def make_compatible_environment(env, log_dir):
-    """Make a suite environment compatible with stable-baselines.
-
-    Args:
-        env (suite environment): environment
-        log_dir (str): path used to monitor the learning
-        """
-    env_gym = jitterbug_dmc.JitterbugGymEnv(env)
-    env_gym.num_envs = 1
-    env_mon = Monitor(env_gym, log_dir, allow_early_resets=True)
-    env_flat = gym.wrappers.FlattenDictWrapper(env_mon, dict_keys=["observations"])
-    env_vec = DummyVecEnv([lambda: env_flat])
-    return env_vec
-
-
-def callback(_locals, _globals):
-    """
-    Callback called at each step (for DQN an others) or after n steps (see ACER or PPO2)
-    :param _locals: (dict)
-    :param _globals: (dict)
-    """
-
-    global n_steps_monitor, best_mean_reward
-
-    # Print stats every 1000 calls
-    if (n_steps_monitor + 1) % 1000 == 0:
-        # Evaluate policy training performance
-        x, y = ts2xy(load_results(log_dir), 'timesteps')
-        # print(x)
-        if len(x) > 0:
-            mean_reward = np.mean(y[-100:])
-            print(x[-1], 'timesteps')
-            print(
-                "Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(best_mean_reward, mean_reward))
-
-            # New best model, you could save the agent here
-            if mean_reward > best_mean_reward:
-                best_mean_reward = mean_reward
-                # Example for saving best model
-                print("Saving new best model")
-                _locals['self'].save(log_dir + 'best_model.pkl')
-
-    n_steps_monitor += 1
-
-    return True
-
-
-class JitterbugDDPGAgent(DDPG):
-    """A DDPG agent for the Jitterbug task"""
-
-    def __init__(
-        self,
-        policy,
-        env,
-        verbose=1,
-        batch_size=64,
-        actor_lr=1e-4,
-        critic_lr=1e-4,
-        log_dir="."
-    ):
-
-        env_vec = make_compatible_environment(env, log_dir)
-
-        # Noise
-        action_noise = OrnsteinUhlenbeckActionNoise(
-            mean=np.array([0.3]),
-            sigma=0.3,
-            theta=0.15
-        )
-
-        super().__init__(
-            policy=policy,
-            env=env_vec,
-            verbose=verbose,
-            batch_size=batch_size,
-            action_noise=action_noise,
-            actor_lr=actor_lr,
-            critic_lr=critic_lr,
-            memory_limit=int(1e6),
-            normalize_observations=True
-        )
-
-    def train(self, nb_steps, callback=None):
-        """Train the A2C agent.
-
-        Args:
-            nb_steps (int): total number of steps used for training
-            callback (callable): callback function to monitor the learning process
-        """
-        self.learn(total_timesteps=nb_steps,
-                   callback=callback
-                   )
-
-
-class JitterbugA2CAgent(A2C):
-    """An A2C agent for the Jitterbug task"""
-
-    def __init__(
-        self,
-        policy,
-        env,
-        verbose=1,
-        max_grad_norm=0.5,
-        learning_rate=1e-4,
-        n_steps=16,
-        log_dir="."
-    ):
-        env_vec = make_compatible_environment(env, log_dir)
-
-        super().__init__(
-            policy=policy,
-            env=env_vec,
-            n_steps=n_steps,
-            verbose=verbose,
-            learning_rate=learning_rate,
-            lr_schedule="linear",
-            ent_coef=0.001,
-            max_grad_norm=max_grad_norm,
-        )
-
-    def train(self, nb_steps, callback=None):
-        """Train the A2C agent.
-
-        Args:
-            nb_steps (int): total number of steps used for training
-            callback (callable): callback function to monitor the learning process
-        """
-        self.learn(total_timesteps=nb_steps,
-                   callback=callback
-                   )
-
-
-class JitterbugPPO2Agent(PPO2):
-    """A PPO2 agent for the Jitterbug task"""
-
-    def __init__(
-        self,
-        policy,
-        env,
-        verbose=1,
-        n_steps=2048,
-        nminibatches=32,
-        noptepochs=10,
-        cliprange=0.1,
-        log_dir="."
-    ):
-
-        env_vec = make_compatible_environment(env, log_dir)
-
-        super().__init__(
-            policy=policy,
-            env=env_vec,
-            verbose=verbose,
-            n_steps=n_steps,
-            nminibatches=nminibatches,
-            noptepochs=noptepochs,
-            ent_coef=0.001,
-            cliprange=cliprange,
-            # cliprange_vf=-1
-        )
-
-    def train(self, nb_steps, callback=None):
-        """Train the A2C agent.
-
-        Args:
-            nb_steps (int): total number of steps used for training
-        """
-
-        self.learn(
-            total_timesteps=nb_steps,
-            callback=callback
-        )
-
-
-def trainDDPG(
+def train(
     task,
-    log_dir,
+    alg,
+    logdir,
     *,
     random_seed=None,
-    batch_size=64,
-    actor_lr=1e-4,
-    critic_lr=1e-4,
-    path_autoencoder=None
+    num_steps=int(100e6),
+    log_every=int(100e3),
+    num_parallel=32,
+    **kwargs
 ):
-    """Train and evaluate DDPG agent"""
+    """Train and evaluate an agent
+
+    Args:
+        task (str): Jitterbug task to train on
+        alg (str): Algorithm to train, one of;
+            - 'ddpg':
+            - 'a2c':
+            - 'ppo2':
+        logdir (str): Logging directory
+
+        random_seed (int): Random seed to use, or None
+        num_steps (int): Number of training steps to train for
+        log_every (int): Save and log progress every this many timesteps
+        num_parallel (int): Number of parallel environments to run. Only used
+            for A2C and PPO2.
+    """
+
+    assert alg in ('ddpg', 'a2c', 'ppo2'), "Invalid alg: {}".format(alg)
 
     # Cast args to types
     if random_seed is not None:
         random_seed = int(random_seed)
-    batch_size = int(batch_size)
-    actor_lr = float(actor_lr)
-    critic_lr = float(critic_lr)
+    else:
+        random_seed = int(time.time())
 
     # Fix random seed
     random.seed(random_seed)
     np.random.seed(random_seed)
 
-    env = suite.load(
+    # Prepare the logging directory
+    os.makedirs(logdir, exist_ok=True)
+
+    print("Training {} on {} with seed {} for {} steps "
+          "(log every {}), saving to {}".format(
+        alg,
+        task,
+        random_seed,
+        num_steps,
+        log_every,
+        logdir
+    ))
+
+    # Construct DMC env
+    env_dmc = suite.load(
         domain_name="jitterbug",
         task_name=task,
-        visualize_reward=True,
-        task_kwargs={
-           "random": random_seed
-        },
-
-        # Important: the keras-rl DDPG agent needs flat observations
-        environment_kwargs={
-            "flat_observation": True,
-        }
+        task_kwargs=dict(random=random_seed),
+        environment_kwargs=dict(flat_observation=True)
     )
 
-    # Construct the DDPG agent
-    agent = JitterbugDDPGAgent(
-        policy=CustomPolicyDDPG,
-        env=env,
-        verbose=1,
-        batch_size=batch_size,
-        actor_lr=actor_lr,
-        critic_lr=critic_lr,
-        log_dir=log_dir
+    # Convert DMC env to Gym env with logging
+    env_gym = gym.wrappers.FlattenDictWrapper(
+        Monitor(
+            jitterbug_dmc.JitterbugGymEnv(env_dmc),
+            logdir,
+            allow_early_resets=True
+        ),
+        dict_keys=["observations"]
     )
 
-    # Train the DDPG agent
-    agent.train(
-        20e6,
-        callback=callback
-    )
+    # Wrap gym env in a dummy parallel vector
+    if False and (alg in ('a2c', 'ppo2') and num_parallel > multiprocessing.cpu_count()):
+        warnings.warn("Number of parallel workers "
+                      "({}) > CPU count ({}), setting to # CPUs".format(
+            num_parallel,
+            multiprocessing.cpu_count()
+        ))
+        print("Using {} parallel environments".format(num_parallel))
+        num_parallel = multiprocessing.cpu_count()
+        env_vec = SubprocVecEnv([lambda: env_gym for _ in range(num_parallel)])
+    else:
+        num_parallel = 1
+        env_vec = DummyVecEnv([lambda: env_gym])
 
-    # Save the DDPG agent
-    if path_autoencoder != None:
-        env.task.jitterbug_autoencoder.save_autoencoder(path_autoencoder)
+    def _cb(_locals, _globals):
+        """Callback for during training"""
 
-    path_trained_agent = f"./trained_ddpg_{task}"
-    # agent.save(path_trained_agent)
+        if 'last_log' not in _cb.__dict__:
+            _cb.last_log = -np.inf
 
-    # Use the DDPG agent
-    #use_trained_agent(load_path="./ddpg-results/6/best_model",
-     #                 env=env,
-     #                 nb_steps=1000,
-     #                 policy=CustomPolicy,
-     #                 monitor_path="/tmp/ddpg/13/",
-     #                 render=False,
-     #                 nb_epochs=5000
-     #                 )
+        if isinstance(_locals['self'], DDPG):
+            ep_r_hist = list(_locals['episode_rewards_history'])
+        elif isinstance(_locals['self'], PPO2):
+            ep_r_hist = [d['r'] for d in _locals['ep_info_buf']]
+        else:
+            raise ValueError("Invalid algorithm: {}".format(
+                _locals['self']
+            ))
+        steps = 1000 * len(ep_r_hist)
 
+        steps_since_last_log = steps - _cb.last_log
+        if steps_since_last_log >= log_every:
+            _cb.last_log = steps
+            print("t={}, ep. r = {:.2f} last 5 ep. mean r = {:.2f}".format(
+                steps,
+                ep_r_hist[-1] if len(ep_r_hist) >= 1 else np.nan,
+                np.mean(ep_r_hist[-5:])
+            ))
+            path = os.path.join(logdir, "model.{}.pkl".format(steps))
+            print("Saving to {}".format(path))
+            _locals['self'].save(path)
 
-def trainA2C(
-    task,
-    log_dir,
-    *,
-    random_seed=None,
-    max_grad_norm=0.5,
-    learning_rate=1e-4,
-    n_steps=16,
-    n_envs=1
-):
-    """Train and evaluate A2C agent"""
+        return True
 
-    # Cast args to types
-    if random_seed is not None:
-        random_seed = int(random_seed)
-    max_grad_norm = float(max_grad_norm)
-    learning_rate = float(learning_rate)
-    n_steps = int(n_steps)
-    n_envs = int(n_envs)
+    if alg == 'ddpg':
 
-    random.seed(random_seed)
-    np.random.seed(random_seed)
+        # Wrap to get a Gym env with some logging capabilities
 
-    env = suite.load(
-        domain_name="jitterbug",
-        task_name=task,
-        visualize_reward=True,
-        task_kwargs={
-            "random": random_seed
-        },
+        # Default parameters for DDPG
+        kwargs.setdefault("normalize_returns", True)
+        kwargs.setdefault("return_range", (0., 1.))
+        kwargs.setdefault("normalize_observations", True)
+        kwargs.setdefault("observation_range", (-5., 5.))
 
-        # Important: the keras-rl DDPG agent needs flat observations
-        environment_kwargs={
-            "flat_observation": True
-        }
-    )
+        kwargs.setdefault("batch_size", 256)
 
-    # Construct the A2C agent
-    agent = JitterbugA2CAgent(
-        policy=CustomPolicyGeneral,
-        env=env,
-        verbose=1,
-        max_grad_norm=max_grad_norm,
-        learning_rate=learning_rate,
-        n_steps=n_steps,
-        log_dir=log_dir
-    )
+        kwargs.setdefault("actor_lr", 1e-4)
+        kwargs.setdefault("critic_lr", 1e-4)
 
-    agent.n_envs = n_envs
-    agent.n_batch = agent.n_envs * agent.n_steps
-    print(f"n_envs = {agent.n_envs}")
-    print(f"n_batch = {agent.n_batch}")
-    path_trained_agent = f"a2c.{task}.model_parameters.pkl"
+        kwargs.setdefault("buffer_size", 1000000)
 
-    # Train the A2C agent
-    agent.train(int(1e4),
-                callback=callback
-                )
+        kwargs.setdefault("action_noise", OrnsteinUhlenbeckActionNoise(
+            mean=np.array([0.3]),
+            sigma=0.3,
+            theta=0.15
+        ))
 
-    # Save the A2C agent
-    path_trained_agent = f"./trained_a2c_{task}"
-    # agent.save(path_trained_agent)
+        print("Constructing DDPG agent with settings:")
+        pprint.pprint(kwargs)
 
-    # Use the A2C agent
-    #use_trained_agent("./a2c-results/",
-    #                  env,
-    #                  nb_steps=1000,
-    #                  policy=CustomPolicy
-    #                 )
+        # Construct the agent
+        agent = DDPG(
+            policy=CustomPolicyDDPG,
+            env=env_vec,
+            verbose=1,
+            **kwargs
+        )
 
+        # Train for a while (logging and saving checkpoints as we go)
+        agent.learn(
+            total_timesteps=num_steps,
+            callback=_cb,
+            log_interval=10
+        )
 
-def trainPPO2(
-    task,
-    log_dir,
-    *,
-    random_seed=None,
-    n_steps=2048,
-    nminibatches=32,
-    noptepochs=10,
-    cliprange=0.1,
-    n_envs=1
-):
-    """Train and evaluate PPO2 agent"""
+    elif alg == 'a2c':
 
-    # Cast args to types
-    if random_seed is not None:
-        random_seed = int(random_seed)
-    n_steps = int(n_steps)
-    nminibatches = int(nminibatches)
-    noptepochs = int(noptepochs)
-    cliprange = float(cliprange)
-    n_envs = int(n_envs)
+        kwargs.setdefault("learning_rate", 1e-4)
+        kwargs.setdefault("n_steps", 256 // num_parallel)
+        kwargs.setdefault("ent_coef", 0.01)                        ### ?????
+        kwargs.setdefault("lr_schedule", 'linear')
 
-    random.seed(random_seed)
-    np.random.seed(random_seed)
+        print("Constructing A2C agent with settings:")
+        pprint.pprint(kwargs)
 
-    env = suite.load(
-        domain_name="jitterbug",
-        task_name=task,
-        visualize_reward=True,
-        task_kwargs={
-            "random": random_seed
-        },
+        agent = A2C(
+            policy=CustomPolicyGeneral,
+            env=env_vec,
+            verbose=1,
+            **kwargs
+        )
 
-        # Important: the keras-rl DDPG agent needs flat observations
-        environment_kwargs={
-            "flat_observation": True
-        }
-    )
+        # Train for a while (logging and saving checkpoints as we go)
+        agent.learn(
+            total_timesteps=num_steps,
+            callback=_cb,
+            log_interval=10
+        )
 
-    # Construct the PPO2 agent
-    agent = JitterbugPPO2Agent(
-        policy=CustomPolicyGeneral,
-        env=env,
-        verbose=1,
-        n_steps=n_steps,
-        log_dir=log_dir,
-        nminibatches=nminibatches,
-        noptepochs=noptepochs,
-        cliprange=cliprange,
-    )
+    elif alg == 'ppo2':
 
-    agent.n_envs = n_envs
-    agent.n_batch = agent.n_envs * agent.n_steps
-    print(f"n_envs = {agent.n_envs}")
-    print(f"n_batch = {agent.n_batch}")
+        kwargs.setdefault("learning_rate", 1e-4)
+        kwargs.setdefault("n_steps", 256 // num_parallel)
+        kwargs.setdefault("ent_coef", 0.01)                        ### ?????
+        kwargs.setdefault("cliprange", 0.1)                        ### ?????
 
-    #Train the PPO2 agent
-    agent.train(
-        int(1e4),
-        callback=callback
-    )
+        print("Constructing PPO2 agent with settings:")
+        pprint.pprint(kwargs)
 
-    # Save the PPO2 agent
-    path_trained_agent = f"./trained_ppo_{task}"
-    # agent.save(path_trained_agent)
+        agent = PPO2(
+            policy=CustomPolicyGeneral,
+            env=env_vec,
+            verbose=1,
+            **kwargs
+        )
 
-    # Use the PPO2 agent
-    # use_trained_agent("./ppo-results/",
-    #                  env,
-    #                  nb_steps=1000,
-    #                  policy=CustomPolicy
-    #                 )
+        # Train for a while (logging and saving checkpoints as we go)
+        agent.learn(
+            total_timesteps=num_steps,
+            callback=_cb,
+            log_interval=100
+        )
+
+    else:
+        raise ValueError("Invalid alg: {}".format(alg))
+
+    # Save final model
+    agent.save(os.path.join(logdir, 'model.final.pkl'))
+
+    print("Done")
 
 
 if __name__ == '__main__':
 
-    # First arg is function to call
-    func = globals()[sys.argv[1]]
+    import os
+    import json
+    import argparse
 
-    # Second arg is task
-    task = sys.argv[2]
-
-    # Third arg is logging directory
-    log_dir = sys.argv[3]
-    os.makedirs(log_dir, exist_ok=True)
-
-    print("Training {} on {}, logging to {}".format(
-        func,
-        task,
-        log_dir
-    ))
-
-    # Remainder of args are keyword parameters
-    kwargs = {
-        k: v
-        for k, v in zip(sys.argv[4::2], sys.argv[5::2])
-    }
-    print("Arguments are:")
-    pprint(kwargs)
-
-    func(
-        task=task,
-        log_dir=log_dir,
-        **kwargs
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+
+    parser.add_argument(
+        "--alg",
+        type=str,
+        choices=('ddpg', 'ppo2'),
+        required=True,
+        help="Algorithm to train"
+    )
+
+    parser.add_argument(
+        "--task",
+        type=str,
+        required=True,
+        help="Task to run"
+    )
+
+    parser.add_argument(
+        "--logdir",
+        type=str,
+        required=False,
+        default=".",
+        help="Logging directory prefix"
+    )
+
+    parser.add_argument(
+        "--kwargs",
+        type=json.loads,
+        required=False,
+        default={},
+        help="Agent keyword arguments"
+    )
+
+    args = parser.parse_args()
+
+    train(alg=args.alg, task=args.task, logdir=args.logdir, **args.kwargs)
+

@@ -205,7 +205,7 @@ def train(
                 # Save training progress
                 csv_path = os.path.join(logdir, "train_progress.csv")
                 with open(csv_path, 'a') as fd:
-                    fd.write("{},{},{}".format(
+                    fd.write("{},{},{}\n".format(
                         ep_r_hist[-1],                  # Episode reward
                         elapsed_steps,                  # Elapsed number of steps
                         elapsed_time                    # Elapsed wall time in seconds

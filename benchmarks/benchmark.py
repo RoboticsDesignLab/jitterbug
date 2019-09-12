@@ -223,10 +223,10 @@ def train(
         # Wrap to get a Gym env with some logging capabilities
 
         # Default parameters for DDPG
-        kwargs.setdefault("normalize_returns", True)
-        kwargs.setdefault("return_range", (0., 1.))
-        kwargs.setdefault("normalize_observations", True)
-        kwargs.setdefault("observation_range", (-1., 1.))
+        #kwargs.setdefault("normalize_returns", True)
+        #kwargs.setdefault("return_range", (0., 1.))
+        #kwargs.setdefault("normalize_observations", True)
+        #kwargs.setdefault("observation_range", (-1., 1.))
 
         kwargs.setdefault("batch_size", 256)
 

@@ -274,17 +274,6 @@ class JitterbugPPO2Agent(PPO2):
             callback=callback
         )
 
-    def train(self, nb_steps, callback=None):
-        """Train the A2C agent.
-
-        Args:
-            nb_steps (int): total number of steps used for training
-            callback (callable): callback function to monitor the learning process
-        """
-        self.learn(total_timesteps=nb_steps,
-                   callback=callback
-                   )
-
 
 def trainDDPG(
     task,
@@ -469,15 +458,16 @@ def trainPPO2(
     )
 
     # Construct the PPO2 agent
-    agent = JitterbugPPO2Agent(policy=CustomPolicyGeneral,
-                               env=env,
-                               verbose=1,
-                               n_steps=n_steps,
-                               log_dir=log_dir,
-                               nminibatches=nminibatches,
-                               noptepochs=noptepochs,
-                               cliprange=cliprange,
-                               )
+    agent = JitterbugPPO2Agent(
+        policy=CustomPolicyGeneral,
+        env=env,
+        verbose=1,
+        n_steps=n_steps,
+        log_dir=log_dir,
+        nminibatches=nminibatches,
+        noptepochs=noptepochs,
+        cliprange=cliprange,
+    )
 
     agent.n_envs = n_envs
     agent.n_batch = agent.n_envs * agent.n_steps
@@ -485,9 +475,10 @@ def trainPPO2(
     print(f"n_batch = {agent.n_batch}")
 
     #Train the PPO2 agent
-    agent.train(int(1e4),
-                callback=callback
-                )
+    agent.train(
+        int(1e4),
+        callback=callback
+    )
 
     # Save the PPO2 agent
     path_trained_agent = f"./trained_ppo_{task}"

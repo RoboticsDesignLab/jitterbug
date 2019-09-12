@@ -132,7 +132,7 @@ def train(
 
         if num_parallel > multiprocessing.cpu_count():
             warnings.warn("Number of parallel workers "
-                          "({}) > CPU count ({}), setting to # CPUs".format(
+                          "({}) > CPU count ({}), setting to # CPUs - 1".format(
                 num_parallel,
                 multiprocessing.cpu_count()
             ))

@@ -66,7 +66,7 @@ def get_reward_from_csv(file):
     return np.array(reward, dtype=float)
 
 
-def plot_csv_glob(fileglob, window, **kwargs):
+def plot_csv_glob(fileglob, window, *, quartiles=[25, 50, 75], **kwargs):
     """Plot performance over many seeds into the current axes
 
     Args:
@@ -109,7 +109,7 @@ def plot_csv_glob(fileglob, window, **kwargs):
     # Smooth
     q1, q2, q3 = (
         ma(q, window)
-        for q in np.percentile(rewards, q=[25, 50, 75], axis=0)
+        for q in np.percentile(rewards, q=quartiles, axis=0)
     )
 
     x = np.arange(window // 2, window // 2 + len(q1))

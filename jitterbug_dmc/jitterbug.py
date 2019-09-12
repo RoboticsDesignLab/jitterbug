@@ -45,9 +45,6 @@ from dm_control.utils import containers
 from dm_control.utils import io as resources
 from dm_control.mujoco.wrapper.mjbindings import mjlib
 
-import autoencoder
-import denoising_autoencoder
-import pickle
 
 # Load the suite so we can add to it
 SUITE = containers.TaggedTasks()
@@ -74,11 +71,12 @@ def move_from_origin(
         time_limit=DEFAULT_TIME_LIMIT,
         control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
-        environment_kwargs=None
+        environment_kwargs=None,
+        **kwargs
 ):
     """Move the Jitterbug away from the origin"""
     physics = Physics.from_xml_string(*get_model_and_assets())
-    task = Jitterbug(random=random, task="move_from_origin")
+    task = Jitterbug(random=random, task="move_from_origin", **kwargs)
     environment_kwargs = environment_kwargs or {}
     return control.Environment(
         physics,
@@ -94,11 +92,12 @@ def face_direction(
         time_limit=DEFAULT_TIME_LIMIT,
         control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
-        environment_kwargs=None
+        environment_kwargs=None,
+        **kwargs
 ):
     """Move the Jitterbug to face a certain yaw angle"""
     physics = Physics.from_xml_string(*get_model_and_assets())
-    task = Jitterbug(random=random, task="face_direction")
+    task = Jitterbug(random=random, task="face_direction", **kwargs)
     environment_kwargs = environment_kwargs or {}
     return control.Environment(
         physics,
@@ -114,11 +113,12 @@ def move_in_direction(
         time_limit=DEFAULT_TIME_LIMIT,
         control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
-        environment_kwargs=None
+        environment_kwargs=None,
+        **kwargs
 ):
     """Move the Jitterbug in a certain direction"""
     physics = Physics.from_xml_string(*get_model_and_assets())
-    task = Jitterbug(random=random, task="move_in_direction")
+    task = Jitterbug(random=random, task="move_in_direction", **kwargs)
     environment_kwargs = environment_kwargs or {}
     return control.Environment(
         physics,
@@ -134,11 +134,12 @@ def move_to_position(
         time_limit=DEFAULT_TIME_LIMIT,
         control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
-        environment_kwargs=None
+        environment_kwargs=None,
+        **kwargs
 ):
     """Move the Jitterbug to a certain XYZ position"""
     physics = Physics.from_xml_string(*get_model_and_assets())
-    task = Jitterbug(random=random, task="move_to_position")
+    task = Jitterbug(random=random, task="move_to_position", **kwargs)
     environment_kwargs = environment_kwargs or {}
     return control.Environment(
         physics,
@@ -154,11 +155,12 @@ def move_to_pose(
         time_limit=DEFAULT_TIME_LIMIT,
         control_timestep=DEFAULT_CONTROL_TIMESTEP,
         random=None,
-        environment_kwargs=None
+        environment_kwargs=None,
+        **kwargs
 ):
     """Move the Jitterbug to a certain XYZRPY pose"""
     physics = Physics.from_xml_string(*get_model_and_assets())
-    task = Jitterbug(random=random, task="move_to_pose")
+    task = Jitterbug(random=random, task="move_to_pose", **kwargs)
     environment_kwargs = environment_kwargs or {}
     return control.Environment(
         physics,
@@ -317,6 +319,7 @@ class Jitterbug(base.Task):
 
     # Approximate Min, Max ranges for observation dimensions
     _NORM_ALL = np.array([
+        # Position
         [-2.0,    2.0],                         # X
         [-2.0,    2.0],                         # Y
         [ 0.0,    0.1],                         # Z
@@ -324,13 +327,19 @@ class Jitterbug(base.Task):
         [-1.0,    1.0],                         # Qy
         [-1.0,    1.0],                         # Qz
         [-1.0,    1.0],                         # Qw
+
+        # Velocity
         [-1.0,    1.0],                         # Vx
         [-1.0,    1.0],                         # Vy
         [-1.0,    1.0],                         # Vz
         [-35.0,   35.0],                        # Vr
         [-35.0,   35.0],                        # Vp
         [-35.0,   35.0],                        # Vy
+
+        # Motor position
         [-np.pi, np.pi],                        # motor angle
+
+        # Motor velocity
         [-180.0, 180.0],                        # motor velocity
     ])
 
@@ -364,6 +373,7 @@ class Jitterbug(base.Task):
             random=None,
             task="move_from_origin",
             random_pose=True,
+            norm_obs=False
     ):
         """Initialize an instance of the `Jitterbug` domain
 
@@ -380,6 +390,8 @@ class Jitterbug(base.Task):
                 - move_to_pose
             random_pose (bool): If true, initialize the Jitterbug with a random
                 pose to break symmetries
+            norm_obs (bool): If true, observations will be approximately normalized
+                to the range (-1, 1)
         """
 
         self.feature_names = [
@@ -412,6 +424,7 @@ class Jitterbug(base.Task):
 
         self.task = task
         self.random_pose = random_pose
+        self.norm_obs = norm_obs
         super(Jitterbug, self).__init__(random=random)
 
         #self.pickleFile = open("observations.pkl", "wb")
@@ -570,7 +583,6 @@ class Jitterbug(base.Task):
         self.batch_size = 1000
         self.buffer_size = int(1e4)
 
-
     def initialize_episode(self, physics):
         """Sets the state of the environment at the start of each episode
         """
@@ -638,15 +650,38 @@ class Jitterbug(base.Task):
 
         super(Jitterbug, self).initialize_episode(physics)
 
+    @staticmethod
+    def _norm(v, min, max):
+        """Normalize a vector to the range (-1.0, 1.0)"""
+        return (v - min) / (max - min) * 2.0 - 1.0
+
     def get_observation(self, physics):
         """Returns an observation of the state and the target position
         """
         obs = collections.OrderedDict()
-        obs['position'] = physics.jitterbug_position()
-        obs['velocity'] = physics.jitterbug_velocity()
-        obs['motor_position'] = physics.motor_position()
-        obs['motor_velocity'] = physics.motor_velocity()
-        #print(physics.named.data)
+        obs['position'] = Jitterbug._norm(
+            physics.jitterbug_position(),
+            Jitterbug._NORM_ALL[0:7, 0],
+            Jitterbug._NORM_ALL[0:7, 1]
+        )
+        obs['velocity'] = Jitterbug._norm(
+            physics.jitterbug_velocity(),
+            Jitterbug._NORM_ALL[7:13, 0],
+            Jitterbug._NORM_ALL[7:13, 1]
+        )
+
+        obs['motor_position'] = Jitterbug._norm(
+            physics.motor_position(),
+            Jitterbug._NORM_ALL[13, 0],
+            Jitterbug._NORM_ALL[13, 1]
+        )
+
+        obs['motor_velocity'] = Jitterbug._norm(
+            physics.motor_velocity(),
+            Jitterbug._NORM_ALL[14, 0],
+            Jitterbug._NORM_ALL[14, 1]
+        )
+
         if self.task == "move_from_origin":
 
             # Jitterbug position is a sufficient observation for this task
@@ -655,45 +690,61 @@ class Jitterbug(base.Task):
         elif self.task == "face_direction":
 
             # Store the relative target yaw angle
-            obs['angle_to_target'] = physics.angle_jitterbug_to_target()
+            obs['angle_to_target'] = Jitterbug._norm(
+                physics.angle_jitterbug_to_target(),
+                Jitterbug._NORM_TASKS['face_direction'][0, 0],
+                Jitterbug._NORM_TASKS['face_direction'][0, 1]
+            )
 
         elif self.task == "move_in_direction":
 
             # Store the relative target yaw angle
-            obs['angle_to_target'] = physics.angle_jitterbug_to_target()
+            obs['angle_to_target'] = Jitterbug._norm(
+                physics.angle_jitterbug_to_target(),
+                Jitterbug._NORM_TASKS['move_in_direction'][0, 0],
+                Jitterbug._NORM_TASKS['move_in_direction'][0, 1]
+            )
 
             # Store the speed in the target frame
-            obs['speed_in_target_frame'] = (
-                physics.jitterbug_velocity_in_target_frame()[0]
+            obs['speed_in_target_frame'] = Jitterbug._norm(
+                physics.jitterbug_velocity_in_target_frame(),
+                Jitterbug._NORM_TASKS['move_in_direction'][1:, 0],
+                Jitterbug._NORM_TASKS['move_in_direction'][1:, 1]
             )
 
         elif self.task == "move_to_position":
 
             # Store the relative target XYZ position in JB frame
-            obs['target_in_jitterbug_frame'] = (
-                physics.target_position_in_jitterbug_frame()
+            obs['target_in_jitterbug_frame'] = Jitterbug._norm(
+                physics.target_position_in_jitterbug_frame(),
+                Jitterbug._NORM_TASKS['move_to_position'][:, 0],
+                Jitterbug._NORM_TASKS['move_to_position'][:, 1]
             )
 
         elif self.task == "move_to_pose":
 
             # Store the relative target XYZ position in JB frame
-            obs['target_in_jitterbug_frame'] = (
-                physics.target_position_in_jitterbug_frame()
+            obs['target_in_jitterbug_frame'] = Jitterbug._norm(
+                physics.target_position_in_jitterbug_frame(),
+                Jitterbug._NORM_TASKS['move_to_pose'][0:3, 0],
+                Jitterbug._NORM_TASKS['move_to_pose'][0:3, 1]
             )
 
             # Store the relative target yaw angle
-            obs['angle_to_target'] = physics.angle_jitterbug_to_target()
+            obs['angle_to_target'] = Jitterbug._norm(
+                physics.angle_jitterbug_to_target(),
+                Jitterbug._NORM_TASKS['move_to_pose'][3, 0],
+                Jitterbug._NORM_TASKS['move_to_pose'][3, 1]
+            )
 
         else:
             raise ValueError("Invalid task {}".format(self.task))
-        #pickle.dump(obs, self.pickleFile)
-        # new_obs = self.PCA(obs)
+
         self.counter += 1
 
         if self.use_autoencoder or self.use_several_autoencoders or self.use_denoising_autoencoder or self.train_autoencoder or self.use_denoising_autoencoder15 or self.use_autoencoder15 or self.use_autoencoder13:
             obs = self.encode_obs(obs)
-        #print(obs)
-        #print(obs['position'])
+
         return obs
 
     def obsdict2vec(self, obs):

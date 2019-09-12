@@ -2,6 +2,11 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 
+% Key links for ICRA2020
+% CFP: https://www.icra2020.org/call-for-papers
+% PaperPlaza: https://ras.papercept.net/conferences/scripts/start.pl
+% Author Guidelines: http://ras.papercept.net/conferences/support/tex.php
+
 \documentclass[letterpaper, 10 pt, conference]{ieeeconf}
 %\documentclass[a4paper, 10pt, conference]{ieeeconf}
 
@@ -80,7 +85,9 @@ Jitterbug -- An Underactuated Continuous Control Benchmark
 
 \subsection{Proximal Policy Optimization (PPO)}
 
-\subsection{Deep Mind Control Suite}
+\subsection{DeepMind Control Suite}
+
+
 
 \subsection{Under-actuated Control}
 
@@ -100,6 +107,7 @@ Jitterbug -- An Underactuated Continuous Control Benchmark
     \caption{
         The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
         In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor.
+        The simulated robot retains the (non functional) wind-up crank to more closely mimic the mass distribution of the real toy.
     }
     \label{fig:leader}
     
@@ -125,7 +133,8 @@ Jitterbug -- An Underactuated Continuous Control Benchmark
     \captionsetup{margin=10pt}
     \caption{
         Comparison of DDPG, PPO and A2C agents over environment training steps.
-        We show mean and $\pm$ one standard deviation across XX random seeds in each figure.
+        We show median (solid line) and the first and third quartiles (shaded area) across 10 random seeds in each figure.
+        All plots are filtered with a $10e^3$ step moving average filter.
     }
     
     \label{fig:rl-perf}

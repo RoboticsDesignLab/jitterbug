@@ -73,8 +73,7 @@ def train(
     *,
     random_seed=None,
     num_steps=int(100e6),
-    #log_every=int(100e3),
-    log_every=int(2e3),
+    log_every=int(10e3),
     num_parallel=32,
     **kwargs
 ):
@@ -213,7 +212,7 @@ def train(
                     ))
 
             # Save model checkpoint
-            model_path = os.path.join(logdir, "model.{}.pkl".format(elapsed_steps))
+            model_path = os.path.join(logdir, "model.pkl")
             print("Saved checkpoint to {}".format(model_path))
             _locals['self'].save(model_path)
 

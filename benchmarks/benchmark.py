@@ -7,6 +7,7 @@ import time
 import pprint
 import random
 import warnings
+import datetime
 import multiprocessing
 
 import numpy as np
@@ -72,7 +73,8 @@ def train(
     *,
     random_seed=None,
     num_steps=int(100e6),
-    log_every=int(100e3),
+    #log_every=int(100e3),
+    log_every=int(2e3),
     num_parallel=32,
     **kwargs
 ):
@@ -139,11 +141,7 @@ def train(
         print("Using {} parallel environments".format(num_parallel))
         env_vec = SubprocVecEnv([
             lambda: gym.wrappers.FlattenDictWrapper(
-                Monitor(
-                    jitterbug_dmc.JitterbugGymEnv(env_dmc),
-                    logdir,
-                    allow_early_resets=True
-                ),
+                jitterbug_dmc.JitterbugGymEnv(env_dmc),
                 dict_keys=["observations"]
             )
             for _ in range(num_parallel)
@@ -154,21 +152,22 @@ def train(
         num_parallel = 1
         env_vec = DummyVecEnv([
             lambda: gym.wrappers.FlattenDictWrapper(
-                Monitor(
-                    jitterbug_dmc.JitterbugGymEnv(env_dmc),
-                    logdir,
-                    allow_early_resets=True
-                ),
+                jitterbug_dmc.JitterbugGymEnv(env_dmc),
                 dict_keys=["observations"]
             )
         ])
+
+    # Record start time
+    start_time = datetime.datetime.now()
 
     def _cb(_locals, _globals):
         """Callback for during training"""
 
         if 'last_log' not in _cb.__dict__:
+            # Set static method variable: last log timestep
             _cb.last_log = -np.inf
 
+        # Extract episode reward history based on model type
         if isinstance(_locals['self'], DDPG):
             ep_r_hist = list(_locals['episode_rewards_history'])
         elif isinstance(_locals['self'], PPO2):
@@ -177,19 +176,43 @@ def train(
             raise ValueError("Invalid algorithm: {}".format(
                 _locals['self']
             ))
-        steps = 1000 * len(ep_r_hist)
 
-        steps_since_last_log = steps - _cb.last_log
+        # Compute # elapsed steps based on # elapsed episodes
+        ep_size = int(
+            jitterbug_dmc.jitterbug.DEFAULT_TIME_LIMIT /
+            jitterbug_dmc.jitterbug.DEFAULT_CONTROL_TIMESTEP
+        )
+        elapsed_steps = ep_size * len(ep_r_hist)
+
+        # Compute elapsed time in seconds
+        elapsed_time = (datetime.datetime.now() - start_time).total_seconds()
+
+        # Figure out if it's time to save a checkpoint
+        steps_since_last_log = elapsed_steps - _cb.last_log
         if steps_since_last_log >= log_every:
-            _cb.last_log = steps
-            print("t={}, ep. r = {:.2f} last 5 ep. mean r = {:.2f}".format(
-                steps,
-                ep_r_hist[-1] if len(ep_r_hist) >= 1 else np.nan,
-                np.mean(ep_r_hist[-5:])
-            ))
-            path = os.path.join(logdir, "model.{}.pkl".format(steps))
-            print("Saving to {}".format(path))
-            _locals['self'].save(path)
+            _cb.last_log = elapsed_steps
+
+            # Log some info
+            if len(ep_r_hist) >= 1:
+                print("t={}, ep. r = {:.2f} last 5 ep. mean r = {:.2f}".format(
+                    elapsed_steps,
+                    ep_r_hist[-1],
+                    np.mean(ep_r_hist[-5:])
+                ))
+
+                # Save training progress
+                csv_path = os.path.join(logdir, "train_progress.csv")
+                with open(csv_path, 'a') as fd:
+                    fd.write("{},{},{}".format(
+                        ep_r_hist[-1],                  # Episode reward
+                        elapsed_steps,                  # Elapsed number of steps
+                        elapsed_time                    # Elapsed wall time in seconds
+                    ))
+
+            # Save model checkpoint
+            model_path = os.path.join(logdir, "model.{}.pkl".format(elapsed_steps))
+            print("Saved checkpoint to {}".format(model_path))
+            _locals['self'].save(model_path)
 
         return True
 
@@ -224,6 +247,7 @@ def train(
             policy=CustomPolicyDDPG,
             env=env_vec,
             verbose=1,
+            tensorboard_log=logdir,
             **kwargs
         )
 
@@ -231,7 +255,7 @@ def train(
         agent.learn(
             total_timesteps=num_steps,
             callback=_cb,
-            log_interval=10
+            log_interval=100
         )
 
     elif alg == 'ppo2':
@@ -248,6 +272,7 @@ def train(
             policy=CustomPolicyGeneral,
             env=env_vec,
             verbose=1,
+            tensorboard_log=logdir,
             **kwargs
         )
 

@@ -22,7 +22,6 @@ import stable_baselines
 from dm_control import suite
 
 # Import agents from stable_baselines
-from stable_baselines.a2c.a2c import A2C
 from stable_baselines.ppo2.ppo2 import PPO2
 from stable_baselines.ddpg.ddpg import DDPG
 from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
@@ -30,7 +29,7 @@ from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 # Get some extra utilities
 from stable_baselines.bench import Monitor
 from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv
-from stable_baselines.results_plotter import load_results, ts2xy
+#from stable_baselines.results_plotter import load_results, ts2xy
 
 # Add root folder to path so we can access benchmarks module
 sys.path.insert(0, os.path.join(
@@ -82,9 +81,8 @@ def train(
     Args:
         task (str): Jitterbug task to train on
         alg (str): Algorithm to train, one of;
-            - 'ddpg':
-            - 'a2c':
-            - 'ppo2':
+            - 'ddpg': DDPG Algorithm
+            - 'ppo2': PPO2 Algorithm
         logdir (str): Logging directory
 
         random_seed (int): Random seed to use, or None
@@ -94,7 +92,7 @@ def train(
             for A2C and PPO2.
     """
 
-    assert alg in ('ddpg', 'a2c', 'ppo2'), "Invalid alg: {}".format(alg)
+    assert alg in ('ddpg', 'ppo2'), "Invalid alg: {}".format(alg)
 
     # Cast args to types
     if random_seed is not None:
@@ -138,7 +136,7 @@ def train(
     )
 
     # Wrap gym env in a dummy parallel vector
-    if False and (alg in ('a2c', 'ppo2') and num_parallel > multiprocessing.cpu_count()):
+    if alg in ('ppo2') and num_parallel > multiprocessing.cpu_count():
         warnings.warn("Number of parallel workers "
                       "({}) > CPU count ({}), setting to # CPUs".format(
             num_parallel,
@@ -210,30 +208,6 @@ def train(
         # Construct the agent
         agent = DDPG(
             policy=CustomPolicyDDPG,
-            env=env_vec,
-            verbose=1,
-            **kwargs
-        )
-
-        # Train for a while (logging and saving checkpoints as we go)
-        agent.learn(
-            total_timesteps=num_steps,
-            callback=_cb,
-            log_interval=10
-        )
-
-    elif alg == 'a2c':
-
-        kwargs.setdefault("learning_rate", 1e-4)
-        kwargs.setdefault("n_steps", 256 // num_parallel)
-        kwargs.setdefault("ent_coef", 0.01)                        ### ?????
-        kwargs.setdefault("lr_schedule", 'linear')
-
-        print("Constructing A2C agent with settings:")
-        pprint.pprint(kwargs)
-
-        agent = A2C(
-            policy=CustomPolicyGeneral,
             env=env_vec,
             verbose=1,
             **kwargs

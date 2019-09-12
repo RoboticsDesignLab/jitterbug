@@ -315,6 +315,50 @@ class Physics(mujoco.Physics):
 class Jitterbug(base.Task):
     """A jitterbug `Task`"""
 
+    # Approximate Min, Max ranges for observation dimensions
+    _NORM_ALL = np.array([
+        [-2.0,    2.0],                         # X
+        [-2.0,    2.0],                         # Y
+        [ 0.0,    0.1],                         # Z
+        [-1.0,    1.0],                         # Qx
+        [-1.0,    1.0],                         # Qy
+        [-1.0,    1.0],                         # Qz
+        [-1.0,    1.0],                         # Qw
+        [-1.0,    1.0],                         # Vx
+        [-1.0,    1.0],                         # Vy
+        [-1.0,    1.0],                         # Vz
+        [-35.0,   35.0],                        # Vr
+        [-35.0,   35.0],                        # Vp
+        [-35.0,   35.0],                        # Vy
+        [-np.pi, np.pi],                        # motor angle
+        [-180.0, 180.0],                        # motor velocity
+    ])
+
+    # Approximate Min, max ranges for observation dimensions specific to tasks
+    _NORM_TASKS = dict(
+        move_from_origin=[],                    # No extra dimensions
+        face_direction=[
+            [-np.pi, np.pi]                     # Relative Yaw angle
+        ],
+        move_in_direction=[
+            [-np.pi, np.pi],                    # Relative Yaw angle
+            [-1.0, 1.0],                        # Relative Vx
+            [-1.0, 1.0],                        # Relative Vy
+            [-1.0, 1.0]                         # Relative Vz
+        ],
+        move_to_position=[
+            [-3.0, 3.0],                        # Relative X
+            [-3.0, 3.0],                        # Relative Y
+            [-0.1, 0.1]                         # Relative Z
+        ],
+        move_to_pose=[
+            [-3.0, 3.0],                        # Relative X
+            [-3.0, 3.0],                        # Relative Y
+            [-0.1, 0.1],                        # Relative Z
+            [-np.pi, np.pi]                     # Relative Yaw Angle
+        ]
+    )
+
     def __init__(
             self,
             random=None,

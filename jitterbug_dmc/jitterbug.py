@@ -808,7 +808,6 @@ class Jitterbug(base.Task):
             encoded_obs_dict = {'observations': encoded_obs}
         return encoded_obs_dict
 
-
     def update_autoencoder(self):
         self.jitterbug_autoencoder.train_autoencoder(training_data=self.observation_buffer,
                                                      num_epoch=1,
@@ -816,12 +815,11 @@ class Jitterbug(base.Task):
                                                      )
         print("Autoencoder updated")
 
-
-
     def PCA(self, obs):
         obsArray = np.concatenate(
             (obs['position'], obs['velocity'], obs['motor_position'], obs['motor_velocity'], obs['angle_to_target']))
         return {'observations': np.dot(obsArray, self.principalVectors4dim)}
+
 
 def demo():
     """Demonstrate the Jitterbug domain"""

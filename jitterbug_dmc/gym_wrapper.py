@@ -15,6 +15,7 @@ class JitterbugGymEnv(dm2gym.DMControlEnv):
             render_every (int): Draw a human-friendly visualisation of the
                 Jitterbug every this many frames
         """
+        self.num_envs = 1
         self.frame_count = 0
         self.render_every = render_every
         super().__init__(env)

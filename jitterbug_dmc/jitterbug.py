@@ -345,27 +345,27 @@ class Jitterbug(base.Task):
 
     # Approximate Min, max ranges for observation dimensions specific to tasks
     _NORM_TASKS = dict(
-        move_from_origin=[],                    # No extra dimensions
-        face_direction=[
+        move_from_origin=np.array([]),                    # No extra dimensions
+        face_direction=np.array([
             [-np.pi, np.pi]                     # Relative Yaw angle
-        ],
-        move_in_direction=[
+        ]),
+        move_in_direction=np.array([
             [-np.pi, np.pi],                    # Relative Yaw angle
             [-1.0, 1.0],                        # Relative Vx
             [-1.0, 1.0],                        # Relative Vy
             [-1.0, 1.0]                         # Relative Vz
-        ],
-        move_to_position=[
+        ]),
+        move_to_position=np.array([
             [-3.0, 3.0],                        # Relative X
             [-3.0, 3.0],                        # Relative Y
             [-0.1, 0.1]                         # Relative Z
-        ],
-        move_to_pose=[
+        ]),
+        move_to_pose=np.array([
             [-3.0, 3.0],                        # Relative X
             [-3.0, 3.0],                        # Relative Y
             [-0.1, 0.1],                        # Relative Z
             [-np.pi, np.pi]                     # Relative Yaw Angle
-        ]
+        ])
     )
 
     def __init__(

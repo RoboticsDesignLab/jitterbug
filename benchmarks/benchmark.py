@@ -340,9 +340,9 @@ def demoDDPG(
         domain_name="jitterbug",
         task_name=task,
         visualize_reward=True,
-        #task_kwargs={
-        #    "random": random_seed
-        #},
+        task_kwargs={
+           "random": random_seed
+        },
 
         # Important: the keras-rl DDPG agent needs flat observations
         environment_kwargs={

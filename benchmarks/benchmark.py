@@ -269,40 +269,9 @@ class JitterbugPPO2Agent(PPO2):
             nb_steps (int): total number of steps used for training
         """
 
-        self.learn(total_timesteps=nb_steps,
-                   callback=callback
-                   )
-
-
-class JitterbugTRPOAgent(TRPO):
-    """An A2C agent for the Jitterbug task"""
-
-    def __init__(self,
-                 policy,
-                 env,
-                 verbose=1,
-                 log_dir=".",
-                 cg_damping=1e-2,
-                 cg_iters=10,
-                 vf_stepsize=3e-4,
-                 vf_iters=3,
-                 lam=0.98,
-                 entcoeff=0.0,
-                 timesteps_per_batch=1024):
-
-        env_vec = make_compatible_environment(env, log_dir)
-
-        super().__init__(
-            policy=policy,
-            env=env_vec,
-            verbose=verbose,
-            cg_damping=cg_damping,
-            cg_iters=cg_iters,
-            vf_stepsize=vf_stepsize,
-            vf_iters=vf_iters,
-            lam=lam,
-            entcoeff=entcoeff,
-            timesteps_per_batch=timesteps_per_batch
+        self.learn(
+            total_timesteps=nb_steps,
+            callback=callback
         )
 
     def train(self, nb_steps, callback=None):

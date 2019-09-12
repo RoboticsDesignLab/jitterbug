@@ -125,29 +125,43 @@ def train(
         environment_kwargs=dict(flat_observation=True)
     )
 
-    # Convert DMC env to Gym env with logging
-    env_gym = gym.wrappers.FlattenDictWrapper(
-        Monitor(
-            jitterbug_dmc.JitterbugGymEnv(env_dmc),
-            logdir,
-            allow_early_resets=True
-        ),
-        dict_keys=["observations"]
-    )
-
     # Wrap gym env in a dummy parallel vector
-    if alg in ('ppo2') and num_parallel > multiprocessing.cpu_count():
-        warnings.warn("Number of parallel workers "
-                      "({}) > CPU count ({}), setting to # CPUs".format(
-            num_parallel,
-            multiprocessing.cpu_count()
-        ))
+    if alg in ('ppo2'):
+
+        if num_parallel > multiprocessing.cpu_count():
+            warnings.warn("Number of parallel workers "
+                          "({}) > CPU count ({}), setting to # CPUs".format(
+                num_parallel,
+                multiprocessing.cpu_count()
+            ))
+            num_parallel = multiprocessing.cpu_count()
+
         print("Using {} parallel environments".format(num_parallel))
-        num_parallel = multiprocessing.cpu_count()
-        env_vec = SubprocVecEnv([lambda: env_gym for _ in range(num_parallel)])
+        env_vec = SubprocVecEnv([
+            lambda: gym.wrappers.FlattenDictWrapper(
+                Monitor(
+                    jitterbug_dmc.JitterbugGymEnv(env_dmc),
+                    logdir,
+                    allow_early_resets=True
+                ),
+                dict_keys=["observations"]
+            )
+            for _ in range(num_parallel)
+        ])
+
     else:
+
         num_parallel = 1
-        env_vec = DummyVecEnv([lambda: env_gym])
+        env_vec = DummyVecEnv([
+            lambda: gym.wrappers.FlattenDictWrapper(
+                Monitor(
+                    jitterbug_dmc.JitterbugGymEnv(env_dmc),
+                    logdir,
+                    allow_early_resets=True
+                ),
+                dict_keys=["observations"]
+            )
+        ])
 
     def _cb(_locals, _globals):
         """Callback for during training"""

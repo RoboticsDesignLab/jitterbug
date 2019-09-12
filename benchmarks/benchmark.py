@@ -136,7 +136,10 @@ def train(
                 num_parallel,
                 multiprocessing.cpu_count()
             ))
-            num_parallel = multiprocessing.cpu_count()
+            num_parallel = max(
+                1,
+                multiprocessing.cpu_count() - 1
+            )
 
         print("Using {} parallel environments".format(num_parallel))
         env_vec = SubprocVecEnv([

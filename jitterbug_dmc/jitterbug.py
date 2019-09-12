@@ -1006,13 +1006,17 @@ def demo():
         domain_name="jitterbug",
         task_name="move_from_origin",
         visualize_reward=True,
-        task_kwargs={
-            # "time_limit": float("inf")
-        }
+        task_kwargs=dict(
+            #time_limit=float("inf")
+            norm_obs=True
+        )
     )
 
-    # Use a constant policy
-    policy = lambda ts: 0.8
+    def policy(ts):
+        """Constant policy"""
+        print(ts.observation)
+        return 0.8
+
     # Dance, jitterbug, dance!
     viewer.launch(
         env,

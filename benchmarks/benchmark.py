@@ -122,7 +122,7 @@ def train(
     env_dmc = suite.load(
         domain_name="jitterbug",
         task_name=task,
-        task_kwargs=dict(random=random_seed),
+        task_kwargs=dict(random=random_seed, norm_obs=True),
         environment_kwargs=dict(flat_observation=True)
     )
 

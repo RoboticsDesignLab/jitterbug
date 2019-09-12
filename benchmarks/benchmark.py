@@ -317,7 +317,7 @@ class JitterbugTRPOAgent(TRPO):
                    )
 
 
-def demoDDPG(
+def trainDDPG(
     task,
     log_dir,
     *,
@@ -389,7 +389,7 @@ def demoDDPG(
      #                 )
 
 
-def demoA2C(
+def trainA2C(
     task,
     log_dir,
     *,
@@ -460,7 +460,7 @@ def demoA2C(
     #                 )
 
 
-def demoPPO2(
+def trainPPO2(
     task,
     log_dir,
     *,
@@ -532,7 +532,7 @@ def demoPPO2(
     #                 )
 
 
-def demoTRPO(
+def trainTRPO(
     task,
     *,
     random_seed=None,

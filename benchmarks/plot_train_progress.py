@@ -1,4 +1,5 @@
 
+import os
 import sys
 import csv
 import glob
@@ -27,41 +28,52 @@ def ma(data, window, *, mode='valid'):
 
 
 def get_reward_from_csv(file):
-    """Extract reward vector from a monitor.csv file"""
+    """Extract reward vector from a csv file"""
     reward = []
-    with open(file, 'rt') as f:
-        data = csv.reader(f)
-        for ri, row in enumerate(data):
 
-            if ri < 2:
-                # Skip first two rows
-                continue
+    if os.path.basename(file) == "monitor.csv":
+        # Backward compatability for monitor.csv files
 
-            if len(row) == 0:
-                # Skip empty rows
-                continue
+        with open(file, 'rt') as f:
+            data = csv.reader(f)
+            for ri, row in enumerate(data):
 
-            """
-            XXX ajs 11/Sep/2019 There seems to be bug with
-            csv.DictWriter.writerow() as used in
-            stable_baselines/bench/monitor.py:98 - we occasionally see reward
-            values that are missing the mantissa, e.g.
-            'XXX.XXe-5' will simply appear as 'e-5' in the CSV cell.
-            To work-around this, we detect these cases and replace with 0
-            """
-            if row[0].split("e")[0] == '':
-                warnings.warn(
-                    "Got malformed reward (no mantissa) "
-                    "at line {} of {}: {}, replacing with 0.0".format(
-                        ri,
-                        file,
-                        row[0]
+                if ri < 2:
+                    # Skip first two rows
+                    continue
+
+                if len(row) == 0:
+                    # Skip empty rows
+                    continue
+
+                """
+                XXX ajs 11/Sep/2019 There seems to be bug with
+                csv.DictWriter.writerow() as used in
+                stable_baselines/bench/monitor.py:98 - we occasionally see reward
+                values that are missing the mantissa, e.g.
+                'XXX.XXe-5' will simply appear as 'e-5' in the CSV cell.
+                To work-around this, we detect these cases and replace with 0
+                """
+                if row[0].split("e")[0] == '':
+                    warnings.warn(
+                        "Got malformed reward (no mantissa) "
+                        "at line {} of {}: {}, replacing with 0.0".format(
+                            ri,
+                            file,
+                            row[0]
+                        )
                     )
-                )
-                reward.append(0.0)
-                continue
+                    reward.append(0.0)
+                    continue
 
-            reward.append(float(row[0]))
+                reward.append(float(row[0]))
+
+    else:
+        # Try and read a generic reward, timestep, wall time CSV file
+        with open(file, 'rt') as f:
+            data = csv.reader(f)
+            for ri, row in enumerate(data):
+                reward.append(row[0])
 
     return np.array(reward, dtype=float)
 

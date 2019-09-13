@@ -122,3 +122,32 @@ All tasks require the jitterbug to remain upright at all times.
    position 
  - `move_to_pose` (hard): The jitterbug must move to a certain cartesian
    position and face in a certain direction 
+
+## Common Problems
+
+### OpenMPI Wheel Fails To Build
+
+
+
+### `libprotobuf` Version Mismatch Error
+
+We observed this happening sometimes on Ubuntu 16.04.5 LTS when running
+`import jitterbug_dmc` from python, even when the installed version of protobuf
+is correct.
+It seems to be something wrong with the Ubuntu tensorflow build that gets
+installed by pip.
+
+```bash
+[libprotobuf FATAL google/protobuf/stubs/common.cc:61] This program requires version 3.7.0 of the Protocol Buffer runtime library, but the installed version is 2.6.1.  Please update your library.  If you compiled the program yourself, make sure that your headers are from the same version of Protocol Buffers as your link-time library.  (Version verification failed in "bazel-out/k8-opt/genfiles/tensorflow/core/framework/tensor_shape.pb.cc".)
+terminate called after throwing an instance of 'google::protobuf::FatalException'
+  what():  This program requires version 3.7.0 of the Protocol Buffer runtime library, but the installed version is 2.6.1.  Please update your library.  If you compiled the program yourself, make sure that your headers are from the same version of Protocol Buffers as your link-time library.  (Version verification failed in "bazel-out/k8-opt/genfiles/tensorflow/core/framework/tensor_shape.pb.cc".)
+```
+
+Some links to more information;
+
+ - https://devtalk.nvidia.com/default/topic/1037736/jetson-tx2/protobuf-version-error/
+ - https://devtalk.nvidia.com/default/topic/1046492/tensorrt/extremely-long-time-to-load-trt-optimized-frozen-tf-graphs/post/5315675/#5315675
+ - https://askubuntu.com/questions/1029394/protobuf-error-on-ubuntu-16-using-tensorflow
+ - https://devtalk.nvidia.com/default/topic/1008180/tensorflow-and-protobuf-/
+ - https://github.com/NVIDIA/DIGITS/issues/2061
+ - https://stackoverflow.com/questions/46627874/protobuf-version-mismatch#50481381

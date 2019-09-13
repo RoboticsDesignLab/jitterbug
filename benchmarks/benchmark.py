@@ -263,8 +263,8 @@ def train(
 
         kwargs.setdefault("learning_rate", 1e-4)
         kwargs.setdefault("n_steps", 256 // num_parallel)
-        kwargs.setdefault("ent_coef", 0.01)                        ### ?????
-        kwargs.setdefault("cliprange", 0.1)                        ### ?????
+        kwargs.setdefault("ent_coef", 0.01)
+        kwargs.setdefault("cliprange", 0.1)
 
         print("Constructing PPO2 agent with settings:")
         pprint.pprint(kwargs)

@@ -10,4 +10,5 @@ tmp/**
 # Ignore data files
 **/*.mat
 **/*.csv
+**/*.out.tfevents*
 

@@ -142,20 +142,28 @@ def train(
 
         print("Using {} parallel environments".format(num_parallel))
         env_vec = SubprocVecEnv([
-            lambda: gym.wrappers.FlattenDictWrapper(
-                jitterbug_dmc.JitterbugGymEnv(env_dmc),
-                dict_keys=["observations"]
+            lambda: Monitor(
+                gym.wrappers.FlattenDictWrapper(
+                    jitterbug_dmc.JitterbugGymEnv(env_dmc),
+                    dict_keys=["observations"]
+                ),
+                os.path.join(logdir, str(random.randint(0, 99999999))),
+                allow_early_resets=True
             )
-            for _ in range(num_parallel)
+            for n in range(num_parallel)
         ])
 
     else:
 
         num_parallel = 1
         env_vec = DummyVecEnv([
-            lambda: gym.wrappers.FlattenDictWrapper(
-                jitterbug_dmc.JitterbugGymEnv(env_dmc),
-                dict_keys=["observations"]
+            lambda: Monitor(
+                gym.wrappers.FlattenDictWrapper(
+                    jitterbug_dmc.JitterbugGymEnv(env_dmc),
+                    dict_keys=["observations"]
+                ),
+                logdir,
+                allow_early_resets=True
             )
         ])
 
@@ -165,9 +173,8 @@ def train(
     def _cb(_locals, _globals):
         """Callback for during training"""
 
-        if 'last_log' not in _cb.__dict__:
-            # Set static method variable: last log timestep
-            _cb.last_log = -np.inf
+        if 'last_num_eps' not in _cb.__dict__:
+            _cb.last_num_eps = 0
 
         # Extract episode reward history based on model type
         if isinstance(_locals['self'], DDPG):
@@ -184,32 +191,24 @@ def train(
             jitterbug_dmc.jitterbug.DEFAULT_TIME_LIMIT /
             jitterbug_dmc.jitterbug.DEFAULT_CONTROL_TIMESTEP
         )
-        elapsed_steps = ep_size * len(ep_r_hist)
+        num_eps = len(ep_r_hist)
+        elapsed_steps = ep_size * num_eps
 
         # Compute elapsed time in seconds
         elapsed_time = (datetime.datetime.now() - start_time).total_seconds()
 
-        # Figure out if it's time to save a checkpoint
-        steps_since_last_log = elapsed_steps - _cb.last_log
-        if steps_since_last_log >= log_every:
-            _cb.last_log = elapsed_steps
+        # Log some info
+        if num_eps != _cb.last_num_eps:
+            _cb.last_num_eps = num_eps
 
-            # Log some info
-            if len(ep_r_hist) >= 1:
-                print("t={}, ep. r = {:.2f} last 5 ep. mean r = {:.2f}".format(
-                    elapsed_steps,
-                    ep_r_hist[-1],
-                    np.mean(ep_r_hist[-5:])
-                ))
-
-                # Save training progress
-                csv_path = os.path.join(logdir, "train_progress.csv")
-                with open(csv_path, 'a') as fd:
-                    fd.write("{},{},{}\n".format(
-                        ep_r_hist[-1],                  # Episode reward
-                        elapsed_steps,                  # Elapsed number of steps
-                        elapsed_time                    # Elapsed wall time in seconds
-                    ))
+            print("{:.2f}s | {}ep | {}#: episode reward = "
+                  "{:.2f}, last 5 episode reward = {:.2f}".format(
+                elapsed_time,
+                num_eps,
+                elapsed_steps,
+                ep_r_hist[-1],
+                np.mean(ep_r_hist[-5:])
+            ))
 
             # Save model checkpoint
             model_path = os.path.join(logdir, "model.pkl")
@@ -256,8 +255,7 @@ def train(
         # Train for a while (logging and saving checkpoints as we go)
         agent.learn(
             total_timesteps=num_steps,
-            callback=_cb,
-            log_interval=100
+            callback=_cb
         )
 
     elif alg == 'ppo2':
@@ -282,7 +280,7 @@ def train(
         agent.learn(
             total_timesteps=num_steps,
             callback=_cb,
-            log_interval=100
+            log_interval=10
         )
 
     else:

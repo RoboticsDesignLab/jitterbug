@@ -26,14 +26,8 @@
 % See the \addtolength command later in the file to balance the column lengths
 % on the last page of the document
 
-% The following packages can be found on http:\\www.ctan.org
-%\usepackage{graphics} % for pdf, bitmapped graphics files
-%\usepackage{epsfig} % for postscript graphics files
-%\usepackage{mathptmx} % assumes new font selection scheme installed
-%\usepackage{times} % assumes new font selection scheme installed
-%\usepackage{amsmath} % assumes amsmath package installed
-%\usepackage{amssymb}  % assumes amsmath package installed
-
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{graphicx}
 \graphicspath{{figures/}}
 \usepackage{caption}
@@ -49,13 +43,13 @@
 
 \author{
     J\'er\'emy Augot$^{1,2}$, Aaron J Snoswell$^{2}$ and Surya P. N. Singh$^{2}$
-% <-this % stops a space
-\thanks{
-    $^{1}$ Ecole CentraleSup\'elec, Paris, France
-}%
-\thanks{
-    $^{2}$The Robotics Design Lab at The University of Queensland, Brisbane, Australia
-}%
+    % <-this % stops a space
+    \thanks{
+        $^{1}$ Ecole CentraleSup\'elec, Paris, France
+    }%
+    \thanks{
+        $^{2}$The Robotics Design Lab at The University of Queensland, Brisbane, Australia
+    }%
 }
 
 \begin{document}
@@ -73,6 +67,8 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{INTRODUCTION}
+
+Foo bar \cite{Haarnoja2018SAC}
 
 \lipsum[1-2]
 
@@ -253,11 +249,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{thebibliography}{99}
-
-\bibitem{c1} G. O. Young, Synthetic structure of industrial plastics (Book style with paper title and editor), in Plastics, 2nd ed. vol. 3, J. Peters, Ed.  New York: McGraw-Hill, 1964, pp. 1564.
-
-\end{thebibliography}
-
+\bibliographystyle{ieeetr}
+\bibliography{root}
 
 \end{document}

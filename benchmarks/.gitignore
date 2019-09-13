@@ -11,4 +11,4 @@ tmp/**
 **/*.mat
 **/*.csv
 **/*.out.tfevents*
-
+**/*out.txt

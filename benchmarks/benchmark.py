@@ -74,7 +74,7 @@ def train(
     random_seed=None,
     num_steps=int(100e6),
     log_every=int(10e3),
-    num_parallel=32,
+    num_parallel=8,
     **kwargs
 ):
     """Train and evaluate an agent

@@ -23,8 +23,7 @@ import stable_baselines
 from dm_control import suite
 
 # Import agents from stable_baselines
-from stable_baselines.ppo2.ppo2 import PPO2
-from stable_baselines.ddpg.ddpg import DDPG
+from stable_baselines import DDPG, PPO2, SAC
 from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 
 # Get some extra utilities
@@ -54,7 +53,7 @@ class CustomPolicyDDPG(stable_baselines.ddpg.policies.FeedForwardPolicy):
 
 
 class CustomPolicyGeneral(stable_baselines.common.policies.FeedForwardPolicy):
-    """A general FeedForward policy"""
+    """A general Actor-Critic  policy"""
 
     def __init__(self, *args, **kwargs):
         super(CustomPolicyGeneral, self).__init__(
@@ -84,6 +83,7 @@ def train(
         alg (str): Algorithm to train, one of;
             - 'ddpg': DDPG Algorithm
             - 'ppo2': PPO2 Algorithm
+            - 'sac': SAC Algorithm
         logdir (str): Logging directory
 
         random_seed (int): Random seed to use, or None
@@ -93,7 +93,7 @@ def train(
             for A2C and PPO2.
     """
 
-    assert alg in ('ddpg', 'ppo2'), "Invalid alg: {}".format(alg)
+    assert alg in ('ddpg', 'sac', 'ppo2'), "Invalid alg: {}".format(alg)
 
     # Cast args to types
     if random_seed is not None:
@@ -182,6 +182,8 @@ def train(
             ep_r_hist = list(_locals['episode_rewards_history'])
         elif isinstance(_locals['self'], PPO2):
             ep_r_hist = [d['r'] for d in _locals['ep_info_buf']]
+        elif isinstance(_locals['self'], SAC):
+            ep_r_hist = [d['r'] for d in _locals['ep_info_buf']]
         else:
             raise ValueError("Invalid algorithm: {}".format(
                 _locals['self']
@@ -219,8 +221,6 @@ def train(
         return True
 
     if alg == 'ddpg':
-
-        # Wrap to get a Gym env with some logging capabilities
 
         # Default parameters for DDPG
         #kwargs.setdefault("normalize_returns", True)
@@ -284,6 +284,42 @@ def train(
             log_interval=10
         )
 
+    elif alg == 'sac':
+
+        # Default parameters for SAC
+        kwargs.setdefault("learning_rate", 1e-4)
+        kwargs.setdefault("buffer_size", 1000000)
+        kwargs.setdefault("batch_size", 256)
+        kwargs.setdefault("ent_coef", 'auto')
+        #kwargs.setdefault("ent_coef", 'auto_0.1')
+
+        kwargs.setdefault("action_noise", OrnsteinUhlenbeckActionNoise(
+            mean=np.array([0.3]),
+            sigma=0.3,
+            theta=0.15
+        ))
+
+        print("Constructing SAC agent with settings:")
+        pprint.pprint(kwargs)
+
+        # Construct the agent
+        # XXX ajs 14/Sep/19 SAC in stable_baselines uses outdated policy
+        # classes so we just use MlpPolicy and pass policy_kwargs
+        agent = SAC(
+            policy='MlpPolicy',
+            env=env_vec,
+            verbose=1,
+            tensorboard_log=logdir,
+            policy_kwargs=dict(layers=[350, 250], act_fun=tf.nn.relu),
+            **kwargs
+        )
+
+        # Train for a while (logging and saving checkpoints as we go)
+        agent.learn(
+            total_timesteps=num_steps,
+            callback=_cb
+        )
+
     else:
         raise ValueError("Invalid alg: {}".format(alg))
 
@@ -307,7 +343,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--alg",
         type=str,
-        choices=('ddpg', 'ppo2'),
+        choices=('ddpg', 'sac', 'ppo2'),
         required=True,
         help="Algorithm to train"
     )

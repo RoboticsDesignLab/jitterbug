@@ -141,6 +141,7 @@ def train(
             )
 
         print("Using {} parallel environments".format(num_parallel))
+        # XXX ajs 13/Sep/19 Hack to create multiple monitors that don't write to the same file
         env_vec = SubprocVecEnv([
             lambda: Monitor(
                 gym.wrappers.FlattenDictWrapper(

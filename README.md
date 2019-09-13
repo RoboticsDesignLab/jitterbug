@@ -35,13 +35,6 @@ under Windows, Mac or Linux.
 The only pre-requisite package is
 [`dm_control`](https://github.com/deepmind/dm_control).
 
-If you're using Ubuntu 16.04, you may have problems with the GLFW dirvers.
-Switching to osmesa (software rendering) may fix this,
-
-```bash
-export MUJOCO_GL=osmesa
-```
-
 ## Usage
 
 ### DeepMind control Interface
@@ -125,6 +118,15 @@ All tasks require the jitterbug to remain upright at all times.
 
 ## Common Problems
 
+### Ubuntu: Problems with GLFW drivers 
+
+If you're using Ubuntu 16.04, you may have problems with the GLFW dirvers.
+Switching to osmesa (software rendering) may fix this,
+
+```bash
+export MUJOCO_GL=osmesa
+```
+
 ### OpenMPI Wheel Fails To Build
 
 
@@ -136,6 +138,7 @@ We observed this happening sometimes on Ubuntu 16.04.5 LTS when running
 is correct.
 It seems to be something wrong with the Ubuntu tensorflow build that gets
 installed by pip.
+However, this doesn't seem to stop the `benchmarks/benchmark.py` file from workgin.
 
 ```bash
 [libprotobuf FATAL google/protobuf/stubs/common.cc:61] This program requires version 3.7.0 of the Protocol Buffer runtime library, but the installed version is 2.6.1.  Please update your library.  If you compiled the program yourself, make sure that your headers are from the same version of Protocol Buffers as your link-time library.  (Version verification failed in "bazel-out/k8-opt/genfiles/tensorflow/core/framework/tensor_shape.pb.cc".)

@@ -37,11 +37,14 @@
 \usepackage{graphicx}
 \graphicspath{{figures/}}
 \usepackage{caption}
+\usepackage{tabularx}
+\usepackage{booktabs}
 
 \usepackage{lipsum}
 
-\title{\LARGE \bf
-Jitterbug -- An Underactuated Continuous Control Benchmark
+\title{
+    \LARGE \bf%
+    A Reduced-Order Approach to Assist with Reinforcement Learning for Underactuated Robotics
 }
 
 \author{
@@ -71,25 +74,7 @@ Jitterbug -- An Underactuated Continuous Control Benchmark
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{INTRODUCTION}
 
-\lipsum[1]
-
-\section{PRELIMINARIES}
-
-\section{RELATED WORK}
-
-\subsection{Reinforcement Learning}
-
-\subsection{Deep Deterministic Policy Gradients (DDPG)}
-
-\subsection{Advantage Actor-Critic (A2C)}
-
-\subsection{Proximal Policy Optimization (PPO)}
-
-\subsection{DeepMind Control Suite}
-
-
-
-\subsection{Under-actuated Control}
+\lipsum[1-2]
 
 \begin{figure}[ht]
     
@@ -113,17 +98,111 @@ Jitterbug -- An Underactuated Continuous Control Benchmark
     
 \end{figure}
 
+\lipsum[1-4]
+
+\section{RELATED WORK}
+
+\subsection{Reinforcement Learning}
+
+\subsection{Deep Deterministic Policy Gradients (DDPG)}
+
+\subsection{Advantage Actor-Critic (A2C)}
+
+\subsection{Proximal Policy Optimization (PPO)}
+
+\subsection{DeepMind Control Suite}
+
+\subsection{Under-actuated Control}
+
+\lipsum[1-2]
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{fig-system-arch}
+    \caption{
+        The architecture of our system.
+    }
+    \label{fig:system-arch}
+\end{figure}
+
 \section{METHOD}
 
-\lipsum[1]
+\lipsum[1-9]
 
-\section{EVALUATION METRICS}
+\section{THE JITTERBUG ENVIRONMENT}
 
-\lipsum[1]
+\lipsum[1-9]
 
 \section{EXPERIMENTS}
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{fig-autoencoder}
+    \caption{
+        WE used a De-Noising AutoEncoder as a means to learn a reduced-order state representation.
+    }
+    \label{fig:autoencoder}
+\end{figure}
+
 \lipsum[1]
+
+\begin{table*}[t!]
+    
+    \centering
+    \caption{Algorithm Hyper-parameters}
+    \label{tab:results}
+    \medskip
+    
+    {\def\arraystretch{1.2}
+        \begin{tabularx}{\textwidth}{X rr c rr c rr}
+            
+            \toprule
+            
+            & \multicolumn{2}{c}{\% Distance Match} & \phantom{a} & \multicolumn{2}{c}{Feature Vector L2} & \phantom{a} & \multicolumn{2}{c}{Log Likelihood} \\
+            
+            \cmidrule{2-3} \cmidrule{5-6} \cmidrule{8-9}
+            
+            & {avg.} & {med.} & & {avg.} & {med.} & & {avg.} & {med.} \\
+            
+            \midrule
+            
+            MaxEnt (Ours) &
+            56.74 & 57.52 &  & 5.145E3 & 1.270E3 &  & 4.360E-121 & 2.932e-121 \\
+            
+            MaxEnt \cite{Ziebart2008} &
+            38.03 & 31.36 &  & 172.406E3 & 178.043E3 &  & $-\infty$ & $-\infty$ \\
+            
+            MaxEnt (Length-binned ensemble) &
+            60.12 & 62.13 &  & 3.388E3 & 1.662E3 &  & 1.050e-14 & 8.733e-15 \\
+            
+            MaxEnt ($k$-means ensemble) &
+            65.58 & 73.68 &  & 1.132E3 & 562.29 &  & 3.74E-119 & 2.8228e-119 \\[10pt]
+            
+            
+            Shortest Path &
+            52.10 & 50.54 &  & 2.679E3 & 995.400 &  & {-} & {-} \\
+            
+            Logistic Regression &
+            52.45 & 50.18 &  & {-} & {-} &  & {-} & {-} \\
+            
+            \bottomrule
+            
+        \end{tabularx}
+    }
+    
+\end{table*}
+
+\lipsum[1-9]
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{fig-motor-hist}
+    \caption{
+        Characterising successful policy behaviours.
+        A histogram of motor velocities.
+    }
+    \label{fig:motor-hist}
+\end{figure}
 
 \begin{figure*}[p]
     
@@ -132,7 +211,7 @@ Jitterbug -- An Underactuated Continuous Control Benchmark
     
     \captionsetup{margin=10pt}
     \caption{
-        Comparison of DDPG, PPO and A2C agents over environment training steps.
+        Comparison of RL algorithms over environment training steps.
         We show median (solid line) and the first and third quartiles (shaded area) across 10 random seeds in each figure.
         All plots are filtered with a $10e^3$ step moving average filter.
     }
@@ -140,7 +219,11 @@ Jitterbug -- An Underactuated Continuous Control Benchmark
     \label{fig:rl-perf}
 \end{figure*}
 
-\section{CONCLUSIONS}
+\section{DISCUSSION}
+
+\lipsum[1]
+
+\section{CONCLUSION}
 
 \lipsum[1]
 

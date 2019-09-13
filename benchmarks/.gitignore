@@ -7,3 +7,7 @@
 
 tmp/**
 
+# Ignore data files
+**/*.mat
+**/*.csv
+

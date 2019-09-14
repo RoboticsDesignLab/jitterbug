@@ -81,8 +81,8 @@ def plot_csv_glob(fileglob, window, *, quartiles=[25, 50, 75], **kwargs):
     files = list(glob.glob(fileglob))
 
     if len(files) == 0:
-        warnings.warn("Glob `{}` matched 0 files".format(fileglob))
-        return None
+        warnings.warn("Glob '{}' matched 0 files".format(fileglob))
+        exit()
 
     print("Loading rewards from {} files".format(len(files)))
     rewards = [

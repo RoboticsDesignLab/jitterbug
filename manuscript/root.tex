@@ -282,17 +282,28 @@ We observed that a key difference between successful and unsuccessful trained po
 For example, for all tasks but \emph{Move From Origin}, achieving high reward requires careful modulation of the reactive torque applied to the Jitterbug body by the motor counterweight.
 One way to achieve this (the method we use in our heuristic policies) is by pulsing the motor in different directions.
 We observed that successful policies learned to pulse the motor in short bursts in alternating directions (e.g. $\sim180\degree$ at a time, see Figure~\ref{fig:motor-hist}), whereas unsuccessful policies would often drive the motor continuously.
+In doing so, the successful policies were able to achieve high cumulative episode return, and accomplish the high-level task encoded by the reward (Figure~\ref{fig:heatmap}).
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth]{fig-motor-hist}
     \caption{
-        Characterising successful policy behaviours for the \emph{Move In Direction} task.
+        Characterising policy behaviours for the \emph{Move In Direction} task.
         We plot the distribution of motor velocities across many episodes for a successful policy (green) and unsuccessful policy (orange).
         The successful policy learns to pulse the motor in alternating directions (the same strategy used by our heuristic policy).
         In contrast, the unsuccessful policy gets stuck in a local minima where the motor is continuously driven in one direction.
     }
     \label{fig:motor-hist}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{fig-heatmap}
+    \caption{
+        Heatmap showing Jitterbug position over 100 episodes before (left) and after (right) training DDPG on the task \emph{Move In Direction}.
+        In the second figure, to evaluate the agent, the target direction was fixed at $+45\degree$.
+    }
+\label{fig:heatmap}
 \end{figure}
 
 \subsection{Reduced-Order Training}

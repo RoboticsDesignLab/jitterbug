@@ -247,7 +247,7 @@ Training curves for these algorithms are not included here for brevity.
     
     \centering
     \caption{
-        Algorithm Hyper-parameters.
+        Algorithm hyper-parameters.
         Bold items were changed from the defaults offered by the \texttt{stable\_baselines} package.
     }
     \label{tab:hyper-params}
@@ -263,7 +263,12 @@ Training curves for these algorithms are not included here for brevity.
             
             \emph{Shared} & & \\[1pt]
             \quad Optimizer & & Adam \cite{Adam} \\
-            \rowstyle{\bfseries} \quad Learning Rate (\boldmath$\alpha$) & & 1{\tiny E}\textsuperscript{--4} \\[6pt]
+            \rowstyle{\bfseries} \quad Learning Rate (\boldmath$\alpha$) & & 1{\tiny E}\textsuperscript{--4} \\
+            \quad Network Architecture(s) & & Fully Connected \\
+            \quad Number of Hidden Layers & & 2 \\
+            \rowstyle{\bfseries} \quad Hidden Layer Sizes & & [350, 250] \\
+            \rowstyle{\bfseries} \quad Activation Functions & & ReLU \\
+            [6pt]
             
             \emph{DDPG} & & \\[1pt]
             \rowstyle{\bfseries} \quad Batch Size & & 256 \\
@@ -273,7 +278,8 @@ Training curves for these algorithms are not included here for brevity.
             \quad Soft Update Coefficient ($\tau$) & & 1{\tiny E}\textsuperscript{--3} \\
             \quad Parameter Noise & & None \\
             \rowstyle{\bfseries} \quad Action Noise & & Ornstein-Uhlenbeck \\
-            \multicolumn{3}{r}{\boldmath$\mu = 0.3, \sigma = 0.3, \theta = 0.15$} \\[6pt]
+            \multicolumn{3}{r}{\boldmath$\mu = 0.3, \sigma = 0.3, \theta = 0.15$} \\
+            [6pt]
             
             \emph{PPO} & & \\[1pt]
             \rowstyle{\bfseries} \quad Steps / Environment / Update & & 256 \\
@@ -284,7 +290,8 @@ Training curves for these algorithms are not included here for brevity.
             \quad Minibatches & & 4 \\
             \quad Policy Clipping Range & & 0.2 \\
             \quad Value Clipping Range & & None \\
-            \quad Surrogate Optimization Epochs & & 4 \\[6pt]
+            \quad Surrogate Optimization Epochs & & 4 \\
+            [6pt]
             
             \bottomrule
             
@@ -327,6 +334,22 @@ In doing so, the successful policies were able to achieve high cumulative episod
 
 \subsection{Reduced-Order Training}
 
+\emph{Autoencoder}: The input $X$ is corrupted by adding random noise to each of the features.
+Random noise used: $X_\text{noisy} = X + \mathcal{N}(0, 0.1)$.
+The autoencoder is fed with the corrupted data $X_{noisy}$ and is trained to reproduce the original data $X$.
+Loss used: Mean Squared Error between the output $Y$ and the original data $X$.
+
+Dimensions:
+\begin{itemize}
+    \item Input/Output: $d = 16$
+    \item Latent: several cases - $l = 12,8,4$
+\end{itemize}
+
+\emph{Training the Autoencoder}: Gathering of the data used to train the autoencoder: random policy, i.e. an agent was run for 5M steps taking only random actions and each observed state was saved in a file.
+
+Training: from this dataset, 80\% of the data was used to train and 20\% to test.
+Use: Once trained, only the encoder part of the autoencoder is used (see figure)
+
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\linewidth]{fig-autoencoder}
@@ -336,7 +359,7 @@ In doing so, the successful policies were able to achieve high cumulative episod
     \label{fig:autoencoder}
 \end{figure}
 
-\lipsum[1-9]
+\lipsum[1-7]
 
 \begin{figure*}[p]
     
@@ -346,9 +369,9 @@ In doing so, the successful policies were able to achieve high cumulative episod
     \caption{
         Characterising the Jitterbug task suite.
         We compare the training progress of DDPG and PPO up to 6 million training steps (6000 episodes).
-        We show median (solid line) and the first and third quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
+        We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
         A task is considered 'solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
-        All plots are filtered with a $10e^3$ step moving average filter.
+        All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.
     }
     
     \label{fig:rl-perf}

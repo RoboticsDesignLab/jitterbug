@@ -289,7 +289,11 @@ Figure~\ref{fig:parts} shows the physical composition of our simulated Jitterbug
     \label{fig:parts}
 \end{figure}
 
-Due to the importance of contact and stiff dynamics in the Jitterbug's locomotion, we found it necessary to adjust MuJoCo's default settings, selecting an integration timestep of $0.0002$ and semi-implicit Euler integration.
+Due to the importance of contact and stiff dynamics in the Jitterbug's locomotion, we found it necessary to adjust MuJoCo's default settings, selecting an integration timestep of 0.0002s and semi-implicit Euler integration.
+To simplify the control problem, we use a control timestep of 0.01s.
+Thus, one step in the MDP results in 50 steps of the physics simulation and corresponds to 10ms of elapsed time.
+Accordingly, an episode (1000 MDP steps) corresponds to 10s of elapsed time.
+As is standard practice, during the time between control steps the most recent commanded action is repeated.
 With these settings we qualitatively observed a close correspondence between the Katita and the simulated dynamics under constant motor actuation on the Jitterbug.
 
 DMC supports the definition of physically-based camera models for to enable learning from raw pixels if desired.

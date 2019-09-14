@@ -90,97 +90,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{INTRODUCTION}
 
-As robots become more compliant and variable they become more capable, and more complex.  Underactuated robots, for example, provide great design freedom, yet their adoption has been limited by the need for manual controller designs.
+As robots become more compliant and variable they become more capable, and more complex.
+Underactuated robots, for example, provide great design freedom, yet their adoption has been limited by the need for manual controller designs.
 
-Deep Reinforcement Learning (DRL) methods offer automated tools for robotic control by identifying a policy that maximize the expected sum of rewards \cite{henderson2018deep}.  This has been extended to continuous control domains via algorithms such as the Deep Deterministic Policy Gradient (DDPG) \cite{DDG}, Proximal Policy Optimization (PPO) \cite{PPO}, Soft Actor-Critic (SAC) \cite{SAC}, and Twin Delayed Deep Deterministic (TD3) \cite{TD3}.  The power of these methods comes, in part, from the high-dimensional, nonlinear function approximation of both the policy and the expected value via neural networks.  The dimensionality of this rich representations also presents a challenge for sample collection, stability, and convergence \cite{Islam2017}.  Reducing the order seems an natural approach to addressing this challenge, but doing so directly requires carefully defining suitable (state-space) features as the aforementioned methods are sensitive to the chosen representation \cite{bhatnagar2009convergent}.  
+Deep Reinforcement Learning (DRL) methods offer automated tools for robotic control by identifying a policy that maximizes the expected sum of rewards \cite{henderson2018deep}.
+This has been extended to continuous control domains via algorithms such as the Deep Deterministic Policy Gradient (DDPG) \cite{DDPG}, Proximal Policy Optimization (PPO) \cite{PPO}, Soft Actor-Critic (SAC) \cite{SAC}, and Twin Delayed Deep Deterministic (TD3) \cite{TD3}.
+The power of these methods comes, in part, from the high-dimensional, nonlinear function approximation of both the policy and the expected value by neural networks.
+The dimensionality of these rich representations also presents a challenge for sample collection, stability, and convergence \cite{Islam2017}.
+Reducing the order seems a natural approach to addressing this challenge, but doing so directly requires carefully defining suitable (state-space) features as the aforementioned methods are sensitive to the chosen representation \cite{bhatnagar2009convergent}.  
 
-Interestingly, many robots are underactuated by design, or at times, by circumstance (e.g., due to motor saturation).  Such systems achieve their tasks due to the inherent dependence of their actuation states.  This implicit structure suggests that an (automatic) reduction of the actuation space to a would be make these systems more compatible with (model-free) DRL methods; and would allow more variable underactuated systems.  Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark based around a passive compliant toy system (see also Fig. \ref{fig:one}).
+Interestingly, many robots are underactuated by design, or at times, by circumstance (e.g., due to motor saturation).
+Such systems achieve their tasks due to the inherent dependence of their actuation states.
+This implicit structure suggests that an (automatic) reduction of the actuation space may make these systems more compatible with (model-free) DRL methods; and would allow more variable underactuated systems.
+Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark based around a passive compliant toy system (see also Figure~\ref{fig:leader}).
 
-The contributions of this paper are ...
-We present a reduced order variant for this domain.
-We introduce the Jitterbug Problem as a diverse underactuated robotics task with dynamic, compliant and non-trivial motion in five scenarios of varying gradations of task complexity. 
-And, we find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.
-
-
-
-
-
-
-
-% In the case of robhot
-
-
-% , which, if not done careful 
-
-% this directly requires physical models and is challenging when there is high variance or uncertainty.   
-
-
-
-% Underactuated robots, in particular, are compatible with this notion for the 
-
-%  other aspect that 
-
-
-
-
-
-% Underactuated robots naturally 
-
-% are such a system.  
-
-
-
-% These also represent a curse in that 
-
-
-%  flexibility in representing  
-
-% In general, a challenge to using these methods
-
-
-% The use of DRL  In general, a challenge for these  these cases has 
-
-
-
-% %by identifying the ``best'' policy and
-
-% Model-free 
-
-% and has shown promising results in a variety of robotic tas  
-
-
-
-
-% such as the 
-
-
-
-% trial and error, but have been limited by the   
- 
-
-
-% but they 
-
-% for continuous control, such as DDPG 
-
-
-
-
-% Underactuated robots are a class of such systems that provide the designer great options, but have been limited 
-
-
-
-
-% One of the challenges with these methods is handing high dimensional 
-
-Foo bar \cite{Haarnoja2018SAC}
-
-
-
-
-
-
-\lipsum[1-2]
 
 \begin{figure}[ht]
     
@@ -205,6 +128,68 @@ Foo bar \cite{Haarnoja2018SAC}
     
 \end{figure}
 
+The contributions of this paper are ...
+We present a reduced order variant for this domain.
+We introduce the Jitterbug Problem as a diverse underactuated robotics task with dynamic, compliant and non-trivial motion in five scenarios of varying gradations of task complexity.
+And, we find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.
+
+
+% In the case of robhot
+
+
+% , which, if not done careful 
+
+
+% this directly requires physical models and is challenging when there is high variance or uncertainty.   
+
+
+% Underactuated robots, in particular, are compatible with this notion for the 
+
+
+% other aspect that 
+
+
+% Underactuated robots naturally 
+
+
+% are such a system.  
+
+
+% These also represent a curse in that 
+
+
+% flexibility in representing  
+
+
+% In general, a challenge to using these methods
+
+
+% The use of DRL  In general, a challenge for these these cases has 
+
+
+% by identifying the ``best'' policy and
+
+
+% Model-free 
+
+
+% and has shown promising results in a variety of robotic tas  
+
+
+% such as the 
+
+
+% trial and error, but have been limited by the   
+
+
+% for continuous control, such as DDPG 
+
+
+% Underactuated robots are a class of such systems that provide the designer great options, but have been limited 
+
+
+% One of the challenges with these methods is handing high dimensional 
+
 \lipsum[1-4]
 
 \section{RELATED WORK}
@@ -212,15 +197,13 @@ Foo bar \cite{Haarnoja2018SAC}
 
 Reinforcement Learning is an ....  
 
-
-
-Reinforcement Learning (RL) methods offer automated tools for controller design of such systems via trail and error \cite{sutton1998reinforcement}, but have been been limited by feature representations and forward models \cite{duan2016benchmarking}.  Deep Reinforcement Learning (DRL) algorithms for continuous control address this through the use of deep neural networks for both the policy ("actor") and value function ("critic") \cite{DDPG, SAC}.  Such systems have been  
-
+Reinforcement Learning (RL) methods offer automated tools for controller design of such systems via trail and error \cite{sutton1998reinforcement}, but have been been limited by feature representations and forward models \cite{duan2016benchmarking}.
+Deep Reinforcement Learning (DRL) algorithms for continuous control address this through the use of deep neural networks for both the policy (`actor') and value function (`critic') \cite{DDPG, SAC}.
+Such systems have been  ...
 
 \subsection{Deep Reinforcement Learning}
 
-
-and have shown promise in a host of challenging applications including visualmotor learning \cite{finn2016deep} and VR teleoperation \cite{zhang2018deep}. 
+...and have shown promise in a host of challenging applications including visualmotor learning \cite{finn2016deep} and VR teleoperation \cite{zhang2018deep}. 
 
 %\subsection{Deep Deterministic Policy Gradients (DDPG)}
 
@@ -235,18 +218,21 @@ and have shown promise in a host of challenging applications including visualmot
 
 \subsection{Reduced Order Approaches for Underactuated Robotics}
 
-Underacted robots are fundamentally correlated in their actuation space  \cite{tedrake2009underactuated}.  When a model is available control strategies ranging from optimal control \cite{betts2010practical} to direct collocation \cite{von1993numerical} to trajectory optimization \cite{kalakrishnan2011stomp} have been applied.  Some novel robots, such as compliant legged robots or soft robots, tend to exhibit complex dynamics that do stymie dynamical system and model reduction approaches as an explicit physical model may not be available \cite{nakajima2015information}.  Learning the model empirically, such as via a neural network, typically centers around obtaining a model that forecasts the robot's next timestep which is then used subsequently for control, such as via Model Predictive Control (MPC)  for a legged robot \cite{nagabandi2018learning} or for manipulation with a soft-gripper \cite{nishimura2017thin}.  
+Underacted robots are fundamentally correlated in their actuation space  \cite{tedrake2009underactuated}.
+When a model is available control strategies including from optimal control \cite{betts2010practical}, direct collocation \cite{von1993numerical}, and trajectory optimization \cite{kalakrishnan2011stomp} have been applied.
+Some novel robots, such as compliant legged robots or soft robots, tend to exhibit complex dynamics that do stymie dynamical system and model reduction approaches as an explicit physical model may not be available \cite{nakajima2015information}.
+Learning the model empirically, such as via a neural network, typically centers around obtaining a model that forecasts the robot's next timestep which is then used subsequently for control, such as via Model Predictive Control (MPC)  for a legged robot \cite{nagabandi2018learning} or for manipulation with a soft-gripper \cite{nishimura2017thin}.
 
-Highly variable motion is not random.  Given that actuation space for underactuated robots is structured, an autoencoder would be able to automatically discover some of these correlations \cite{AE_hinton2006reducing, ngsparse}.  A concern, however, is that the reduced model is not always intuitive, which would complicate the subsequent synchronization with a model based control strategy.   Model-free deep reinforcement learning (DRL) continuous control methods, however, are rather compatible with an autoencoder's reduced state description.
+Highly variable motion is not random.
+Given that actuation space for underactuated robots is structured, an autoencoder would be able to automatically discover some of these correlations \cite{AE_hinton2006reducing, ngsparse}.
+A concern, however, is that the reduced model is not always intuitive, which would complicate the subsequent synchronization with a model based control strategy.
+Model-free deep reinforcement learning (DRL) continuous control methods, however, are rather compatible with an autoencoder's reduced state description.
 
 The use model reduction complements said DRL methods...
-.... This has been considered for reinforcement learning ... 
+
+...This has been considered for reinforcement learning ... 
 
 This has been particularly effective in cases with very high dimensional inputs, such as from video, for low-dimensional independent constraints, such as obstacle locations \cite{finn2016deep, lynch2019learning}....
-
-
-
-%\lipsum[1-2]
 
 \begin{figure}[ht]
     \centering
@@ -259,14 +245,10 @@ This has been particularly effective in cases with very high dimensional inputs,
 
 \section{METHOD}
 
-
 We use the intuition that an underacted system has correlations between states %(otherwise it would be uncontrollable for said states)
 and thus there is a lower-dimensional representation that could describe this process.  
 
-
-
-
-\lipsum[1-9]
+\lipsum[1-4]
 
 \section{A NOVEL, UNDER-ACTUATED CONTROL BENCHMARK}
 

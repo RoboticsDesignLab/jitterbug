@@ -31,7 +31,6 @@
 \usepackage{gensymb}
 \usepackage{graphicx}
 \graphicspath{{figures/}}
-\usepackage{caption}
 \usepackage{tabularx}
 \usepackage{booktabs}
 
@@ -312,12 +311,13 @@ We observed that successful policies learned to pulse the motor in short bursts 
 \begin{figure*}[p]
     
     \centering
-    \includegraphics[width=\textwidth]{fig-rl-perf}
+    \includegraphics[width=0.98\textwidth]{fig-rl-perf}
     
-    \captionsetup{margin=10pt}
     \caption{
-        Comparison of RL algorithms over environment training steps.
-        We show median (solid line) and the first and third quartiles (shaded area) across 10 random seeds in each figure.
+        Characterising the Jitterbug task suite.
+        We compare the training progress of DDPG and PPO up to 6 million training steps (6000 episodes).
+        We show median (solid line) and the first and third quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
+        A task is considered 'solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
         All plots are filtered with a $10e^3$ step moving average filter.
     }
     

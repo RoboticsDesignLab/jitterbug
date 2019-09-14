@@ -28,12 +28,28 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{bm}
+\usepackage{textcomp}
 \usepackage{gensymb}
 \usepackage{graphicx}
-\graphicspath{{figures/}}
-\usepackage{caption}
 \usepackage{tabularx}
+\usepackage{array}
 \usepackage{booktabs}
+\usepackage{subcaption}
+
+\captionsetup[table]{
+    justification=centerlast,
+    textfont=small,
+}
+
+\graphicspath{{figures/}}
+
+% Set a style for an entire table row
+\newcolumntype{$}{>{\global\let\currentrowstyle\relax}}
+\newcolumntype{^}{>{\currentrowstyle}}
+\newcommand{\rowstyle}[1]{\gdef\currentrowstyle{#1}%
+    #1\ignorespaces
+}
 
 % Some small icons we use in the text
 \newcommand{\com}{\,\includegraphics[width=9pt]{ico-com}\,}
@@ -183,7 +199,7 @@ Foo bar \cite{Haarnoja2018SAC}
         The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
         In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor.
         %The simulated robot retains the (non functional) wind-up crank to more closely mimic the mass distribution of the real toy.
-        For scale, the blue checks on the floor are 1cm in size.
+        For scale, the blue checks on the simulated floor on the right are 1cm in size.
     }
     \label{fig:leader}
     
@@ -199,7 +215,6 @@ Reinforcement Learning is an ....
 
 
 Reinforcement Learning (RL) methods offer automated tools for controller design of such systems via trail and error \cite{sutton1998reinforcement}, but have been been limited by feature representations and forward models \cite{duan2016benchmarking}.  Deep Reinforcement Learning (DRL) algorithms for continuous control address this through the use of deep neural networks for both the policy ("actor") and value function ("critic") \cite{DDPG, SAC}.  Such systems have been  
-
 
 
 \subsection{Deep Reinforcement Learning}
@@ -279,7 +294,7 @@ The hinge stiffness was manually tuned to reproduce the dominant leg vibration m
 The Jitterbug model density was set using standard values for stainless steel ($7700$ kg/m$^3$) for the body and tough plastic ($1100$ kg/m$^3$) for the feet.
 Figure~\ref{fig:parts} shows the physical composition of our simulated Jitterbug model.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\linewidth]{fig-jitterbug-parts}
     \caption[
@@ -343,58 +358,62 @@ We contrast the performance of PPO (an on-policy method) and DDPG (an off-policy
 We also overlay the performance of our heuristic policies for comparison.
 Each figure shows the median and 10\textsuperscript{th} - 90\textsuperscript{th} percentile episode return across 10 different seeds.
 
-Our selected hyper-parameters are reported in Table~\ref{tab:results}.
+Our selected hyper-parameters are reported in Table~\ref{tab:hyper-params}.
 For all cases, we used fully-connected neural networks with hidden layers of size 350 and 250 with ReLU activation.
 Where applicable, we use separate networks for the actor and critic (i.e. no shared weights).
 
 We ran additional experiments using TRPO, A2C and SAC and observed similar performance to the reported results.
 Training curves for these algorithms are not included here for brevity.
 
-\begin{table*}[t!]
+\begin{table}[ht]
     
     \centering
-    \caption{Algorithm Hyper-parameters}
-    \label{tab:results}
+    \caption{
+        Algorithm Hyper-parameters.
+        Bold items were changed from the defaults offered by the \texttt{stable\_baselines} package.
+    }
+    \label{tab:hyper-params}
     \medskip
     
     {\def\arraystretch{1.2}
-        \begin{tabularx}{\textwidth}{X rr c rr c rr}
+        \begin{tabularx}{0.95\linewidth}{$ X ^ c ^ >{\raggedleft\arraybackslash}p{2.5cm}}
             
             \toprule
             
-            & \multicolumn{2}{c}{\% Distance Match} & \phantom{a} & \multicolumn{2}{c}{Feature Vector L2} & \phantom{a} & \multicolumn{2}{c}{Log Likelihood} \\
-            
-            \cmidrule{2-3} \cmidrule{5-6} \cmidrule{8-9}
-            
-            & {avg.} & {med.} & & {avg.} & {med.} & & {avg.} & {med.} \\
-            
+            Parameter & \phantom{abc} & Value \\
             \midrule
             
-            MaxEnt (Ours) &
-            56.74 & 57.52 &  & 5.145E3 & 1.270E3 &  & 4.360E-121 & 2.932e-121 \\
+            \emph{Shared} & & \\[1pt]
+            \quad Optimizer & & Adam \cite{Adam} \\
+            \rowstyle{\bfseries} \quad Learning Rate ($\alpha$) & & 1{\tiny E}\textsuperscript{--4} \\[6pt]
             
-            MaxEnt \cite{Ziebart2008} &
-            38.03 & 31.36 &  & 172.406E3 & 178.043E3 &  & $-\infty$ & $-\infty$ \\
+            \emph{DDPG} & & \\[1pt]
+            \rowstyle{\bfseries} \quad Batch Size & & 256 \\
+            \quad Training Steps & & 50 \\
+            \quad Rollout and Evaluation Steps & & 100 \\
+            \rowstyle{\bfseries} \quad Replay Buffer Size & & 1{\tiny E}\textsuperscript{6} \\
+            \quad Soft Update Coefficient ($\tau$) & & 1{\tiny E}\textsuperscript{--3} \\
+            \quad Parameter Noise & & None \\
+            \rowstyle{\bfseries} \quad Action Noise & & Ornstein-Uhlenbeck \\
+            \multicolumn{3}{r}{\boldmath$\mu = 0.3, \sigma = 0.3, \theta = 0.15$} \\[6pt]
             
-            MaxEnt (Length-binned ensemble) &
-            60.12 & 62.13 &  & 3.388E3 & 1.662E3 &  & 1.050e-14 & 8.733e-15 \\
-            
-            MaxEnt ($k$-means ensemble) &
-            65.58 & 73.68 &  & 1.132E3 & 562.29 &  & 3.74E-119 & 2.8228e-119 \\[10pt]
-            
-            
-            Shortest Path &
-            52.10 & 50.54 &  & 2.679E3 & 995.400 &  & {-} & {-} \\
-            
-            Logistic Regression &
-            52.45 & 50.18 &  & {-} & {-} &  & {-} & {-} \\
+            \emph{PPO} & & \\[1pt]
+            \rowstyle{\bfseries} \quad Steps / Environment / Update & & 256 \\
+            \rowstyle{\bfseries} \quad Entropy Coefficient & & 1{\tiny E}\textsuperscript{--2} \\
+            \quad Value Function Coefficient & & 0.5 \\
+            \quad Max Gradient Norm & & 0.5 \\
+            \quad Bias-Variance Coefficient ($\lambda$) & & 0.95 \\
+            \quad Minibatches & & 4 \\
+            \quad Policy Clipping Range & & 0.2 \\
+            \quad Value Clipping Range & & None \\
+            \quad Surrogate Optimization Epochs & & 4 \\[6pt]
             
             \bottomrule
             
         \end{tabularx}
     }
     
-\end{table*}
+\end{table}
 
 \subsection{Characterising Learned Policies}
 
@@ -404,17 +423,28 @@ We observed that a key difference between successful and unsuccessful trained po
 For example, for all tasks but \emph{Move From Origin}, achieving high reward requires careful modulation of the reactive torque applied to the Jitterbug body by the motor counterweight.
 One way to achieve this (the method we use in our heuristic policies) is by pulsing the motor in different directions.
 We observed that successful policies learned to pulse the motor in short bursts in alternating directions (e.g. $\sim180\degree$ at a time, see Figure~\ref{fig:motor-hist}), whereas unsuccessful policies would often drive the motor continuously.
+In doing so, the successful policies were able to achieve high cumulative episode return, and accomplish the high-level task encoded by the reward (Figure~\ref{fig:heatmap}).
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\linewidth]{fig-motor-hist}
     \caption{
-        Characterising successful policy behaviours for the \emph{Move In Direction} task.
+        Characterising policy behaviours for the \emph{Move In Direction} task.
         We plot the distribution of motor velocities across many episodes for a successful policy (green) and unsuccessful policy (orange).
         The successful policy learns to pulse the motor in alternating directions (the same strategy used by our heuristic policy).
         In contrast, the unsuccessful policy gets stuck in a local minima where the motor is continuously driven in one direction.
     }
     \label{fig:motor-hist}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{fig-heatmap}
+    \caption{
+        Heatmap showing Jitterbug position over 100 episodes before (left) and after (right) training DDPG on the task \emph{Move In Direction}.
+        In the second figure, to evaluate the agent, the target direction was fixed at $+45\degree$.
+    }
+\label{fig:heatmap}
 \end{figure}
 
 \subsection{Reduced-Order Training}
@@ -433,12 +463,13 @@ We observed that successful policies learned to pulse the motor in short bursts 
 \begin{figure*}[p]
     
     \centering
-    \includegraphics[width=\textwidth]{fig-rl-perf}
+    \includegraphics[width=0.98\textwidth]{fig-rl-perf}
     
-    \captionsetup{margin=10pt}
     \caption{
-        Comparison of RL algorithms over environment training steps.
-        We show median (solid line) and the first and third quartiles (shaded area) across 10 random seeds in each figure.
+        Characterising the Jitterbug task suite.
+        We compare the training progress of DDPG and PPO up to 6 million training steps (6000 episodes).
+        We show median (solid line) and the first and third quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
+        A task is considered 'solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
         All plots are filtered with a $10e^3$ step moving average filter.
     }
     

@@ -90,14 +90,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{INTRODUCTION}
 
-As robots become more compliant and variable they become more capable, and more complex.
+As robots become increasingly variable and compliant they become more capable, and complex.
 Underactuated robots, for example, provide great design freedom, yet their adoption has been limited by the need for manual controller designs.
 
 Deep Reinforcement Learning (DRL) methods offer automated tools for robotic control by identifying a policy that maximizes the expected sum of rewards \cite{henderson2018deep}.
 This has been extended to continuous control domains via algorithms such as the Deep Deterministic Policy Gradient (DDPG) \cite{DDPG}, Proximal Policy Optimization (PPO) \cite{PPO}, Soft Actor-Critic (SAC) \cite{SAC}, and Twin Delayed Deep Deterministic (TD3) \cite{TD3}.
 The power of these methods comes, in part, from the high-dimensional, nonlinear function approximation of both the policy and the expected value by neural networks.
-The dimensionality of these rich representations also presents a challenge for sample collection, stability, and convergence \cite{Islam2017}.
-Reducing the order seems a natural approach to addressing this challenge, but doing so directly requires carefully defining suitable (state-space) features as the aforementioned methods are sensitive to the chosen representation \cite{bhatnagar2009convergent}.  
+The dimensionality of these rich representations also presents challenges, particularly for sample collection, stability, and convergence \cite{Islam2017}.
+Reducing the order seems a natural approach to addressing these challenges, but doing so directly requires carefully defining suitable (state-space) features as the aforementioned methods are sensitive to the chosen representation \cite{bhatnagar2009convergent}.  
 
 Interestingly, many robots are underactuated by design, or at times, by circumstance (e.g., due to motor saturation).
 Such systems achieve their tasks due to the inherent dependence of their actuation states.
@@ -122,7 +122,7 @@ Towards this, we introduce a highly variable, single actuator robotic locomotion
         The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
         In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor.
         %The simulated robot retains the (non functional) wind-up crank to more closely mimic the mass distribution of the real toy.
-        For scale, the blue checks on the simulated floor on the right are 1cm in size.
+        For scale, the blue checks on the simulated floor on the right are $1cm$ in size.
     }
     \label{fig:leader}
     

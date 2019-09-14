@@ -28,11 +28,17 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{gensymb}
 \usepackage{graphicx}
 \graphicspath{{figures/}}
 \usepackage{caption}
 \usepackage{tabularx}
 \usepackage{booktabs}
+
+% Some small icons we use in the text
+\newcommand{\com}{\,\includegraphics[width=9pt]{ico-com}\,}
+\newcommand{\hinge}{\,\includegraphics[width=9pt]{ico-hinge}\,}
+\newcommand{\motor}{\,\includegraphics[width=9pt]{ico-motor}\,}
 
 \usepackage{lipsum}
 
@@ -88,7 +94,8 @@ Foo bar \cite{Haarnoja2018SAC}
     \caption{
         The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
         In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor.
-        The simulated robot retains the (non functional) wind-up crank to more closely mimic the mass distribution of the real toy.
+        %The simulated robot retains the (non functional) wind-up crank to more closely mimic the mass distribution of the real toy.
+        For scale, the blue checks on the floor are 1cm in size.
     }
     \label{fig:leader}
     
@@ -125,22 +132,102 @@ Foo bar \cite{Haarnoja2018SAC}
 
 \lipsum[1-9]
 
-\section{THE JITTERBUG ENVIRONMENT}
+\section{A NOVEL, UNDER-ACTUATED CONTROL BENCHMARK}
 
-\lipsum[1-9]
+We implemented our Jitterbug benchmark using the DeepMind Control Suite (DMC) framework [REF].
+DMC is a framework and set of benchmark tasks for continuous control published by Google DeepMind in 2018.
+DMC benchmarks consist of a \emph{domain} defining a robotic and environment model and \emph{tasks} which are instances of that domain with specific MDP structure
+
+DMC uses the robust Multi-Joint dynamics with Contact (MuJoCo) robotics physics engine for simulation [REF].
+To aid comparison across tasks, DMC imposes constraints on rewards ($R \in [0, 1]$) and episode length ($H = 1000$).
+As such, for any DMC task, cumulative episode return $\approx 1000$ indicates success.
+
+DMC tasks are compatible subsets of the popular OpenAI Gym framework [REF], meaning many popular RL algorithm frameworks can be used with these benchmarks.
+
+\subsection{The Jitterbug Domain}
+
+Our Jitterbug model was inspired by the children's toy Katita (Figure~\ref{fig:leader}).
+We aimed to reproduce the physical dynamics of this toy while enabling control by replacing the wind-up spring with a single actuator of equivalent torque.
+Our Jitterbug model conforms to the dimensions and mass of the Katita, however we replace the wind-up spring with a controlled single degree-of-freedom motor.
+We retain the (non-functional) wind up crank to more closely model the mass distribution of the physical Katita.
+
+We used high-speed recording and visual tachometry to measure the Katita motor speed and leg vibration modes.
+By reverse-engineering the Katita gearbox we estimated the torque output of the drive spring and configured the MuJoCo actuator appropriately.
+We modelled the legs as rigid bodies with shoulder and elbow hinge joints.
+The hinge stiffness was manually tuned to reproduce the dominant leg vibration mode observed in our high-speed footage.
+The Jitterbug model density was set using standard values for stainless steel ($7700$ kg/m$^3$) for the body and tough plastic ($1100$ kg/m$^3$) for the feet.
+Figure~\ref{fig:parts} shows the physical composition of our simulated Jitterbug model.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{fig-jitterbug-parts}
+    \caption[
+        Schematic representation of the Jitterbug model.
+        Individual rigid bodies are in different colours and we highlight the position of the center of mass, hinge joints and the single motor.
+    ]{
+        Schematic representation of the Jitterbug model.
+        Individual rigid bodies are in different colours and we highlight the position of the center of mass (\protect\com), hinge joints  (\protect\hinge) and the single motor (\protect\motor).
+    }
+    \label{fig:parts}
+\end{figure}
+
+Due to the importance of contact and stiff dynamics in the Jitterbug's locomotion, we found it necessary to adjust MuJoCo's default settings, selecting an integration timestep of $0.0002$ and semi-implicit Euler integration.
+With these settings we qualitatively observed a close correspondence between the Katita and the simulated dynamics under constant motor actuation on the Jitterbug.
+
+DMC supports the definition of physically-based camera models for to enable learning from raw pixels if desired.
+We defined several cameras for the Jitterbug domain including an overhead, tracking and ego-centric view.
+
+\subsection{The Jitterbug Task Suite}
+
+The Jitterbug dynamics naturally induce very high variance motion under a range of motor velocities.
+We defined a collection of five tasks of increasing difficulty based on the Jitterbug domain.
+The tasks were designed with increasingly sparse reward signals to increase the difficulty.
+
+For all tasks we choose $\gamma = 0.99$ and consider a task solved when cumulative episode reward is $\gtrapprox 900$.
+In all tasks the Jitterbug is reset to a random pose near the origin at the start of an episode.
+All tasks have a single continuous action controlling the motor $\mathcal{A} = [-1, 1]$ (larger/smaller values are clipped) and continuous state and observation spaces.
+
+For each task, we report ($\text{dim}(\mathcal{S}), \text{dim}(\mathcal{O})$) and a brief description of the reward structure.
+Tasks are reported here ordered easiest to hardest.
+
+\begin{enumerate}
+    
+    \item \emph{Move From Origin} (16, 15): The Jitterbug must move away from the origin in any direction.
+    N.b. a sufficiently fast constant motor velocity is sufficient to solve this task.
+    
+    \item \emph{Face In Direction} (17, 16): The Jitterbug must rotate to face in a randomly selected yaw direction.
+    
+    \item \emph{Move In Direction} (20, 19): The Jitterbug is rewarded for velocity in a randomly selected direction in the X, Y plane.
+    
+    \item \emph{Move To Position} (19, 18): The Jitterbug must move to a randomly selected position in the X, Y plane.
+    
+    \item \emph{Move To Pose} (20, 19): The Jitterbug must move to a randomly selected position in the X, Y plane and rotate to face in a randomly selected yaw direction.
+    N.b. Due to the multiplication of position and yaw reward components, this task has a \emph{very} sparse reward signal!
+    
+\end{enumerate}
+
+In addition, for all tasks the Jitterbug must remain upright to achieve reward.
+Falling does not terminate the episode early as the leg dynamics are sufficiently springy that bouncing into the upright pose again can allow recovery from this condition (albeit at the loss of some reward).
+Indeed - we observed some learned strategies that appeared to utilize this mode of locomotion!
 
 \section{EXPERIMENTS}
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\linewidth]{fig-autoencoder}
-    \caption{
-        WE used a De-Noising AutoEncoder as a means to learn a reduced-order state representation.
-    }
-    \label{fig:autoencoder}
-\end{figure}
+\subsection{Characterising The Jitterbug Tasks}
 
-\lipsum[1]
+To verify feasibility, we hand-crafted heuristic policies that can solve each task.
+To characterise the difficulty of the Jitterbug task suite, we performed preliminary hyper-parameter tuning to select reasonable settings and trained several RL algorithms on the tasks.
+
+Figure~\ref{fig:rl-perf} reports training curves for example on- and off-policy algorithms.
+We contrast the performance of PPO (an on-policy method) and DDPG (an off-policy method).
+We also overlay the performance of our heuristic policies for comparison.
+Each figure shows the median and 10\textsuperscript{th} - 90\textsuperscript{th} percentile episode return across 10 different seeds.
+
+Our selected hyper-parameters are reported in Table~\ref{tab:results}.
+For all cases, we used fully-connected neural networks with hidden layers of size 350 and 250 with ReLU activation.
+Where applicable, we use separate networks for the actor and critic (i.e. no shared weights).
+
+We ran additional experiments using TRPO, A2C and SAC and observed similar performance to the reported results.
+Training curves for these algorithms are not included here for brevity.
 
 \begin{table*}[t!]
     
@@ -188,17 +275,39 @@ Foo bar \cite{Haarnoja2018SAC}
     
 \end{table*}
 
-\lipsum[1-9]
+\subsection{Characterising Learned Policies}
+
+To verify the learned policies were sensible (i.e. to confirm the absence of `reward hacking') we qualitatively and quantitatively investigated the exhibited behaviours.
+
+We observed that a key difference between successful and unsuccessful trained policies seemed to be the ability to learn piecewise control functions.
+For example, for all tasks but \emph{Move From Origin}, achieving high reward requires careful modulation of the reactive torque applied to the Jitterbug body by the motor counterweight.
+One way to achieve this (the method we use in our heuristic policies) is by pulsing the motor in different directions.
+We observed that successful policies learned to pulse the motor in short bursts in alternating directions (e.g. $\sim180\degree$ at a time, see Figure~\ref{fig:motor-hist}), whereas unsuccessful policies would often drive the motor continuously.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth]{fig-motor-hist}
     \caption{
-        Characterising successful policy behaviours.
-        A histogram of motor velocities.
+        Characterising successful policy behaviours for the \emph{Move In Direction} task.
+        We plot the distribution of motor velocities across many episodes for a successful policy (green) and unsuccessful policy (orange).
+        The successful policy learns to pulse the motor in alternating directions (the same strategy used by our heuristic policy).
+        In contrast, the unsuccessful policy gets stuck in a local minima where the motor is continuously driven in one direction.
     }
     \label{fig:motor-hist}
 \end{figure}
+
+\subsection{Reduced-Order Training}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{fig-autoencoder}
+    \caption{
+        WE used a De-Noising AutoEncoder as a means to learn a reduced-order state representation.
+    }
+    \label{fig:autoencoder}
+\end{figure}
+
+\lipsum[1-9]
 
 \begin{figure*}[p]
     

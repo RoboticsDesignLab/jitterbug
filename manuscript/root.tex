@@ -30,6 +30,7 @@
 \usepackage{textcomp,gensymb}
 \usepackage{tabularx,booktabs}
 \usepackage{array,subcaption}
+\let\labelindent\relax
 \usepackage{enumitem}
 \usepackage{graphicx}
 \usepackage{hyperref}
@@ -343,7 +344,7 @@ To characterize the difficulty of the Jitterbug task suite, we performed prelimi
 
 Figure~\ref{fig:rl-perf} reports training curves for example on- and off-policy algorithms.
 We contrast the performance of PPO (an on-policy method) and DDPG (an off-policy method).
-We also overlay the performance of our heuristic policies for comparison.
+%We also overlay the performance of our heuristic policies for comparison.
 Each figure shows the median and 10\textsuperscript{th} - 90\textsuperscript{th} percentile episode return across 10 different seeds.
 
 Our selected hyper-parameters are reported in Table~\ref{tab:hyper-params}.
@@ -392,7 +393,7 @@ In doing so, the successful policies were able to achieve high cumulative episod
     \centering
     \includegraphics[width=\linewidth]{fig-autoencoder}
     \caption{
-        WE used a De-Noising AutoEncoder as a means to learn a reduced-order state representation.
+        Schematic representation of a Denoising AutoEncoder.
     }
     \label{fig:autoencoder}
 \end{figure}

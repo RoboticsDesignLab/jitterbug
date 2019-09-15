@@ -26,17 +26,13 @@
 % See the \addtolength command later in the file to balance the column lengths
 % on the last page of the document
 
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{hyperref}
-\usepackage{bm}
-\usepackage{textcomp}
-\usepackage{gensymb}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{textcomp,gensymb}
+\usepackage{tabularx,booktabs}
+\usepackage{array,subcaption}
 \usepackage{graphicx}
-\usepackage{tabularx}
-\usepackage{array}
-\usepackage{booktabs}
-\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{color,soul}
 
 \captionsetup[table]{
     justification=centerlast,
@@ -84,7 +80,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-\lipsum[1]
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
 \end{abstract}
 
@@ -144,9 +140,7 @@ The challenging nature of the Jitterbug task may also help inform future researc
 
 \section{RELATED WORK}
 
-
-
-
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
 {Para}
 
@@ -289,9 +283,13 @@ This has been particularly effective in cases with very high dimensional inputs,
 \end{figure}
 
 We use the intuition that an underacted system has correlations between states %(otherwise it would be uncontrollable for said states)
-and thus there is a lower-dimensional representation that could describe this process.  
+and thus there is a lower-dimensional representation that could describe this process. 
 
-\lipsum[1-3]
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
 \section{A NOVEL, UNDER-ACTUATED CONTINUOUS CONTROL BENCHMARK}
 
@@ -505,13 +503,15 @@ To optimize the AutoEncoder network we use the Mean Squared Error between the ou
 Training data were gathered by running a random policy on the Jitterbug for 5 million steps, and we used 80\% of this data for training and 20\% as a held-out test set.
 Once trained, the decoder side of the AutoEncoder was discarded and the encoder used to provide an augmented observation representation to a Deep Reinforcement Learning algorithm.
 
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+
 \section{DISCUSSION}
 
-\lipsum[1]
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
 \section{CONCLUSION}
 
-\lipsum[1]
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
 %\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
                                   % on the last page of the document manually. It shortens

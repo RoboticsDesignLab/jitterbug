@@ -220,12 +220,14 @@ Such systems have been  ...
 \subsection{Reduced Order Approaches for Underactuated Robotics}
 
 Underacted robots are fundamentally correlated in their actuation space  \cite{tedrake2009underactuated}.
-When a model is available control strategies including from optimal control \cite{betts2010practical}, direct collocation \cite{von1993numerical}, and trajectory optimization \cite{kalakrishnan2011stomp} have been applied.
-Some novel robots, such as compliant legged robots or soft robots, tend to exhibit complex dynamics that do stymie dynamical system and model reduction approaches as an explicit physical model may not be available \cite{nakajima2015information}.
+When a model is available control strategies including optimal control \cite{betts2010practical}, direct collocation \cite{von1993numerical} and trajectory optimization \cite{kalakrishnan2011stomp} have been applied.
+Some novel robots, such as compliant legged robots or soft robots, tend to exhibit complex dynamics that limit dynamical system and model reduction approaches as an explicit physical model may not be available \cite{nakajima2015information}.
 
-Model reduction is a common strategy in robotics, linear dynamical systems, and machine learning \cite{betts2010practical, sutton1998reinforcement}.   Variations of this approach include method such as: model linearizion, mixing of open-loop and (typically linear) closed-loop control \cite{kolter2010probabilistic}, and tunable models \cite{maeda2011tuned}.  The issue with these approaches is that system model(s) are essentially needed.  
+Model reduction is a common strategy in robotics, linear dynamical systems, and machine learning \cite{betts2010practical, sutton1998reinforcement}.   Variations of this approach include method such as: model linearizion, mixing of open-loop and (typically linear) closed-loop control \cite{kolter2010probabilistic}, and tunable models \cite{maeda2011tuned}.  The issue with these approaches is that explicit system model(s) are typically needed.  
 
-Alternatively, statistical methods allow for empirical model.  An approach, such as Principle Components Analysis (PCA), may help `reduce' this empirical model by trying to identify linearly uncorrelated values.  However, the highly variable of the robot and the piecewise nature of contact (e.g., in legged locomotion or grasping) are better described by non-linear models and non-Gaussian distributions.  
+Alternatively, statistical methods allow for empirical model.
+An approach such as Principle Components Analysis (PCA) may help `reduce' this empirical model by trying to identify linearly correlated values.
+However, the highly variable of the robot and the piecewise nature of contact (e.g., in legged locomotion or grasping) are better described by non-linear models and non-Gaussian distributions.  
 
 In the underactuated domain, these ideas have been used to get an empirical model that then inform subsequent model-based control.  For example, Nagabandi, \emph{et al.} \cite{nagabandi2018learning} use a small legged robot in which a neural network forecasts the robot's state at the next timestep which is then used via Model Predictive Control (MPC).  Nishimura, \emph{et al.} use an autoencoder in a similar fashion to inform manipulation with a soft-gripper \cite{nishimura2017thin}.  In both these cases the control model is analytic and the engineering effort is needed to synchronize the empirical model with the controller, which can limit the types of policies and strategies that the robot can learn and execute.
 

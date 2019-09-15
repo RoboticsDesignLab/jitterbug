@@ -100,10 +100,9 @@ The dimensionality of these rich representations also presents challenges, parti
 Reducing the order seems a natural approach to addressing these challenges, but doing so directly requires carefully defining suitable (state-space) features as the aforementioned methods are sensitive to the chosen representation \cite{bhatnagar2009convergent}.  
 
 Interestingly, many robots are underactuated by design, or at times, by circumstance (e.g., due to motor saturation).
-Such systems achieve their tasks due to the inherent dependence of their actuation states.
+Such systems achieve their tasks due to the inherent dependence of their actuation states \cite{spong1998underactuated}.
 This implicit structure suggests that an (automatic) reduction of the actuation space may make these systems more compatible with (model-free) DRL methods, which, in turn, would allow for more variable underactuated systems.
-Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark based around a passive compliant toy system (see also Figure~\ref{fig:leader}).
-
+Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark based around a passive compliant toy system with tasks of varying difficulty, particularly around the sparsity of the reward signal (see also Fig.~\ref{fig:leader}).
 
 \begin{figure}[ht]
     
@@ -119,7 +118,7 @@ Towards this, we introduce a highly variable, single actuator robotic locomotion
     \end{minipage}
     
     \caption{
-        The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
+        \textbf{The Jitterbug Problem}: The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
         In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor.
         %The simulated robot retains the (non functional) wind-up crank to more closely mimic the mass distribution of the real toy.
         For scale, the blue checks on the simulated floor on the right are $1cm$ in size.
@@ -128,71 +127,94 @@ Towards this, we introduce a highly variable, single actuator robotic locomotion
     
 \end{figure}
 
+A reduced order approach is a common strategy in engineering.   An issue herein is that a highly variable and under-actuated system, such as the Jitterbug Problem, is variant on the state and thus difficult to explicitly model. 
+%While this may limit options, it does not mean all hope it lost.    
+Though `highly variable' does not imply `chaotic'; that is, the system is deterministic for over short portions of the state-space and time.  The motion is clearly non-linear, however, due to the contacts and locomotion phases and gaits.  (Indeed, it has been reported that the Katita toy, on which the problem is based, even exhibits a `galloping' mode \cite{jgn.thesis}).  A nonlinear approach for automatically discovering interesting structure in empirical models is unsupervised learning.  An auto-encoder is a well-know neural network approach for this that can help automatically discover underlying correlations and their interdependencies \cite{AE_hinton2006reducing}.   %While one could integrate this network into the policy and value network(s), this approach directly...
+In this way, initial (random) exploration helps characterize the implicit structure of the (underactuated) action space that then focuses subsequent DRL control policy learning.
+
+
+In this paper, we make two contributions.   First...
+Second...
+
+Additionally we shown that...  
+
 The contributions of this paper are ...
 We present a reduced order variant for this domain.
 We introduce the Jitterbug Problem as a diverse underactuated robotics task with dynamic, compliant and non-trivial motion in five scenarios of varying gradations of task complexity.
 And, we find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.
 
 
-% In the case of robhot
 
-
-% , which, if not done careful 
-
-
-% this directly requires physical models and is challenging when there is high variance or uncertainty.   
-
-
-% Underactuated robots, in particular, are compatible with this notion for the 
-
-
-% other aspect that 
-
-
-% Underactuated robots naturally 
-
-
-% are such a system.  
-
-
-% These also represent a curse in that 
-
-
-% flexibility in representing  
-
-
-% In general, a challenge to using these methods
-
-
-% The use of DRL  In general, a challenge for these these cases has 
-
-
-% by identifying the ``best'' policy and
-
-
-% Model-free 
-
-
-% and has shown promising results in a variety of robotic tas  
-
-
-% such as the 
-
-
-% trial and error, but have been limited by the   
-
-
-% for continuous control, such as DDPG 
-
-
-% Underactuated robots are a class of such systems that provide the designer great options, but have been limited 
-
-
-% One of the challenges with these methods is handing high dimensional 
 
 \lipsum[1-4]
 
 \section{RELATED WORK}
+
+
+
+{Para}
+
+
+% In the case of robhot
+
+% , which, if not done careful 
+
+% this directly requires physical models and is challenging when there is high variance or uncertainty.   
+
+% Underactuated robots, in particular, are compatible with this notion for the 
+
+% other aspect that 
+
+% Underactuated robots naturally 
+
+% are such a system.  
+
+% These also represent a curse in that 
+
+% flexibility in representing  
+
+% In general, a challenge to using these methods
+
+% The use of DRL  In general, a challenge for these these cases has 
+
+% by identifying the ``best'' policy and
+
+% Model-free 
+
+% and has shown promising results in a variety of robotic tas  
+
+% such as the 
+
+% trial and error, but have been limited by the   
+
+% for continuous control, such as DDPG 
+
+% Underactuated robots are a class of such systems that provide the designer great options, but have been limited 
+
+% One of the challenges with these methods is handing high dimensional 
+
+
+{Model Reduction}
+
+
+
+
+
+
+Model reduction is a common strategy in robotics, linear dynamical systems, and machine learning \cite{betts2010practical, sutton1998reinforcement}.   Variations of this approach include method such as: model linearizion, mixing of open-loop and (typically linear) closed-loop control \cite{kolter2010probabilistic}, and tunable models \cite{maeda2011tuned}.  The issue with these approaches is that system model(s) are essentially needed.  Alternatively statistical methods, such as Principle Components Analysis (PCA), may help `reduce' empirical models by trying to identify linearly uncorrelated values.  However, in many robotics tasks the underactuation is dependent on the state  
+
+
+) is a statistical procedure that uses an orthogonal transformation to convert a set of observations of possibly correlated variables (entities each of which takes on various numerical values) into a set of values of linearly uncorrelated variables called principal components.
+
+
+An alternative approach might be to approximate  probability distribution(s) as compared to arbitrary nonlinear function or transformation
+
+is to model the There are also statistical methods such as 
+
+
+
+
+
 
 
 Reinforcement Learning is an ....  

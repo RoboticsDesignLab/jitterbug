@@ -5,7 +5,6 @@ import csv
 import glob
 import warnings
 import numpy as np
-from pprint import pprint
 from matplotlib import pyplot as plt
 
 
@@ -97,8 +96,6 @@ def plot_csv_glob(fileglob, window, *, quartiles=[10, 50, 90], **kwargs):
         len(r)
         for r in rewards
     ]
-    print("Reward lengths:")
-    pprint(list(zip(files, reward_len)))
     min_len = min(reward_len)
     max_len = max(reward_len)
     print("Min training length: {}, max: {}".format(

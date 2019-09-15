@@ -81,7 +81,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+\hl{add me :-) - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
 \end{abstract}
 
@@ -157,10 +157,6 @@ Underactuated robots are fundamentally correlated in their actuation space  \cit
 When a model is available control strategies including from optimal control \cite{betts2010practical}, direct collocation \cite{von1993numerical}, and trajectory optimization \cite{kalakrishnan2011stomp} have been applied.
 Some novel robots, such as compliant legged robots or soft robots, tend to exhibit complex dynamics that do stymie dynamical system and model reduction approaches as an explicit physical model may not be available \cite{nakajima2015information}.
 
-Model reduction is a common strategy in robotics, linear dynamical systems, and machine learning \cite{betts2010practical, sutton1998reinforcement}.   Variations of this approach include method such as: model linearizion, mixing of open-loop and (typically linear) closed-loop control \cite{kolter2010probabilistic}, and tunable models \cite{maeda2011tuned}.  The issue with these approaches is that system model(s) are essentially needed.  
-
-Alternatively, statistical methods allow for empirical model.  An approach, such as Principle Components Analysis (PCA), may help `reduce' this empirical model by trying to identify linearly uncorrelated values.  However, the highly variable of the robot and the piecewise nature of contact (e.g., in legged locomotion or grasping) are better described by non-linear models and non-Gaussian distributions.  
-
 Given that actuation space for underactuated robots is structured, an autoencoder would be able to automatically discover some of these correlations \cite{AE_hinton2006reducing, ngsparse}.
 A concern, however, is that the reduced model is not always intuitive, which would complicate the subsequent synchronization with a model based control strategy.
 In this way model-free deep reinforcement learning continuous control methods are rather compatible with an autoencoder's reduced state description.
@@ -194,10 +190,11 @@ and thus there is a lower-dimensional representation that could describe this pr
 
 \hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
-\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
-
 \section{A Novel, Underactuated Control Benchmark}
 
+% ------------------------------------------------------------------------------------------------------------------------
+\section{A Novel, Underactuated Control Benchmark}
+% ------------------------------------------------------------------------------------------------------------------------
 We implemented our Jitterbug benchmark using the DeepMind Control Suite (DMC) framework \cite{Tassa2018DMC}.
 DMC is a framework and set of benchmark tasks for continuous control published by Google DeepMind in 2018.
 DMC benchmarks consist of a \emph{domain} defining a robotic and environment model and \emph{tasks} which are instances of that domain with specific MDP structure
@@ -282,7 +279,6 @@ Indeed - we observed some learned strategies that appeared to utilize this mode 
 
 \section{Experiments}
 
-\subsection{Characterising The Jitterbug Tasks}
 \begin{table}[t]
     
     \centering
@@ -340,8 +336,10 @@ Indeed - we observed some learned strategies that appeared to utilize this mode 
     
 \end{table}
 
+\subsection{Characterizing Learned Policies}
 To verify feasibility, we hand-crafted heuristic policies that can solve each task.
-To characterise the difficulty of the Jitterbug task suite, we performed preliminary hyper-parameter tuning to select reasonable settings and trained several RL algorithms on the tasks.
+To characterize the difficulty of the Jitterbug task suite, we performed preliminary hyper-parameter tuning to select reasonable settings and trained several RL algorithms on the tasks.
+
 
 Figure~\ref{fig:rl-perf} reports training curves for example on- and off-policy algorithms.
 We contrast the performance of PPO (an on-policy method) and DDPG (an off-policy method).
@@ -380,7 +378,7 @@ Training curves for these algorithms are not included here for brevity.
     \label{fig:heatmap}
 \end{figure}
 
-To verify the learned policies were sensible (i.e. to confirm the absence of `reward hacking') we qualitatively and quantitatively investigated the exhibited behaviours.
+To verify the learned policies were sensible (i.e. to confirm the absence of `reward hacking') we qualitatively and quantitatively investigated the exhibited behaviors.
 
 We observed that a key difference between successful and unsuccessful trained policies seemed to be the ability to learn piecewise control functions.
 For example, for all tasks but \emph{Move From Origin}, achieving high reward requires careful modulation of the reactive torque applied to the Jitterbug body by the motor counterweight.
@@ -408,13 +406,7 @@ To optimize the AutoEncoder network we use the Mean Squared Error between the ou
 Training data were gathered by running a random policy on the Jitterbug for 5 million steps, and we used 80\% of this data for training and 20\% as a held-out test set.
 Once trained, the decoder side of the AutoEncoder was discarded and the encoder used to provide an augmented observation representation to a Deep Reinforcement Learning algorithm.
 
-\subsection{Reduced-Order Deep Reinforcement Learning}
-
-\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
-
-\section{Discussion and Conclusion}
-
-\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+\section{Discussion And Conclusion}
 
 \hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
@@ -427,16 +419,11 @@ Once trained, the decoder side of the AutoEncoder was discarded and the encoder 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%\section*{APPENDIX}
-
-%\lipsum[1]
-
 \section*{Acknowledgment}
 
 We thank Dr. Hanna Kurniawati at the ANU Robust Decision-making and Learning Laboratory for discussions and simulation assistance.
 This research was partly supported by an Australian Research Council Discovery Project (DP160100714).
 A. J. Snoswell is supported in part through and Australian Government Research Training Program Scholarship. 
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -449,7 +436,7 @@ A. J. Snoswell is supported in part through and Australian Government Research T
     \includegraphics[height=0.94\textheight]{fig-rl-perf}
     
     \caption{
-        Characterising the Jitterbug task suite.
+        \textbf{Characterizing the Jitterbug task suite.}
         We compare the training progress of DDPG and PPO up to 6 million training steps (6000 episodes).
         We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
         A task is considered 'solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).

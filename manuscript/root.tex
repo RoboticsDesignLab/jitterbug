@@ -97,12 +97,7 @@ Deep Reinforcement Learning (Deep Reinforcement Learning) methods offer automate
 This has been extended to continuous control domains via algorithms such as the Deep Deterministic Policy Gradient (DDPG) \cite{DDPG}, Proximal Policy Optimization (PPO) \cite{PPO}, Soft Actor-Critic (SAC) \cite{SAC}, and Twin Delayed Deep Deterministic (TD3) \cite{TD3}.
 The power of these methods comes, in part, from the high-dimensional, nonlinear function approximation of both the policy and the expected value by neural networks.
 The dimensionality of these rich representations also presents challenges, particularly for sample collection, stability, and convergence \cite{Islam2017}.
-Reducing the order seems a natural approach to addressing these challenges, but doing so directly requires carefully defining suitable (state-space) features as the aforementioned methods are sensitive to the chosen representation \cite{bhatnagar2009convergent}.  
-
-Interestingly, many robots are underactuated by design, or at times, by circumstance (e.g., due to motor saturation).
-Such systems achieve their tasks due to the inherent dependence of their actuation states \cite{spong1998underactuated}.
-This implicit structure suggests that an (automatic) reduction of the actuation space may make these systems more compatible with (model-free) Deep Reinforcement Learning methods, which, in turn, would allow for more variable underactuated systems.
-Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark based around a passive compliant toy system with tasks of varying difficulty, particularly around the sparsity of the reward signal (see also Fig.~\ref{fig:leader}).
+Reducing the order seems a natural approach to addressing these challenges, but doing so directly requires carefully defining suitable (state-space) features as the aforementioned methods are sensitive to the chosen representation \cite{bhatnagar2009convergent}. 
 
 \begin{figure}[ht]
     
@@ -120,24 +115,31 @@ Towards this, we introduce a highly variable, single actuator robotic locomotion
     \caption{
         \textbf{The Jitterbug Problem}: The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
         In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor.
-        %The simulated robot retains the (non functional) wind-up crank to more closely mimic the mass distribution of the real toy.
         For scale, the blue checks on the simulated floor on the right are 1cm in size.
     }
     \label{fig:leader}
     
-\end{figure}
+\end{figure} 
 
-A reduced order approach is a common strategy in engineering.   An issue herein is that a highly variable and under-actuated system, such as the Jitterbug Problem, is variant on the state and thus difficult to explicitly model. 
-%While this may limit options, it does not mean all hope it lost.    
-Though `highly variable' does not imply `chaotic'; that is, the system is deterministic for over short portions of the state-space and time.  The motion is clearly non-linear, however, due to the contacts and locomotion phases and gaits.  (Indeed, it has been reported that the Katita toy, on which the problem is based, even exhibits a `galloping' mode \cite{jgn.thesis}).  A nonlinear approach for automatically discovering interesting structure in empirical models is unsupervised learning.  An auto-encoder is a well-know neural network approach for this that can help automatically discover underlying correlations and their interdependencies \cite{AE_hinton2006reducing}.   %While one could integrate this network into the policy and value network(s), this approach directly...
+Interestingly, many robots are underactuated by design, or at times, by circumstance (e.g., due to motor saturation).
+Such systems achieve their tasks due to the inherent inter-dependence of their actuation states \cite{spong1998underactuated}.
+This implicit structure suggests that an (automatic) reduction of the actuation space may make these systems more compatible with (model-free) Deep Reinforcement Learning methods, which, in turn, would allow for more variable underactuated systems.
+Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark (the `Jitterbug' problem) based around a passive compliant toy system with tasks of varying difficulty, particularly around the sparsity of the reward signal (see also Fig.~\ref{fig:leader}).
+
+Reduced order approaches are a common strategy in engineering.
+An issue herein is that an under-actuated system, such as the Jitterbug problem, is highly variant in state space and thus difficult to explicitly model in an analytic form.
+Note that `highly variable' does not imply `chaotic'; that is, the system is deterministic for over short horizons in the state-space.
+However, the motion is clearly non-linear due to the contacts and locomotion phases and gaits (indeed, it has been reported that the Katita toy, on which the problem is based, exhibits a `galloping' locomotion mode \cite{jgn.thesis}).
+A nonlinear approach for automatically discovering interesting structure in empirical models is unsupervised learning.
+Auto-encoders are a well know neural network approach for this that can automatically discover underlying correlations and their interdependencies \cite{AE_hinton2006reducing}.
+%While one could integrate this network into the policy and value network(s), this approach directly...
 In this way, initial (random) exploration helps characterize the implicit structure of the (underactuated) action space that then focuses subsequent Deep Reinforcement Learning control policy learning.
 
-The two contributions of this paper are: (1) a consideration of autoencoder-based model reduction for Deep Reinforcement Learning in highly variable, underactuated robot domains; and, (2) the introduction and characterization of the Jitterbug Problem as a diverse underactuated robotics task with dynamic, compliant and non-trivial motion in five scenarios of varying gradations of task complexity.  We find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.  The challenging nature of the Jitterbug task may also help inform future research in automatic controls for flexible robots. %which would open new vistas for robot design. %thus overcoming a princple design bottleneck.  
-
-
-
-
-\lipsum[1-4]
+The two contributions of this paper are: (1) a consideration of autoencoder-based model reduction for Deep Reinforcement Learning in highly variable, underactuated robot domains; and, (2) the introduction and characterization of the Jitterbug Problem as a diverse underactuated robotics task with dynamic, compliant and non-trivial motion in five scenarios of varying gradations of task complexity.
+We find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.  
+The challenging nature of the Jitterbug task may also help inform future research in automatic controls for flexible robots.
+%which would open new vistas for robot design.
+%thus overcoming a princple design bottleneck.  
 
 \section{RELATED WORK}
 

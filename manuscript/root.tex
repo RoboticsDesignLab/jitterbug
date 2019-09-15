@@ -143,6 +143,8 @@ The two contributions of this paper are: (1) a consideration of autoencoder-base
 
 
 
+
+
 {Para}
 
 
@@ -192,22 +194,6 @@ The two contributions of this paper are: (1) a consideration of autoencoder-base
 
 
 
-Model reduction is a common strategy in robotics, linear dynamical systems, and machine learning \cite{betts2010practical, sutton1998reinforcement}.   Variations of this approach include method such as: model linearizion, mixing of open-loop and (typically linear) closed-loop control \cite{kolter2010probabilistic}, and tunable models \cite{maeda2011tuned}.  The issue with these approaches is that system model(s) are essentially needed.  Alternatively statistical methods, such as Principle Components Analysis (PCA), may help `reduce' empirical models by trying to identify linearly uncorrelated values.  However, in many robotics tasks the underactuation is dependent on the state  
-
-
-) is a statistical procedure that uses an orthogonal transformation to convert a set of observations of possibly correlated variables (entities each of which takes on various numerical values) into a set of values of linearly uncorrelated variables called principal components.
-
-
-An alternative approach might be to approximate  probability distribution(s) as compared to arbitrary nonlinear function or transformation
-
-is to model the There are also statistical methods such as 
-
-
-
-
-
-
-
 Reinforcement Learning is an ....  
 
 Reinforcement Learning (RL) methods offer automated tools for controller design of such systems via trail and error \cite{sutton1998reinforcement}, but have been been limited by feature representations and forward models \cite{duan2016benchmarking}.
@@ -234,7 +220,46 @@ Such systems have been  ...
 Underacted robots are fundamentally correlated in their actuation space  \cite{tedrake2009underactuated}.
 When a model is available control strategies including from optimal control \cite{betts2010practical}, direct collocation \cite{von1993numerical}, and trajectory optimization \cite{kalakrishnan2011stomp} have been applied.
 Some novel robots, such as compliant legged robots or soft robots, tend to exhibit complex dynamics that do stymie dynamical system and model reduction approaches as an explicit physical model may not be available \cite{nakajima2015information}.
-Learning the model empirically, such as via a neural network, typically centers around obtaining a model that forecasts the robot's next timestep which is then used subsequently for control, such as via Model Predictive Control (MPC)  for a legged robot \cite{nagabandi2018learning} or for manipulation with a soft-gripper \cite{nishimura2017thin}.
+
+Model reduction is a common strategy in robotics, linear dynamical systems, and machine learning \cite{betts2010practical, sutton1998reinforcement}.   Variations of this approach include method such as: model linearizion, mixing of open-loop and (typically linear) closed-loop control \cite{kolter2010probabilistic}, and tunable models \cite{maeda2011tuned}.  The issue with these approaches is that system model(s) are essentially needed.  
+
+Alternatively, statistical methods allow for empirical model.  An approach, such as Principle Components Analysis (PCA), may help `reduce' this empirical model by trying to identify linearly uncorrelated values.  However, the highly variable of the robot and the piecewise nature of contact (e.g., in legged locomotion or grasping) are better described by non-linear models and non-Gaussian distributions.  
+
+In the underactuated domain, these ideas have been used to get an empirical model that then inform subsequent model-based control.  For example, Nagabandi, \emph{et al.} \cite{nagabandi2018learning} use a small legged robot in which a neural network forecasts the robot's state at the next timestep which is then used via Model Predictive Control (MPC).  Nishimura, \emph{et al.} use an autoencoder in a similar fashion to inform manipulation with a soft-gripper \cite{nishimura2017thin}.  In both these cases the control model is analytic and the engineering effort is needed to synchronize the empirical model with the controller, which can limit the types of policies and strategies that the robot can learn and execute.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  However, in many robotics tasks the underactuation is dependent on the state  
+
+
+) is a statistical procedure that uses an orthogonal transformation to convert a set of observations of possibly correlated variables (entities each of which takes on various numerical values) into a set of values of linearly uncorrelated variables called principal components.
+
+
+An alternative approach might be to approximate  probability distribution(s) as compared to arbitrary nonlinear function or transformation
+
+is to model the There are also statistical methods such as 
+
+
+
+
+
+
+
+
+
+
 
 Highly variable motion is not random.
 Given that actuation space for underactuated robots is structured, an autoencoder would be able to automatically discover some of these correlations \cite{AE_hinton2006reducing, ngsparse}.

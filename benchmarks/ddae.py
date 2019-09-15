@@ -1,18 +1,25 @@
+"""Train a Denoising Dynamics Auto Encoder"""
 
 import os
 import pickle
+import logging
 
 import numpy as np
 import pandas as pd
 import scipy.io as sio
 
+# Disable tensorflow GPU usage
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
+
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-from tensorflow.estimator.inputs import numpy_input_fn
-
 
 class AutoEncoder(tf.estimator.Estimator):
+    """A Denoising Auto Encoder Class
+
+    Based on https://github.com/sebp/tf_autoencoder
+    """
 
     def __init__(
         self,
@@ -243,7 +250,8 @@ class AutoEncoder(tf.estimator.Estimator):
             predictions=predictions,
             loss=total_loss,
             train_op=train_op,
-            eval_metric_ops=eval_metric_ops)
+            eval_metric_ops=eval_metric_ops
+        )
 
 
 def segment_data(data, h):
@@ -274,10 +282,10 @@ def segment_data(data, h):
 
 def main(
         *,
-        l=12,
+        l=[16, 12, 8, 4],
         h=0,
         batch_size=256,
-        num_epochs=500,
+        num_epochs=50000,
         **kwargs
 ):
     """Train a Denoising Dynamics AutoEncoder
@@ -292,17 +300,16 @@ def main(
 
     """
 
-    assert 1 <= l <= 16,\
-        "Latent space must be 1 <= l <= 16, but was {}".format(l)
-
     tf.logging.set_verbosity(tf.compat.v1.logging.INFO)
+    logging.getLogger().setLevel(logging.INFO)
 
-    print("Training DDAE with |L| = {}, H = {}".format(
+    print("Training DDAE with L = {}, H = {}".format(
         l,
         h
     ))
 
     # Retrieve data
+    print("Preparing Data...")
     data = sio.loadmat(
         os.path.join(
             "observations3_random.mat"
@@ -327,16 +334,64 @@ def main(
         return dataset.batch(batch_size)
 
     # Instantiate DAE with appropriate latent space
+    print("Building AE...")
     mdl = AutoEncoder(
-        hidden_units=[l],
+        hidden_units=l,
         **kwargs
     )
 
+    # Train
+    print("Training...")
     mdl.train(
         input_fn=get_train_dataset,
         steps=num_epochs
     )
 
-    print("Done")
+    # Evaluate
+    print("Evaluating...")
+    print(
+        mdl.evaluate(
+            input_fn=get_test_dataset,
+            steps=1
+        )
+    )
 
 
+if __name__ == '__main__':
+
+    import os
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument(
+        "--enc_layers",
+        type=int,
+        nargs='+',
+        required=True,
+        help="Encoder hidden layer sizes"
+    )
+    parser.add_argument(
+        "--horizon",
+        type=int,
+        default=0,
+        required=False,
+        help="Dynamics horizon"
+    )
+    parser.add_argument(
+        "--model_dir",
+        type=str,
+        required=True,
+        help="Model path"
+    )
+    args = parser.parse_args()
+    args.enc_layers = list(args.enc_layers)
+
+    main(
+        l=args.enc_layers,
+        h=args.horizon,
+        model_dir=args.model_dir
+    )

@@ -68,7 +68,8 @@
         $^{1}$Ecole CentraleSup\'elec, Paris, France
     }%
     \thanks{
-        $^{2}$The Robotics Design Lab at The University of Queensland, Brisbane, Australia
+        $^{2}$The Robotics Design Lab at The University of Queensland, Brisbane, Australia.  
+        %{\texttt{\{j.augot, aaron.snoswell, spns\}@uq.edu.au}}
     }%
 }
 
@@ -81,7 +82,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-\hl{add me :-) - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+
+Compliant underactuated robots are a promising design strategy due to their electromechanical simplicity; however, their control can be rather complex as these robots can be difficult to model.  Recent Deep Reinforcement Learning and simulation methods together could help overcome this bottleneck.  However, these robots tend to exhibit spare rewards and thus making the control policy exploration non-trivial and highly variable.    
+
+We use the intuition that an underactuated system has correlations between states and thus a reduced order representation might help focus control policy exploration process.   To help study this topic, we introduce \emph{The Jitterbug Task} of controlling a compliant legged toy robot with just a single motor across a field and to a location.    
+
+Through this study we find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.  
 
 \end{abstract}
 
@@ -190,7 +196,6 @@ and thus there is a lower-dimensional representation that could describe this pr
 
 \hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
-\section{A Novel, Underactuated Control Benchmark}
 
 % ------------------------------------------------------------------------------------------------------------------------
 \section{A Novel, Underactuated Control Benchmark}
@@ -353,7 +358,7 @@ Where applicable, we use separate networks for the actor and critic (i.e. no sha
 We ran additional experiments using TRPO, A2C and SAC and observed similar performance to the reported results.
 Training curves for these algorithms are not included here for brevity.
 
-\subsection{Characterising Learned Policies}
+%\subsection{Characterizing Learned Policies}
 
 \begin{figure}[t]
     \centering

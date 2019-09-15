@@ -483,7 +483,7 @@ One way to achieve this is by pulsing the motor in different directions -- this 
 We observed that successful policies learned to pulse the motor in short bursts in alternating directions (e.g. $\sim180\degree$ at a time), whereas unsuccessful policies would often drive the motor continuously (Figure~\ref{fig:motor-hist}).
 In doing so, the successful policies were able to achieve high cumulative episode return, and accomplish the high-level task encoded by the reward (Figure~\ref{fig:heatmap}).
 
-\subsection{Reduced-Order Training}
+\subsection{Learning Reduced-Order Representations}
 
 \begin{figure}[t]
     \centering
@@ -503,13 +503,13 @@ To optimize the AutoEncoder network we use the Mean Squared Error between the ou
 Training data were gathered by running a random policy on the Jitterbug for 5 million steps, and we used 80\% of this data for training and 20\% as a held-out test set.
 Once trained, the decoder side of the AutoEncoder was discarded and the encoder used to provide an augmented observation representation to a Deep Reinforcement Learning algorithm.
 
-\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
-
-\section{DISCUSSION}
+\subsection{Reduced-Order Deep Reinforcement Learning}
 
 \hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
-\section{CONCLUSION}
+\section{DISCUSSION AND CONCLUSION}
+
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
 \hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 

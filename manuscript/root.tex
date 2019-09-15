@@ -83,10 +83,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-Underactuated robot designs are enticing due to their electromechanical simplicity; but, their operation is more complex, especially for compliant designs which may not have an explicit model.
-Deep reinforcement learning and multi-joint dynamic simulation methods may help overcome this control bottleneck.  However, these systems tend to operate over large continuous action spaces and exhibit sparse rewards, thus making control policy exploration non-trivial and highly variable.    
+Underactuated robot designs are enticing due to their electromechanical simplicity; but, their operation is complex, especially for compliant designs which may not have an explicit model.
+Deep reinforcement learning methods together with multi-joint dynamic simulation may help overcome this control bottleneck.  However, such systems tend to operate over large continuous action spaces and exhibit sparse rewards, thus making control policy exploration non-trivial and variable.    
 
-Using the observations that an underactuated system has coupled states and that a deep function approximator may generalize across compressed (and potentially nonintuitive) states, we consider a reduced order approach based around a generative autoencoder so as to automatically find a better representation to focus a control policy exploration process. 
+Using the observations (1) that an underactuated system has coupled states and (2) that a deep function approximator may generalize across compressed (and potentially nonintuitive) states, we consider a reduced order approach based around a generative autoencoder so as to automatically find a better representation to focus a control policy exploration process. 
 
 %Motivated by this intuition we ...
 To help evaluate this approach, we also introduce \emph{The Jitterbug Problem}, which is a series of increasingly specific and challenging motion control tasks for a highly compliant legged toy robot with just a single motor locomoting across a field.  
@@ -159,7 +159,7 @@ There is a good deal of work, some rather recent, in both the robotics and machi
 
 Reinforcement Learning (RL) methods offer automated tools for controller design of such systems via trail and error \cite{sutton1998reinforcement}, but have been been limited by feature representations and forward models \cite{duan2016benchmarking}. 
 Deep Reinforcement Learning algorithms typically address this through the use of deep neural networks for both the policy (`actor') and value function (`critic') which has allowed for operation to the continuous control domain \cite{mnih2015human, DDPG}. 
-Such systems may be grouped as using `on-policy' or 'off-policy' learning strategies; where on-policy methods, such as PPO \cite{PPO} and TRPO \cite{TRPO}, are those that use a current policy's action to update the value ($Q$) and off-policy are those methods, such as DDPG \cite{DDPG}, SAC \cite{SAC}, TD3 \cite{TD3}, that update the value via the best action and its total discounted future reward.  
+Such systems may be grouped as using `on-policy' or 'off-policy' learning strategies; where on-policy methods, such as PPO \cite{PPO} and TRPO \cite{TRPO}, are those that use a current policy's action to update the value ($Q$) and off-policy approaches are those methods, such as DDPG \cite{DDPG}, SAC \cite{SAC}, TD3 \cite{TD3}, that update the value via the best action and its total discounted future reward.  
 
 In the context of highly variable, underactuated robotics, on-policy methods may exhibit have lower sample efficiency as they would require new samples to be collected for each gradient step \cite{SAC}.   Conversely, off-policy methods may utilize a replay buffer to minimize correlations between samples \cite{DDPG}, but may have difficulties with brittleness to state-space parameters, stability and convergence \cite{bhatnagar2009convergent}.  In both cases, however, reducing the dimensionality and using a more aligned state-space may reduce these issues. 
 
@@ -182,8 +182,9 @@ In the machine learning domain, the combination of an autoencoder and deep reinf
 This has been particularly effective in cases with very high dimensional inputs, such as from video, for low-dimensional independent constraints, such as obstacle locations \cite{finn2016deep, bitzer2010using, lynch2019learning}.  
 It has have shown promise in a host of challenging applications including visualmotor learning \cite{finn2016deep} and VR teleoperation \cite{zhang2018deep}. 
 
-The system architecture of this work relates to Lange, \emph{et al.} \cite{lange2010deep} in that we train an autoencoder network, remove the decoder side, and then use the remaining encoder network to compress the input features that are used as part of a Deep Reinforcement Learning control policy search.  In contrast to this work, we do see a benefit with a random policy, sparing the need for a `hint-to-goal' heuristic.  This idea has also been considered more recently by Kimura \cite{kimura2018daqn} for reducing the number of trials during the RL policy training phase.   
-Also, in this work, the task is slightly different in that the action space is correlated not only across states, but also across subsequent states in time.  
+The system architecture of this work relates to Lange, \emph{et al.} \cite{lange2010deep} in that we train an autoencoder network, remove the decoder side, and then use the remaining encoder network to compress the input features that are used as part of a Deep Reinforcement Learning control policy search.  In contrast to this work, we do see a benefit with a random policy, sparing the need for a `hint-to-goal' heuristic.  This idea has also been considered more recently by Kimura \cite{kimura2018daqn} for reducing the number of trials during the RL policy training phase.  
+
+In this work, the task is slightly different in that the action space is correlated not only across states, but also across subsequent states in time.  
 
 \section{Method}
 
@@ -201,7 +202,7 @@ and thus there is a lower-dimensional representation that could describe this pr
 
 \hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
-\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+%\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
 
 % ------------------------------------------------------------------------------------------------------------------------

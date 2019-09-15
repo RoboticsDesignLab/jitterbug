@@ -83,11 +83,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-Compliant underactuated robots are a promising design strategy due to their electromechanical simplicity; however, their control can be rather complex as these robots can be difficult to model.  Recent Deep Reinforcement Learning and simulation methods together could help overcome this bottleneck.  However, these robots tend to exhibit spare rewards and thus making the control policy exploration non-trivial and highly variable.    
+Underactuated robot designs are enticing due to their electromechanical simplicity; but, their operation is more complex, especially for compliant designs which may not have an explicit model.
+Deep reinforcement learning and multi-joint simulation methods may help overcome this bottleneck.  However, these systems have tend to operate over large continuous action spaces and exhibit spare rewards, thus making control policy exploration non-trivial and highly variable.    
 
-We use the intuition that an underactuated system has correlations between states and thus a reduced order representation might help focus control policy exploration process.   To help study this topic, we introduce \emph{The Jitterbug Task} of controlling a compliant legged toy robot with just a single motor across a field and to a location.    
+Using the observations that an underactuated system has coupled states and that a deep function approximator may generalize across compressed (and potentially nonintutive) states, we consider a reduced order approach based around a generative autoencoder so as to automatically find a better representation to focus a control policy exploration process. 
 
-Through this study we find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.  
+%Motivated by this intuition we ...
+To help evaluate this approach, we also introduce \emph{The Jitterbug Problem}, which is a series of increasingly specific and challenging motion control tasks for a highly compliant legged toy robot with just a single motor locomoting a field and to a final position and direction.  
+%Compared to other benchmark problems this adds significant variation challenging the exploration process.  
+We benchmarked this problem against off-policy and on-policy deep reinforcement learning algorithms and find, in general, that an off-policy approach had better median rewards, but had higher variability. 
+
+Through this study we find that reduced order models can have similar (reward) performance, yet can empirically have less training variance and slightly better learning rates.    
+%This suggests that for this class of robots reducing the model by taking advantage of the latent structure may provide benefits.
 
 \end{abstract}
 
@@ -120,8 +127,9 @@ Reducing the order seems a natural approach to addressing these challenges, but 
     \caption{
         \textbf{The Jitterbug Problem}: The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
         In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor.
-        For scale, the blue checks on the simulated floor on the right are 1cm in size.
-    }
+        For scale, the blue checks on the simulated floor on the right are 1 cm in size.
+        }
+        \vspace*{-6pt}
     \label{fig:leader}
     
 \end{figure} 
@@ -129,12 +137,12 @@ Reducing the order seems a natural approach to addressing these challenges, but 
 Interestingly, many robots are underactuated by design, or at times, by circumstance (e.g., due to motor saturation).
 Such systems achieve their tasks due to the inherent inter-dependence of their actuation states \cite{spong1998underactuated}.
 This implicit structure suggests that an (automatic) reduction of the actuation space may make these systems more compatible with (model-free) Deep Reinforcement Learning methods, which, in turn, would allow for more variable underactuated systems.
-Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark (the `Jitterbug' problem) based around a passive compliant toy system with tasks of varying difficulty, particularly around the sparsity of the reward signal (see also Fig.~\ref{fig:leader}).
+Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark (which we term `The Jitterbug Problem') based around a passive compliant toy system with tasks of varying difficulty, particularly around the sparsity of the reward signal (see also Fig.~\ref{fig:leader}).
 
 Reduced order approaches are a common strategy in engineering.
-An issue herein is that an under-actuated system, such as the Jitterbug problem, is highly variant in state space and thus difficult to explicitly model in an analytic form.
+An issue herein is that an underactuated system, such as the Jitterbug problem, is highly variant in state space and thus difficult to explicitly model in an analytic form.
 Note that `highly variable' does not imply `chaotic'; that is, the system is deterministic for over short horizons in the state-space.
-However, the motion is clearly non-linear due to the contacts and locomotion phases and gaits (indeed, it has been reported that the Katita toy, on which the problem is based, exhibits a `galloping' locomotion mode \cite{jgn.thesis}).
+However, the motion is clearly non-linear due to the contacts and locomotion phases and gaits.  (Indeed, it has been reported that the Katita toy, on which the problem is inspired, exhibits a `galloping' locomotion mode \cite{jgn.thesis}.)
 A nonlinear approach for automatically discovering interesting structure in empirical models is unsupervised learning.
 Auto-encoders are a well know neural network approach for this that can automatically discover underlying correlations and their interdependencies \cite{AE_hinton2006reducing}.
 In this way, initial (random) exploration helps characterize the implicit structure of the (underactuated) action space that then focuses subsequent Deep Reinforcement Learning control policy learning.
@@ -303,7 +311,7 @@ Tasks are reported here in approximate order of increasing difficulty.
 
 In addition, for all tasks the Jitterbug must remain upright to achieve reward.
 Falling does not terminate the episode early as the leg dynamics are sufficiently springy that bouncing into the upright pose again can allow recovery from this condition (albeit at the loss of some reward).
-Indeed - we observed some learned strategies that appeared to utilize this mode of locomotion!
+Indeed, we observe some learned strategies that appeared to utilize this mode of locomotion!
 
 \section{Experiments}
 

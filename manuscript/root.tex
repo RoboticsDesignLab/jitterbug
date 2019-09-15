@@ -144,7 +144,6 @@ The two contributions of this paper are: (1) a consideration of AutoEncoder-base
 We find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.  
 The challenging nature of the Jitterbug task may also help inform future research in automatic controls for flexible robots.
 
-\pagebreak
 \section{Related Work}
 
 There is a good deal of work, some rather recent, in both the robotics and machine learning communities that is relevant to this work.  The underactuated physical robotics task has the property of continuous states/actions with some correlations between these states.   Thus, the control strategy has to operate over continuous actions, and, ideally, could take advantage of the latent structure. 
@@ -185,7 +184,7 @@ Also, in this work, the task is slightly different in that the action space is c
     \centering
     \includegraphics[width=\linewidth]{fig-system-arch}
     \caption{
-        The architecture of our system.
+        \textbf{The architecture of our system.}
     }
     \label{fig:system-arch}
 \end{figure}
@@ -221,7 +220,7 @@ For our evaluations, we used the \texttt{stable\_baselines} library of RL algori
         Schematic representation of the Jitterbug model.
         Individual rigid bodies are in different colours and we highlight the position of the center of mass, hinge joints and the single motor.
     ]{
-        Schematic representation of the Jitterbug model.
+        \textbf{Schematic representation of the Jitterbug model.}
         Individual rigid bodies are in different colours and we highlight the position of the center of mass (\protect\com), hinge joints  (\protect\hinge) and the single motor (\protect\motor).
     }
     \label{fig:parts}
@@ -263,6 +262,30 @@ All tasks also share the same continuous state space $\text{dim}(\mathcal{S}) = 
 For each task, we report ($\text{dim}(\mathcal{O})$) and a brief description of the reward structure.
 Tasks are reported here in approximate order of increasing difficulty.
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig-motor-hist}
+    \caption{
+        \textbf{Characterising policy behaviours for the \emph{Move In Direction} task.}
+        We plot the distribution of motor velocities across many episodes for a successful policy (green) and unsuccessful policy (orange).
+        The successful policy learns to pulse the motor in alternating directions as indicated by the spikes near $\pm 1$ in the x-axis.
+        Interestingly, this is the same strategy used by our heuristic policies.
+        In contrast, the unsuccessful policy gets stuck in a local minima where the motor is continuously driven in one direction.
+    }
+    \label{fig:motor-hist}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig-heatmap}
+    \caption{
+        \textbf{Heatmap showing Jitterbug position over 100 episodes.}
+        The data were collected before (left) and after (right) training DDPG on the task \emph{Move In Direction}.
+        In the second figure, to evaluate the agent, the target direction was fixed at $+45\degree$.
+    }
+    \label{fig:heatmap}
+\end{figure}
+
 \begin{enumerate}[topsep=8pt, partopsep=0pt]
     
     \item \emph{Move From Origin} (15): The Jitterbug must move away from the origin in any direction.
@@ -289,7 +312,7 @@ Indeed - we observed some learned strategies that appeared to utilize this mode 
     
     \centering
     \caption{
-        Algorithm hyper-parameters for DDPG and PPO.
+        \textbf{Algorithm hyper-parameters for DDPG and PPO.}
         Bold items were changed from the defaults offered by the \texttt{stable\_baselines} package.
     }
     \label{tab:hyper-params}
@@ -343,9 +366,9 @@ Indeed - we observed some learned strategies that appeared to utilize this mode 
 \end{table}
 
 \subsection{Characterizing Learned Policies}
+
 To verify feasibility, we hand-crafted heuristic policies that can solve each task.
 To characterize the difficulty of the Jitterbug task suite, we performed preliminary hyper-parameter tuning to select reasonable settings and trained several RL algorithms on the tasks.
-
 
 Figure~\ref{fig:rl-perf} reports training curves for example on- and off-policy algorithms.
 We contrast the performance of PPO (an on-policy method) and DDPG (an off-policy method).
@@ -358,31 +381,6 @@ Where applicable, we use separate networks for the actor and critic (i.e. no sha
 
 We ran additional experiments using TRPO, A2C and SAC and observed similar performance to the reported results.
 Training curves for these algorithms are not included here for brevity.
-
-%\subsection{Characterizing Learned Policies}
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{fig-motor-hist}
-    \caption{
-        Characterising policy behaviours for the \emph{Move In Direction} task.
-        We plot the distribution of motor velocities across many episodes for a successful policy (green) and unsuccessful policy (orange).
-        The successful policy learns to pulse the motor in alternating directions as indicated by the spikes near $\pm 1$ in the x-axis.
-        Interestingly, this is the same strategy used by our heuristic policies.
-        In contrast, the unsuccessful policy gets stuck in a local minima where the motor is continuously driven in one direction.
-    }
-    \label{fig:motor-hist}
-\end{figure}
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{fig-heatmap}
-    \caption{
-        Heatmap showing Jitterbug position over 100 episodes before (left) and after (right) training DDPG on the task \emph{Move In Direction}.
-        In the second figure, to evaluate the agent, the target direction was fixed at $+45\degree$.
-    }
-    \label{fig:heatmap}
-\end{figure}
 
 To verify the learned policies were sensible (i.e. to confirm the absence of `reward hacking') we qualitatively and quantitatively investigated the exhibited behaviors.
 
@@ -398,7 +396,8 @@ In doing so, the successful policies were able to achieve high cumulative episod
     \centering
     \includegraphics[width=\linewidth]{fig-autoencoder}
     \caption{
-        Schematic representation of a Denoising AutoEncoder.
+        \textbf{Schematic representation of a Denoising AutoEncoder.}
+        We use a Denoising AutoEncoder as a means to learn a reduced order observation representation in an unsupervised manner.
     }
     \label{fig:autoencoder}
 \end{figure}
@@ -411,6 +410,25 @@ To optimize the AutoEncoder network we use the Mean Squared Error between the ou
 
 Training data were gathered by running a random policy on the Jitterbug for 5 million steps, and we used 80\% of this data for training and 20\% as a held-out test set.
 Once trained, the decoder side of the AutoEncoder was discarded and the encoder used to provide an augmented observation representation to a Deep Reinforcement Learning algorithm.
+
+\subsection{Deep RL with Reduced-Order Representations}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig-ae-perf}
+    \caption{
+        \textbf{Performance of a Deep Reinforcement Learning agent with a reduced-order representation.}
+        We plot the training performance of a DDPG agent on the task \textit{Face In Direction} up to 5 million steps.
+        Blue: agent with full-order observations (16 dimensions).
+        Orange: agent with reduced-order observations from Denoising AutoEncoder (8 dimensions).
+        A single random seed is shown and 100-episode moving average filter is applied.
+    }
+    \label{fig:ae-perf}
+\end{figure}
+
+See Figure~\ref{fig:ae-perf}.
+
+\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
 \section{Discussion And Conclusion}
 

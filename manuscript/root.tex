@@ -103,7 +103,7 @@ Through this study we find that reducing the model by taking advantage of the la
 As robots become increasingly variable and compliant they become more capable, and complex.
 Underactuated robots, for example, provide great design freedom, yet their adoption has been limited by the need for manual controller designs.
 
-Deep Reinforcement Learning methods offer automated tools for robotic control by identifying a policy that maximizes the expected sum of rewards \cite{henderson2018deep}.
+Deep reinforcement learning methods offer automated tools for robotic control by identifying a policy that maximizes the expected sum of rewards \cite{henderson2018deep}.
 This has been extended to continuous control domains via algorithms such as the Deep Deterministic Policy Gradient (DDPG) \cite{DDPG}, Proximal Policy Optimization (PPO) \cite{PPO}, Soft Actor-Critic (SAC) \cite{SAC}, and Twin Delayed Deep Deterministic (TD3) \cite{TD3}.
 The power of these methods comes, in part, from the high-dimensional, nonlinear function approximation of both the policy and the expected value by neural networks.
 The dimensionality of these rich representations also presents challenges, particularly for sample collection, stability, and convergence \cite{Islam2017}.
@@ -135,8 +135,8 @@ Reducing the order seems a natural approach to addressing these challenges, but 
 
 Interestingly, many robots are underactuated by design, or at times, by circumstance (e.g., due to motor saturation).
 Such systems achieve their tasks due to the inherent inter-dependence of their actuation states \cite{spong1998underactuated}.
-This implicit structure suggests that an (automatic) reduction of the actuation space may make these systems more compatible with (model-free) Deep Reinforcement Learning methods, which, in turn, would allow for more variable underactuated systems.
-Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark (which we term `The Jitterbug Problem') based around a passive compliant toy system with tasks of varying difficulty, particularly around the sparsity of the reward signal (see also Fig.~\ref{fig:leader}).
+This implicit structure suggests that an (automatic) reduction of the actuation space may make these systems more compatible with (model-free) deep reinforcement learning methods, which, in turn, would allow for more variable underactuated systems.
+Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark, which we term `The Jitterbug Problem', based around a passive compliant toy system with tasks of varying difficulty, particularly around the sparsity of the reward signal (see also Fig.~\ref{fig:leader}).
 
 Reduced order approaches are a common strategy in engineering.
 An issue herein is that an underactuated system, such as the Jitterbug problem, is highly variant in state space and thus difficult to explicitly model in an analytic form.
@@ -144,11 +144,11 @@ Note that `highly variable' does not imply `chaotic'; that is, the system is det
 However, the motion is clearly non-linear due to the contacts and locomotion phases and gaits.  (Indeed, it has been reported that the Katita toy, on which the problem is inspired, exhibits a `galloping' locomotion mode \cite{jgn.thesis}.)
 A nonlinear approach for automatically discovering interesting structure in empirical models is unsupervised learning.
 Auto-encoders are a well know neural network approach for this that can automatically discover underlying correlations and their interdependencies \cite{AE_hinton2006reducing}.
-In this way, initial (random) exploration helps characterize the implicit structure of the (underactuated) action space that then focuses subsequent Deep Reinforcement Learning control policy learning.
+In this way, initial (random) exploration helps characterize the implicit structure of the (underactuated) action space that then focuses subsequent deep reinforcement learning control policy learning.
 
-The two contributions of this paper are: (1) a consideration of AutoEncoder-based model reduction for Deep Reinforcement Learning in highly variable, underactuated robot domains; and, (2) the introduction and characterization of the Jitterbug Problem as a diverse underactuated robotics task with dynamic, compliant and non-trivial motion in five scenarios of varying gradations of task complexity.
+The two contributions of this paper are: (1) a consideration of AutoEncoder-based model reduction for deep reinforcement learning in highly variable, underactuated robot domains; and, (2) the introduction and characterization of the Jitterbug Problem as a diverse underactuated robotics task with dynamic, compliant and non-trivial motion in five scenarios of varying gradations of task complexity.
 We find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.  
-The challenging nature of the Jitterbug task may also help inform future research in automatic controls for flexible robots.
+The challenging nature of the Jitterbug problem may also help inform future research in automatic controls for flexible robots.
 
 \section{Related Work}
 
@@ -157,7 +157,7 @@ There is a good deal of work, some rather recent, in both the robotics and machi
 \subsection{Deep Reinforcement Learning for Continuous Control}
 
 Reinforcement Learning (RL) methods offer automated tools for controller design of such systems via trail and error \cite{sutton1998reinforcement}, but have been been limited by feature representations and forward models \cite{duan2016benchmarking}. 
-Deep Reinforcement Learning algorithms typically address this through the use of deep neural networks for both the policy (`actor') and value function (`critic') which has allowed for operation to the continuous control domain \cite{mnih2015human, DDPG}. 
+Deep reinforcement learning algorithms typically address this through the use of deep neural networks for both the policy (`actor') and value function (`critic') which has allowed for operation to the continuous control domain \cite{mnih2015human, DDPG}. 
 Such systems may be grouped as using `on-policy' or 'off-policy' learning strategies; where on-policy methods, such as PPO \cite{PPO} and TRPO \cite{TRPO}, are those that use a current policy's action to update the value ($Q$) and off-policy approaches are those methods, such as DDPG \cite{DDPG}, SAC \cite{SAC}, TD3 \cite{TD3}, that update the value via the best action and its total discounted future reward.  
 
 In the context of highly variable, underactuated robotics, on-policy methods may exhibit have lower sample efficiency as they would require new samples to be collected for each gradient step \cite{SAC}.   Conversely, off-policy methods may utilize a replay buffer to minimize correlations between samples \cite{DDPG}, but may have difficulties with brittleness to state-space parameters, stability and convergence \cite{bhatnagar2009convergent}.  In both cases, however, reducing the dimensionality and using a more aligned state-space may reduce these issues. 
@@ -181,7 +181,7 @@ In the machine learning domain, the combination of an autoencoder and deep reinf
 This has been particularly effective in cases with very high dimensional inputs, such as from video, for low-dimensional independent constraints, such as obstacle locations \cite{finn2016deep, bitzer2010using, lynch2019learning}.  
 It has have shown promise in a host of challenging applications including visualmotor learning \cite{finn2016deep} and VR teleoperation \cite{zhang2018deep}. 
 
-The system architecture of this work relates to Lange, \emph{et al.} \cite{lange2010deep} in that we train an autoencoder network, remove the decoder side, and then use the remaining encoder network to compress the input features that are used as part of a Deep Reinforcement Learning control policy search.  In contrast to this work, we do see a benefit with a random policy, sparing the need for a `hint-to-goal' heuristic.  This idea has also been considered more recently by Kimura \cite{kimura2018daqn} for reducing the number of trials during the RL policy training phase.  
+The system architecture of this work relates to Lange, \emph{et al.} \cite{lange2010deep} in that we train an autoencoder network, remove the decoder side, and then use the remaining encoder network to compress the input features that are used as part of a deep reinforcement learning control policy search.  In contrast to this work, we do see a benefit with a random policy, sparing the need for a `hint-to-goal' heuristic.  This idea has also been considered more recently by Kimura \cite{kimura2018daqn} for reducing the number of trials during the RL policy training phase.  
 
 In this work, the task is slightly different in that the action space is correlated not only across states, but also across subsequent states in time.  
 
@@ -424,7 +424,7 @@ Once trained, the decoder side of the AutoEncoder was discarded and the encoder 
     \centering
     \includegraphics[width=\linewidth]{fig-ae-perf}
     \caption{
-        \textbf{Performance of a Deep Reinforcement Learning agent with a reduced-order representation.}
+        \textbf{Performance of a deep reinforcement learning agent with a reduced-order representation.}
         We plot the training performance of a DDPG agent on the task \textit{Face In Direction} up to 5 million steps.
         Blue: agent with full-order observations (16 dimensions).
         Orange: agent with reduced-order observations from Denoising AutoEncoder (8 dimensions).

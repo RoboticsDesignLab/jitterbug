@@ -12,3 +12,5 @@ tmp/**
 **/*.csv
 **/*.out.tfevents*
 **/*out.txt
+
+ddae_results*

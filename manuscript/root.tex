@@ -83,18 +83,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-Underactuated robot designs are enticing due to their electromechanical simplicity; but, their operation is complex, especially for compliant designs which may not have an explicit model.
-Deep reinforcement learning methods together with multi-joint dynamic simulation may help overcome this control bottleneck.  However, such systems tend to operate over large continuous action spaces and exhibit sparse rewards, thus making control policy exploration non-trivial and variable.    
+Underactuated robot designs are enticing due to their electromechanical simplicity; but, their operation is complex especially for compliant designs that may not have an explicit model.
+Deep reinforcement learning methods together with multi-joint dynamic simulation may help overcome this control bottleneck.
+However, such systems tend to have large continuous action spaces and exhibit sparse rewards, thus making control policy exploration variable and non-trivial.  
 
-Using the observations (1) that an underactuated system has coupled states and (2) that a deep function approximator may generalize across compressed (and potentially nonintuitive) states, we consider a reduced order approach based around a generative autoencoder so as to automatically find a better representation to focus a control policy exploration process. 
+Using the observations: (1) that an underactuated system has coupled states, and (2) that a deep function approximator may generalize across compressed (and potentially nonintuitive) states, we consider a reduced order approach based around a generative autoencoder so as to automatically find a better representation to focus a control policy exploration process. 
 
 %Motivated by this intuition we ...
 To help evaluate this approach, we also introduce \emph{The Jitterbug Problem}, which is a series of increasingly specific and challenging motion control tasks for a highly compliant legged toy robot with just a single motor locomoting across a field.  
 %Compared to other benchmark problems this adds significant variation challenging the exploration process.  
 We benchmarked this problem against off-policy and on-policy deep reinforcement learning algorithms and find that an off-policy approach had better median rewards, but has higher variability. 
-
-Through this study we find that reduced order models can have similar (reward) performance, yet can empirically have less training variance and slightly better learning rates.    
-%This suggests that for this class of robots reducing the model by taking advantage of the latent structure may provide benefits.
+Through this study we find that reducing the model by taking advantage of the latent structure may exhibit similar (reward) performance, yet empirically has less training variance and slightly better learning rates.
 
 \end{abstract}
 

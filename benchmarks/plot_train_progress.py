@@ -32,6 +32,8 @@ def get_reward_from_csv(file):
     """Extract reward vector from a csv file"""
     reward = []
 
+    print("Reading reward from {}".format(file))
+
     with open(file, 'rt') as f:
         data = csv.reader(f)
         for ri, row in enumerate(data):
@@ -83,7 +85,7 @@ def plot_csv_glob(fileglob, window, *, quartiles=[10, 50, 90], **kwargs):
 
     if len(files) == 0:
         warnings.warn("Glob '{}' matched 0 files".format(fileglob))
-        exit()
+        sys.exit(-1)
 
     print("Loading rewards from {} files".format(len(files)))
     rewards = [

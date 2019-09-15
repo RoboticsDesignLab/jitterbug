@@ -1002,19 +1002,23 @@ def demo():
     import jitterbug_dmc
 
     # Load the Jitterbug domain
+    task = "move_from_origin"
     env = suite.load(
         domain_name="jitterbug",
-        task_name="move_from_origin",
+        task_name=task,
         visualize_reward=True,
         task_kwargs=dict(
-            #time_limit=float("inf")
             norm_obs=True
         )
     )
 
     def policy(ts):
         """Constant policy"""
-        print(ts.observation)
+        # # Print task state, observation sizes
+        # print("dim(S), dim(O) = {}, {}".format(
+        #     len(env.physics.data.qpos) + len(env.physics.data.qvel),
+        #     len(env._task.obsdict2vec(ts.observation)[0])
+        # ))
         return 0.8
 
     # Dance, jitterbug, dance!

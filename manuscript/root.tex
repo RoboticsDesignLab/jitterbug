@@ -184,13 +184,22 @@ The system architecture of this work relates to Lange, \emph{et al.} \cite{lange
 
 In this work, the task is slightly different in that the action space is correlated not only across states, but also across subsequent states in time.  
 
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Method}
+
+
+
+
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{fig-system-arch}
     \caption{
-        \textbf{The architecture of our system.}
+        \textbf{The architecture of our system to make an agent learn a task with a Encoder to reduce the state dimension.} The states are directly read from MuJoCo and are sent through the Encoder to generate new latent states with lower dimension.
     }
     \label{fig:system-arch}
 \end{figure}
@@ -198,9 +207,16 @@ In this work, the task is slightly different in that the action space is correla
 We use the intuition that an underactuated system has correlations between states %(otherwise it would be uncontrollable for said states)
 and thus there is a lower-dimensional representation that could describe this process. 
 
-\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+We choose to use an autoencoder to reduce the state space dimension since it can generate a latent space by exploiting feature correlations \cite{AE_hinton2006reducing}. More specifically, we use a denoising autoencoder to increase robustness of the feature compression \cite{vincent2008extracting}.
+Our process can be split into two parts:
+\begin{itemize}
+\item Defining and training an autoencoder that enables an efficient dimension reduction without loosing too much information in the data compression. 
+\item Integrating the trained encoder to the learning process in order to reduce the dimensionality of the states.
+\end{itemize}
+For the first part, we defined a denoising autoencoder composed of two fully-connected layers with $tanh$ activation functions. We train it to compress the states from an input to a latent space - i.e. encode, and then regenerate them as accurately as possible - i.e decode. The training process is described in section \ref{sec:lro}. Although unused in our later process, the decoder plays a critical part in making sure that the latent space is representative enough of the input.
 
-%\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+Once trained, only the encoder is kept for the second step of our process. A Jitterbug agent is trained to perform a specific task on reduced dimension state space - see section \ref{sec:jt} for more details on the tasks. To do so, the state $S_t$ and the reward $R_t$  of the Jitterbug are read from the MuJoCo environment \cite{Todorov2012MuJoCo} at each time step $t$. The state goes through the encoder which outputs a latent variable $L_t$ with a lower dimension. $L_t$ is then sent to the agent along with the reward $R_t$ in order to generate an action $A_t$. In this way, the Jitterbug agent never sees the real state $S_t$, but instead chooses an action by only considering the reduced latent state $L_t$. The  DDPG algorithm is used because it has a reply buffer to minimize correlations between samples and because its target value ($Q$) network gives consistent targets subsequent iterations, which should help capture some of the sequencing need for underactuated robots.  It shows promising results on solving the tasks (see also Fig. \ref{fig:rl-perf} in Appendix I).
+%Reinforcement Learning algorithm we use is
 
 
 % ------------------------------------------------------------------------------------------------------------------------
@@ -240,7 +256,7 @@ Figure~\ref{fig:parts} shows the schematic composition of our simulated Jitterbu
 
 We used high-speed recording and visual tachometry to measure the Katita motor speed and leg vibration modes.
 By reverse-engineering the Katita gearbox we estimated the torque output of the drive spring and configured the MuJoCo actuator appropriately.
-We modelled the legs as rigid bodies with shoulder and elbow hinge joints.
+We modeled the legs as rigid bodies with shoulder and elbow hinge joints.
 The hinge stiffness was manually tuned to reproduce the dominant leg vibration mode observed in our high-speed footage.
 The Jitterbug model density was set using standard values for stainless steel ($7700$ kg/m$^3$) for the body and tough plastic ($1100$ kg/m$^3$) for the feet.
 
@@ -254,7 +270,7 @@ With these settings we qualitatively observed a close correspondence between the
 DMC supports the definition of physically-based camera models to enable learning from raw pixels if desired.
 We defined several cameras for the Jitterbug domain including an overhead, tracking and ego-centric view.
 
-\subsection{The Jitterbug Task Suite}
+\subsection{The Jitterbug Task Suite}\label{sec:jt}
 
 The Jitterbug dynamics naturally induce very high variance motion under a range of motor velocities.
 We defined a collection of five tasks of increasing difficulty based on the Jitterbug domain.
@@ -396,49 +412,87 @@ One way to achieve this is by pulsing the motor in different directions -- this 
 We observed that successful policies learned to pulse the motor in short bursts in alternating directions (e.g. $\sim180\degree$ at a time), whereas unsuccessful policies would often drive the motor continuously (Figure~\ref{fig:motor-hist}).
 In doing so, the successful policies were able to achieve high cumulative episode return, and accomplish the high-level task encoded by the reward (Figure~\ref{fig:heatmap}).
 
-\subsection{Learning Reduced-Order Representations}
+\subsection{Learning Reduced-Order Representations}\label{sec:lro}
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{fig-autoencoder}
     \caption{
-        \textbf{Schematic representation of a Denoising AutoEncoder.}
-        We use a Denoising AutoEncoder as a means to learn a reduced order observation representation in an unsupervised manner.
+        \textbf{Schematic representation of a Denoising Autoencoder.}
+        We use a Denoising Autoencoder as a means to learn a reduced order observation representation in an unsupervised manner. The inputs $X$ have $d$ features and the latent variables $Z$ have $l<d$ dimensions.
     }
     \label{fig:autoencoder}
 \end{figure}
 
-We use a De-noising AutoEncoder approach to learn a reduced-order observation representation (Figure~\ref{fig:autoencoder}).
+We use a Denoising Autoencoder (DAE) approach to learn a reduced-order observation representation (Figure~\ref{fig:autoencoder}).
 Input states $X$ are corrupted by adding random unbiased noise to each of the features $X_\text{corr} = X + \mathcal{N}(0, 0.1)$.
 The AutoEncoder is then trained with input corrupted data $X_{corr}$ and uncorrupted target labels $X$.
 We implement this using the mid-level API in the \texttt{tensorflow} library \cite{Abadi2015Tensorflow}.
-To optimize the AutoEncoder network we use the Mean Squared Error between the output $Y$ and the original data $X$ as a loss and use the Adam optimizer with default settings \cite{Adam}.
+To optimize the Autoencoder network we use the Mean Squared Error between the output $Y$ and the original data $X$ as a loss and use the Adam optimizer with default settings \cite{Adam}. The MSE for each input $X^i$ is defined in equation \ref{eq:MSE}, with $N$ being the total number of data points and $d$ the number of features.
+
+\begin{equation}
+\forall i \in [1..N], MSE = \frac{1}{d} \sum_{k=1}^d(Y_{k}^i - X_{k}^i)^2
+\label{eq:MSE}
+\end{equation}
 
 Training data were gathered by running a random policy on the Jitterbug for 5 million steps, and we used 80\% of this data for training and 20\% as a held-out test set.
-Once trained, the decoder side of the AutoEncoder was discarded and the encoder used to provide an augmented observation representation to a Deep Reinforcement Learning algorithm.
+Once trained, the decoder side of the Autoencoder was discarded and the encoder used to provide an augmented observation representation to a Deep Reinforcement Learning algorithm.
 
 \subsection{Deep RL with Reduced-Order Representations}
 
+The next step is to learn the control policy.   This is done by connecting the output of the DAE's encoder to the input to the agent for subsequent deep reinforcement learning.     For this study, we used the DDPG algorithm as it is one of many  widely accessible off-policy baseline methods.  While different solvers may be used, the focus of this part of the study was to investigate the influence of the reduced order approach.  
+
+We considered this for a variety of tasks in the Jitterbug Problem.  For example, in a simpler orienting task, such as \emph{Face In Direction}, we observe that the training performance of a (half) reduced order representation is on par with a policy trained using the full representation (see also Fig.~\ref{fig:ae-perf}) with very slightly improved learning rates.  Interestingly, as the ask got more complex, such as in the \emph{Move In Direction} task, we empirically observe a reduction in the variance of the training process with a compressed representation (see also Fig.~\ref{fig:ae-lowvar}).  While the median rewards are higher with the reduced order representation, the maximum reward found is higher with full action space.  This is consistent with the observation that model-free control policy methods are more data intensive and can be more difficult to stabilize.  
+
+%See also Fig.~\ref{fig:ae-perf}.
+
+
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth]{fig-ae-perf}
+    \includegraphics[width=\linewidth]{figure7plus}
     \caption{
         \textbf{Performance of a deep reinforcement learning agent with a reduced-order representation.}
-        We plot the training performance of a DDPG agent on the task \textit{Face In Direction} up to 5 million steps.
-        Blue: agent with full-order observations (16 dimensions).
-        Orange: agent with reduced-order observations from Denoising AutoEncoder (8 dimensions).
-        A single random seed is shown and 100-episode moving average filter is applied.
+        We plot the training performance of a DDPG agent with a full and reduced-order model on the task \textit{Face In Direction} up to 5 million steps.
+        Orange: agent with full-order observations (16 dimensions).
+        Green: agent with reduced-order observations from Denoising Autoencoder (12 dimensions).
+        A single random seed is shown and a 100{\tiny E}\textsuperscript{3} moving average filter is applied.
     }
     \label{fig:ae-perf}
 \end{figure}
 
-See Figure~\ref{fig:ae-perf}.
 
-\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{denoising_autoencoder25_75}
+    \caption{
+        \textbf{Apparent reduction in training process variance.}
+        For a slightly more complex task \textit{Move In Direction}, we compare the training progress of DDPG with a full (orange) and reduced-order representation (12 dimensions, green).  This is done over 5 million training steps (5000 episodes).  We show median (solid line) and the 25\textsuperscript{th} and 75\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
+        A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).  A a 100{\tiny E}\textsuperscript{3} moving average filter is applied.
+        %All plots are filtered with a 100{\tiny E}\textsuperscript{3} step moving average filter.
+    }
+    \label{fig:ae-lowvar}
+\end{figure}
 
-\section{Discussion And Conclusion}
+%% \hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
 
-\hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+% \section{Discussion And Conclusion}
+
+% \hl{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultrices nisl at condimentum ultricies. Sed vitae odio magna. Maecenas faucibus volutpat auctor. Nulla facilisi. Etiam aliquam ex nunc, tempus sollicitudin magna dapibus ut. Nulla aliquet felis ante, et dignissim urna viverra sit amet. Aenean aliquet ex id venenatis condimentum. Fusce dui turpis, malesuada non risus vel, vestibulum tincidunt eros.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Conclusion}
+
+In this paper we consider a reduced order approach based around a generative autoencoder so as to automatically find a better representation to focus a control policy exploration process for a variable and compliant underactuated robot.  This is based on the intuition that underactuated systems have correlations between their state features by their very nature, and therefore can still be efficiently controlled by reducing the input state space dimension.   Also, as part of this, we introduce the Jitterbug problem as an example of such a robot with the job of navigating in a field environment.  It has one actuator (the minimal possible) and has navigation tasks up to three degrees of freedom.
+
+These assumptions and the approach are investigated by showing that a Jitterbug agent can be controlled with fewer features and still solve a task as efficiently as with using the original state space.  As part of this, we chose a denoising autoencoder to reduce the state space dimension since it is a common tool widely used for data compression and correlation finding.  Empirically we find that for more complex tasks the reduced order representation seems to reduce the training  variance and have higher (median) reward.   For lower complexity tasks, we see similar results between the approaches.  Perhaps, this also intuits from model order in a planning and control perspective.  In general, when planning for a robot one assumes that there is a forward model which may guide the subsequent selection of future actions.   The more information one has the more that can be exploited, but the more that has to be explored.  Thus, the reduced order model might help automatically focus the inherent exploration and exploitation trade-off present.       In conclusion, we see that a `reduced order' modeling approach that takes advantage of the latent structure offers benefits and may help inform an automatic control software process for a novel and interesting class of `reduced order' (underactuated) robot hardware.
+
+% ==> %which would open new vistas for robot design.
+%thus overcoming a princple design bottleneck.  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 %\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
                                   % on the last page of the document manually. It shortens
@@ -446,6 +500,9 @@ See Figure~\ref{fig:ae-perf}.
                                   % This command does not take effect until the next page
                                   % so it should come on the page before the last. Make
                                   % sure that you do not shorten the textheight too much.
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -460,6 +517,17 @@ A. J. Snoswell is supported in part through and Australian Government Research T
 \bibliographystyle{ieeetr}
 \bibliography{root}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \clearpage
+% \section*{Appendix I: Benchmark Performance of the Jitterbug Problem Task Suite}
+
+% We consider the benchmark performance of the five tasks of The Jitterbug Problem task suite using both DDPG \cite{DDPG} (an off-policy method) and PPO \cite{PPO} (an on-policy method).  Exectution time was capped to 8 hours so as to represent possible execution on a `field' deployable system.  The cases were stopped when the problem is solved or when it ran out of execution time.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{figure*}[p]
     
     \centering
@@ -469,7 +537,7 @@ A. J. Snoswell is supported in part through and Australian Government Research T
         \textbf{Characterizing the Jitterbug task suite.}
         We compare the training progress of DDPG and PPO up to 5 million training steps (5000 episodes).
         We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
-        A task is considered 'solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
+        A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
         All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.
     }
     

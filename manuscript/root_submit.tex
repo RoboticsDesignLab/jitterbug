@@ -240,10 +240,10 @@ For our evaluations, we used the \texttt{stable\_baselines} library of RL algori
     \includegraphics[width=\linewidth]{fig-jitterbug-parts}
     \caption[
         Schematic representation of the Jitterbug model.
-        Individual rigid bodies are in different colors and we highlight the position of the center of mass, hinge joints and the single motor.
+        Individual rigid bodies are in different colours and we highlight the position of the center of mass, hinge joints and the single motor.
     ]{
         \textbf{Schematic representation of the Jitterbug model.}
-        Individual rigid bodies are in different colors and we highlight the position of the center of mass (\protect\com), hinge joints  (\protect\hinge) and the single motor (\protect\motor).
+        Individual rigid bodies are in different colours and we highlight the position of the center of mass (\protect\com), hinge joints  (\protect\hinge) and the single motor (\protect\motor).
     }
     \label{fig:parts}
 \end{figure}
@@ -288,7 +288,7 @@ Tasks are reported here in approximate order of increasing difficulty.
     \centering
     \includegraphics[width=\linewidth]{fig-motor-hist}
     \caption{
-        \textbf{Characterizing policy behaviors for the \emph{Move In Direction} task.}
+        \textbf{Characterising policy behaviours for the \emph{Move In Direction} task.}
         We plot the distribution of motor velocities across many episodes for a successful policy (green) and unsuccessful policy (orange).
         The successful policy learns to pulse the motor in alternating directions as indicated by the spikes near $\pm 1$ in the x-axis.
         Interestingly, this is the same strategy used by our heuristic policies.
@@ -504,49 +504,6 @@ These assumptions and the approach are investigated by showing that a Jitterbug 
 
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%\clearpage
-\section*{Appendix I: Benchmark Performance of the Jitterbug Problem Face Direction Task}
-%\section*{Appendix I: Benchmark Performance of the Jitterbug Problem Task Suite}
-%Appendixes should appear before the acknowledgment.
-
-%We consider the benchmark performance of the five tasks of The Jitterbug Problem task suite using both DDPG \cite{DDPG} (an off-policy method) and PPO \cite{PPO} (an on-policy method).  %Exectution time was capped to 8 hours so as to represent possible execution on a `field' deployable system.  The cases were stopped when the problem is solved or when it ran out of execution time.
-
-
-We consider the benchmark performance of the face direction tasks in the Jitterbug Problem task suite using both DDPG \cite{DDPG} (an off-policy method) and PPO \cite{PPO} (an on-policy method).  We find that DDPG is able to find rewards more stably, which we assume is because of its replay buffer. %Exectution time was capped to 8 hours so as to represent possible execution on a `field' deployable system.  The cases were stopped when the problem is solved or when it ran out of execution time.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{figure}[h]
-    \vspace*{-6pt}
-    \centering
-    \includegraphics[width=\linewidth]{fig-rl-perf_CROP2}
-
-        \caption{
-        \textbf{Characterizing the Face Direction Jitterbug task.}
-        We compare the training progress of DDPG and PPO up to 5 million training steps (5000 episodes).
-        We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
-        A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
-        All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.
-    }
-\vspace*{-25pt}
-    
-    % \caption{
-    %     \textbf{Characterizing the Jitterbug task suite.}
-    %     We compare the training progress of DDPG and PPO up to 5 million training steps (5000 episodes).
-    %     We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
-    %     A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
-    %     All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.
-    % }
-    
-    \label{fig:rl-perf}
-\end{figure}
-
-\vspace*{-6pt}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section*{Acknowledgment}
@@ -561,5 +518,30 @@ A. J. Snoswell is supported in part through and Australian Government Research T
 \bibliography{root}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \clearpage
+% \section*{Appendix I: Benchmark Performance of the Jitterbug Problem Task Suite}
+
+% We consider the benchmark performance of the five tasks of The Jitterbug Problem task suite using both DDPG \cite{DDPG} (an off-policy method) and PPO \cite{PPO} (an on-policy method).  Exectution time was capped to 8 hours so as to represent possible execution on a `field' deployable system.  The cases were stopped when the problem is solved or when it ran out of execution time.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure*}[p]
+    
+    \centering
+    \includegraphics[height=0.94\textheight]{fig-rl-perf}
+    
+    \caption{
+        \textbf{Characterizing the Jitterbug task suite.}
+        We compare the training progress of DDPG and PPO up to 5 million training steps (5000 episodes).
+        We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
+        A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
+        All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.
+    }
+    
+    \label{fig:rl-perf}
+\end{figure*}
 
 \end{document}

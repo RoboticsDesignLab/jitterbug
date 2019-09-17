@@ -36,6 +36,7 @@
 \usepackage{hyperref}
 \usepackage{color,soul}
 \usepackage{cite}
+\usepackage{afterpage}
 
 \captionsetup[table]{
     justification=centerlast,
@@ -549,6 +550,9 @@ We consider (in Fig. \ref{fig:rl-perf}) the benchmark performance of the various
     }    
     \label{fig:rl-perf}
 \end{figure*}
+
+%Force the Floats here :-)
+\afterpage{\clearpage}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

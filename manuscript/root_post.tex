@@ -508,6 +508,23 @@ These assumptions and the approach are investigated by showing that a Jitterbug 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Acknowledgment}
+
+We thank Dr. Hanna Kurniawati at the ANU Robust Decision-making and Learning Laboratory for discussions and computing assistance.
+This research was partly supported by an Australian Research Council Discovery Project (DP160100714).
+A. J. Snoswell is supported in part through an Australian Government Research Training Program Scholarship. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\bibliographystyle{ieeetr}
+\bibliography{root}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Appendixes should appear before the acknowledgment.
 %\clearpage
 \appendix
@@ -538,35 +555,22 @@ We consider (in Fig. \ref{fig:rl-perf}) the benchmark performance of the various
 
 
 \begin{figure*}[h]
-    
-    \centering
-    \includegraphics[height=0.9\textheight]{fig-rl-perf_4_star}
-
-        \caption{
-        \textbf{Characterizing the Jitterbug task suite.}
-        We compare the training progress of DDPG and PPO up to 4 million training steps (4000 episodes).
-        We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
-        A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).  All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.  For the cases where the results stop early (noted with a {\LARGE$\ast$}), this is because the simulations were limited to have the same compute time for comparison. 
-    }    
-    \label{fig:rl-perf}
+	
+	\centering
+	\includegraphics[height=0.9\textheight]{fig-rl-perf_super}
+	
+	\caption{
+		\textbf{Characterizing the Jitterbug task suite.}
+		We compare the training progress of DDPG and PPO up to 4 million training steps (4000 episodes).
+		We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
+		%A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).  
+		All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.  %For the cases where the results stop early (noted with a {\LARGE$\ast$}), this is because the simulations were limited to have the same compute time for comparison. 
+	}    
+	\label{fig:rl-perf}
 \end{figure*}
 
 %Force the Floats here :-)
 \afterpage{\clearpage}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section*{Acknowledgment}
-
-We thank Dr. Hanna Kurniawati at the ANU Robust Decision-making and Learning Laboratory for discussions and computing assistance.
-This research was partly supported by an Australian Research Council Discovery Project (DP160100714).
-A. J. Snoswell is supported in part through an Australian Government Research Training Program Scholarship. 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\bibliographystyle{ieeetr}
-\bibliography{root}
 
 
 

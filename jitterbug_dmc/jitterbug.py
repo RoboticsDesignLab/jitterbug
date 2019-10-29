@@ -44,8 +44,11 @@ from dm_control.utils import rewards
 from dm_control.utils import containers
 from dm_control.utils import io as resources
 from dm_control.mujoco.wrapper.mjbindings import mjlib
+import torch
+import torch.optim as opt
 
-
+import denoising_autoencoder
+import VAE
 # Load the suite so we can add to it
 SUITE = containers.TaggedTasks()
 
@@ -465,6 +468,7 @@ class Jitterbug(base.Task):
         self.use_autoencoder = False
         self.use_several_autoencoders = False
         self.use_denoising_autoencoder = False
+        self.use_VAE = True
         self.train_autoencoder = False
         self.use_denoising_autoencoder15 = False
         self.use_autoencoder15 = False
@@ -492,13 +496,24 @@ class Jitterbug(base.Task):
                 sess = tf.Session(graph=g)
 
                 self.session = sess
-                self.jitterbug_autoencoder = denoising_autoencoder.Autoencoder(feature_dimension=16,
+                self.jitterbug_autoencoder = denoising_autoencoder.Autoencoder(feature_dimension=19,
                                                                      lr=0.0005,
                                                                      sess=self.session
                                                                      )
-                i=21
+                i=46
                 self.jitterbug_autoencoder.load_autoencoder(f"./autoencoder_model{i}.ckpt")
                 print(f"load autoencoder {i} from file ./autoencoder_model{i}.ckpt")
+
+        if self.use_VAE:
+            device = torch.device(
+                "cuda" if torch.cuda.is_available() and use_gpu
+                else "cpu"
+            )
+            self.jitterbug_autoencoder = VAE.VAE(data_size=19, latent_size=15).to(device)
+            optimizer = opt.Adam(self.jitterbug_autoencoder.parameters(), lr=1e-3)
+            path = "./VAE.pt"
+            self.jitterbug_autoencoder.load_autoencoder(path)
+            print("VAE loaded from "+path)
 
         if self.use_denoising_autoencoder15:
             g = tf.Graph()
@@ -742,7 +757,7 @@ class Jitterbug(base.Task):
 
         self.counter += 1
 
-        if self.use_autoencoder or self.use_several_autoencoders or self.use_denoising_autoencoder or self.train_autoencoder or self.use_denoising_autoencoder15 or self.use_autoencoder15 or self.use_autoencoder13:
+        if self.use_autoencoder or self.use_several_autoencoders or self.use_denoising_autoencoder or self.train_autoencoder or self.use_denoising_autoencoder15 or self.use_autoencoder15 or self.use_autoencoder13 or self.use_VAE:
             obs = self.encode_obs(obs)
 
         return obs
@@ -910,8 +925,10 @@ class Jitterbug(base.Task):
         return r
 
     def encode_obs(self, obs):
-        obsArray = np.concatenate(
-            (obs['position'], obs['velocity'], obs['motor_position'], obs['motor_velocity'], obs['angle_to_target']))
+        obs_line = []
+        for key in obs:
+            obs_line.append(obs[key])
+        obsArray = np.concatenate(obs_line)
         if self.train_autoencoder:
             if self.normalize01:
                 norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs01(obsArray))]
@@ -928,14 +945,11 @@ class Jitterbug(base.Task):
                 self.update_autoencoder()
 
         if self.use_autoencoder or self.use_denoising_autoencoder:
-            if self.normalize01:
-                norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs01(obsArray))]
-            else:
-                norm_obs = [np.array(self.jitterbug_autoencoder.normalize_obs(obsArray))]
-            #print("###############")
-            #print(norm_obs)
-            encoded_obs = self.jitterbug_autoencoder.encode(norm_obs)
-            #print(encoded_obs)
+            encoded_obs = self.jitterbug_autoencoder.encode([obsArray])
+            encoded_obs_dict = {'observations': np.array(encoded_obs)}
+
+        if self.use_VAE:
+            encoded_obs = self.jitterbug_autoencoder.encode(torch.Tensor(obsArray))
             encoded_obs_dict = {'observations': np.array(encoded_obs)}
 
         if self.use_denoising_autoencoder15 or self.use_autoencoder15:

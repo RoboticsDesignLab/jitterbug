@@ -177,6 +177,7 @@ def train(
         if 'last_num_eps' not in _cb.__dict__:
             _cb.last_num_eps = 0
 
+
         # Extract episode reward history based on model type
         if isinstance(_locals['self'], DDPG):
             ep_r_hist = list(_locals['episode_rewards_history'])

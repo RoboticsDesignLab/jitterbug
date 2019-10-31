@@ -24,7 +24,7 @@ from dm_control import suite
 
 # Import agents from stable_baselines
 from stable_baselines import DDPG, PPO2, SAC, TD3
-from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
+from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise, NormalActionNoise
 
 # Get some extra utilities
 from stable_baselines.bench import Monitor
@@ -329,13 +329,15 @@ def train(
         kwargs.setdefault("learning_rate", 1e-4)
         kwargs.setdefault("buffer_size", 1000000)
         kwargs.setdefault("batch_size", 256)
+        kwargs.setdefault("gradient_steps", 1000)
+        kwargs.setdefault("learning_starts", 10000)
+        kwargs.setdefault("train_freq", 1000)
 
         #kwargs.setdefault("ent_coef", 'auto_0.1')
 
-        kwargs.setdefault("action_noise", OrnsteinUhlenbeckActionNoise(
-            mean=np.array([0.3]),
-            sigma=0.3,
-            theta=0.15
+        kwargs.setdefault("action_noise", NormalActionNoise(
+            mean=0,
+            sigma=0.2,
         ))
 
         print("Constructing TD3 agent with settings:")

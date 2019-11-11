@@ -25,7 +25,7 @@ import inspect
 
 from dm_control import suite
 
-from jitterbug_dmc import jitterbug
+from jitterbug_dmc import jitterbug, augmented_jitterbug
 
 # Add jitterbug to domain record
 suite._DOMAINS.update({

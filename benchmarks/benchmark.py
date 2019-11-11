@@ -29,7 +29,8 @@ from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise, NormalActi
 # Get some extra utilities
 from stable_baselines.bench import Monitor
 from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv
-#from stable_baselines.results_plotter import load_results, ts2xy
+
+# from stable_baselines.results_plotter import load_results, ts2xy
 
 # Add root folder to path so we can access benchmarks module
 sys.path.insert(0, os.path.join(
@@ -37,6 +38,7 @@ sys.path.insert(0, os.path.join(
     ".."
 ))
 import jitterbug_dmc
+from jitterbug_dmc import augmented_jitterbug
 
 
 class CustomPolicyDDPG(stable_baselines.ddpg.policies.FeedForwardPolicy):
@@ -66,15 +68,17 @@ class CustomPolicyGeneral(stable_baselines.common.policies.FeedForwardPolicy):
 
 
 def train(
-    task,
-    alg,
-    logdir,
-    *,
-    random_seed=None,
-    num_steps=int(100e6),
-    log_every=int(10e3),
-    num_parallel=8,
-    **kwargs
+        task,
+        alg,
+        logdir,
+        domain_name,
+        *,
+        random_seed=None,
+        num_steps=int(1e3),
+        log_every=int(10e3),
+        num_parallel=8,
+        load_policy=False,
+        **kwargs
 ):
     """Train and evaluate an agent
 
@@ -85,15 +89,18 @@ def train(
             - 'ppo2': PPO2 Algorithm
             - 'sac': SAC Algorithm
         logdir (str): Logging directory
+        domain_name (str): Name of the DMC domain
 
         random_seed (int): Random seed to use, or None
         num_steps (int): Number of training steps to train for
         log_every (int): Save and log progress every this many timesteps
         num_parallel (int): Number of parallel environments to run. Only used
+        load_policy (bool): Whether to load an existing or not. It Yes, the policy is loaded from logdir.
             for A2C and PPO2.
     """
 
     assert alg in ('ddpg', 'sac', 'ppo2', 'td3'), "Invalid alg: {}".format(alg)
+    assert domain_name in ('jitterbug', 'augmented_jitterbug'), "Invalid domain_name: {}".format(domain_name)
 
     # Cast args to types
     if random_seed is not None:
@@ -118,9 +125,17 @@ def train(
         logdir
     ))
 
+    if domain_name == "augmented_jitterbug":
+        augmented_jitterbug.augment_Jitterbug(modify_legs=True,
+                                              modify_mass=True,
+                                              modify_coreBody1=False,
+                                              modify_coreBody2=False,
+                                              modify_global_density=False,
+                                              modify_gear=False,
+                                              )
     # Construct DMC env
     env_dmc = suite.load(
-        domain_name="jitterbug",
+        domain_name=domain_name,
         task_name=task,
         task_kwargs=dict(random=random_seed, norm_obs=True),
         environment_kwargs=dict(flat_observation=True)
@@ -177,7 +192,6 @@ def train(
         if 'last_num_eps' not in _cb.__dict__:
             _cb.last_num_eps = 0
 
-
         # Extract episode reward history based on model type
         if isinstance(_locals['self'], DDPG):
             ep_r_hist = list(_locals['episode_rewards_history'])
@@ -226,10 +240,10 @@ def train(
     if alg == 'ddpg':
 
         # Default parameters for DDPG
-        #kwargs.setdefault("normalize_returns", True)
-        #kwargs.setdefault("return_range", (0., 1.))
-        #kwargs.setdefault("normalize_observations", True)
-        #kwargs.setdefault("observation_range", (-1., 1.))
+        # kwargs.setdefault("normalize_returns", True)
+        # kwargs.setdefault("return_range", (0., 1.))
+        # kwargs.setdefault("normalize_observations", True)
+        # kwargs.setdefault("observation_range", (-1., 1.))
 
         kwargs.setdefault("batch_size", 256)
 
@@ -248,13 +262,23 @@ def train(
         pprint.pprint(kwargs)
 
         # Construct the agent
-        agent = DDPG(
-            policy=CustomPolicyDDPG,
-            env=env_vec,
-            verbose=1,
-            tensorboard_log=logdir,
-            **kwargs
-        )
+        if load_policy:
+            print("Load DDPG agent from ", logdir)
+            agent = DDPG.load(load_path=os.path.join(logdir, "model.final.pkl"),
+                              policy=CustomPolicyDDPG,
+                              env=env_vec,
+                              verbose=1,
+                              tensorboard_log=logdir,
+                              **kwargs
+                              )
+        else:
+            agent = DDPG(
+                policy=CustomPolicyDDPG,
+                env=env_vec,
+                verbose=1,
+                tensorboard_log=logdir,
+                **kwargs
+            )
 
         # Train for a while (logging and saving checkpoints as we go)
         agent.learn(
@@ -272,13 +296,23 @@ def train(
         print("Constructing PPO2 agent with settings:")
         pprint.pprint(kwargs)
 
-        agent = PPO2(
-            policy=CustomPolicyGeneral,
-            env=env_vec,
-            verbose=1,
-            tensorboard_log=logdir,
-            **kwargs
-        )
+        if load_policy:
+            print("Load PPO2 agent from ", logdir)
+            agent = PPO2.load(load_path=os.path.join(logdir, "model.final.pkl"),
+                              policy=CustomPolicyGeneral,
+                              env=env_vec,
+                              verbose=1,
+                              tensorboard_log=logdir,
+                              **kwargs
+                              )
+        else:
+            agent = PPO2(
+                policy=CustomPolicyGeneral,
+                env=env_vec,
+                verbose=1,
+                tensorboard_log=logdir,
+                **kwargs
+            )
 
         # Train for a while (logging and saving checkpoints as we go)
         agent.learn(
@@ -294,12 +328,11 @@ def train(
         kwargs.setdefault("buffer_size", 1000000)
         kwargs.setdefault("batch_size", 256)
         kwargs.setdefault("ent_coef", 'auto')
-        #kwargs.setdefault("ent_coef", 'auto_0.1')
+        # kwargs.setdefault("ent_coef", 'auto_0.1')
 
-        kwargs.setdefault("action_noise", OrnsteinUhlenbeckActionNoise(
-            mean=np.array([0.3]),
-            sigma=0.3,
-            theta=0.15
+        kwargs.setdefault("action_noise", NormalActionNoise(
+            mean=0,
+            sigma=0.2,
         ))
 
         print("Constructing SAC agent with settings:")
@@ -308,14 +341,25 @@ def train(
         # Construct the agent
         # XXX ajs 14/Sep/19 SAC in stable_baselines uses outdated policy
         # classes so we just use MlpPolicy and pass policy_kwargs
-        agent = SAC(
-            policy='MlpPolicy',
-            env=env_vec,
-            verbose=1,
-            tensorboard_log=logdir,
-            policy_kwargs=dict(layers=[350, 250], act_fun=tf.nn.relu),
-            **kwargs
-        )
+
+        if load_policy:
+            print("Load SAC agent from ", logdir)
+            kwargs.setdefault("policy_kwargs", dict(layers=[350, 250], act_fun=tf.nn.relu))
+            agent = SAC.load(load_path=os.path.join(logdir, "model.final.pkl"),
+                             env=env_vec,
+                             verbose=1,
+                             tensorboard_log=logdir,
+                             **kwargs
+                             )
+        else:
+            agent = SAC(
+                policy='MlpPolicy',
+                env=env_vec,
+                verbose=1,
+                tensorboard_log=logdir,
+                policy_kwargs=dict(layers=[350, 250], act_fun=tf.nn.relu),
+                **kwargs
+            )
 
         # Train for a while (logging and saving checkpoints as we go)
         agent.learn(
@@ -333,7 +377,7 @@ def train(
         kwargs.setdefault("learning_starts", 10000)
         kwargs.setdefault("train_freq", 1000)
 
-        #kwargs.setdefault("ent_coef", 'auto_0.1')
+        # kwargs.setdefault("ent_coef", 'auto_0.1')
 
         kwargs.setdefault("action_noise", NormalActionNoise(
             mean=0,
@@ -346,14 +390,24 @@ def train(
         # Construct the agent
         # XXX ajs 14/Sep/19 SAC in stable_baselines uses outdated policy
         # classes so we just use MlpPolicy and pass policy_kwargs
-        agent = TD3(
-            policy='MlpPolicy',
-            env=env_vec,
-            verbose=1,
-            tensorboard_log=logdir,
-            policy_kwargs=dict(layers=[350, 250], act_fun=tf.nn.relu),
-            **kwargs
-        )
+        if load_policy:
+            print("Load TD3 agent from ", logdir)
+            kwargs.setdefault("policy_kwargs", dict(layers=[350, 250], act_fun=tf.nn.relu))
+            agent = TD3.load(load_path=os.path.join(logdir, "model.final.pkl"),
+                             env=env_vec,
+                             verbose=1,
+                             tensorboard_log=logdir,
+                             **kwargs
+                             )
+        else:
+            agent = TD3(
+                policy='MlpPolicy',
+                env=env_vec,
+                verbose=1,
+                tensorboard_log=logdir,
+                policy_kwargs=dict(layers=[350, 250], act_fun=tf.nn.relu),
+                **kwargs
+            )
 
         # Train for a while (logging and saving checkpoints as we go)
         agent.learn(
@@ -371,7 +425,6 @@ def train(
 
 
 if __name__ == '__main__':
-
     import os
     import json
     import argparse
@@ -405,6 +458,22 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
+        "--domain",
+        type=str,
+        required=False,
+        default="jitterbug",
+        help="Either 'jitterbug' or 'augmented_jitterbug'"
+    )
+
+    parser.add_argument(
+        "--num_sim",
+        type=int,
+        required=False,
+        default=1,
+        help="The number of simulations to run sequentially'"
+    )
+
+    parser.add_argument(
         "--kwargs",
         type=json.loads,
         required=False,
@@ -414,5 +483,17 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    train(alg=args.alg, task=args.task, logdir=args.logdir, **args.kwargs)
+    for i in range(args.num_sim):
+        if i == 0:
+            load_policy = False
+        else:
+            # Load policy
+            load_policy = True
 
+        train(alg=args.alg,
+              task=args.task,
+              logdir=args.logdir,
+              domain_name=args.domain,
+              load_policy=load_policy,
+              **args.kwargs
+              )

@@ -74,10 +74,11 @@ def train(
         domain_name,
         *,
         random_seed=None,
-        num_steps=int(1e3),
+        num_steps=int(2e3),
         log_every=int(10e3),
         num_parallel=8,
         load_policy=False,
+        load_policy_dir="",
         **kwargs
 ):
     """Train and evaluate an agent
@@ -263,8 +264,8 @@ def train(
 
         # Construct the agent
         if load_policy:
-            print("Load DDPG agent from ", logdir)
-            agent = DDPG.load(load_path=os.path.join(logdir, "model.final.pkl"),
+            print("Load DDPG agent from ", load_policy_dir)
+            agent = DDPG.load(load_path=os.path.join(load_policy_dir, "model.final.pkl"),
                               policy=CustomPolicyDDPG,
                               env=env_vec,
                               verbose=1,
@@ -297,8 +298,8 @@ def train(
         pprint.pprint(kwargs)
 
         if load_policy:
-            print("Load PPO2 agent from ", logdir)
-            agent = PPO2.load(load_path=os.path.join(logdir, "model.final.pkl"),
+            print("Load PPO2 agent from ", load_policy_dir)
+            agent = PPO2.load(load_path=os.path.join(load_policy_dir, "model.final.pkl"),
                               policy=CustomPolicyGeneral,
                               env=env_vec,
                               verbose=1,
@@ -343,9 +344,9 @@ def train(
         # classes so we just use MlpPolicy and pass policy_kwargs
 
         if load_policy:
-            print("Load SAC agent from ", logdir)
+            print("Load SAC agent from ", load_policy_dir)
             kwargs.setdefault("policy_kwargs", dict(layers=[350, 250], act_fun=tf.nn.relu))
-            agent = SAC.load(load_path=os.path.join(logdir, "model.final.pkl"),
+            agent = SAC.load(load_path=os.path.join(load_policy_dir, "model.final.pkl"),
                              env=env_vec,
                              verbose=1,
                              tensorboard_log=logdir,
@@ -391,9 +392,9 @@ def train(
         # XXX ajs 14/Sep/19 SAC in stable_baselines uses outdated policy
         # classes so we just use MlpPolicy and pass policy_kwargs
         if load_policy:
-            print("Load TD3 agent from ", logdir)
+            print("Load TD3 agent from ", load_policy_dir)
             kwargs.setdefault("policy_kwargs", dict(layers=[350, 250], act_fun=tf.nn.relu))
-            agent = TD3.load(load_path=os.path.join(logdir, "model.final.pkl"),
+            agent = TD3.load(load_path=os.path.join(load_policy_dir, "model.final.pkl"),
                              env=env_vec,
                              verbose=1,
                              tensorboard_log=logdir,
@@ -482,18 +483,22 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-
+    log = args.logdir
     for i in range(args.num_sim):
+        logdir = os.path.join(log, str(i))
         if i == 0:
             load_policy = False
+            load_policy_dir = ""
         else:
             # Load policy
             load_policy = True
+            load_policy_dir = os.path.join(log, str(i-1))
 
         train(alg=args.alg,
               task=args.task,
-              logdir=args.logdir,
+              logdir=logdir,
               domain_name=args.domain,
               load_policy=load_policy,
+              load_policy_dir=load_policy_dir,
               **args.kwargs
               )

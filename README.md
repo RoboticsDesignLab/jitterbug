@@ -121,7 +121,7 @@ All tasks require the jitterbug to remain upright at all times.
 4 algorithms are implemented in `benchmark.py`, all directly using [`stable-baselines`](https://github.com/hill-a/stable-baselines):
 
  - DDPG
- - PPO
+ - PPO2
  - SAC
  - TD3
 

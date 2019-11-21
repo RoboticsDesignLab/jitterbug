@@ -118,12 +118,14 @@ All tasks require the jitterbug to remain upright at all times.
    
 ### RL Algorithms
 
-4 algorithms are implemented in the benchmark.py file, all directly using the stable-baselines library:
+4 algorithms are implemented in the 'benchmark.py' file, all directly using [`stable-baselines`](https://github.com/hill-a/stable-baselines):
 
  - DDPG
  - PPO
  - SAC
  - TD3
+
+To start a sac agent learning the 'move_in_direction' task, enter the following command from the 'benchmarks' directory: 'python benchmark.py --alg sac --task move_in_direction --logdir /path/to/save/the/files
 
 ### Autoencoders
 

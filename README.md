@@ -132,7 +132,13 @@ A list of hyper-parameters can be found in the Excel file [`benchmarks/rl-hyper-
 
 ### Autoencoders
 
-TO DO
+Several types of autoencoders can be found in [`benchmarks`](benchmarks):
+ 
+ - A classic AutoEncoder (AE) in [`benchmarks/autoencoder.py`](benchmarks/autoencoder.py)
+ - A Denoising AutoEncoder (DAE) in [`benchmarks/denoising_autoencoder.py`](benchmarks/denoising_autoencoder.py)
+ - A Dynamic Denoising AutoEncoder (DDAE) in [`benchmarks/ddae.py`](benchmarks/ddae.py)
+ - A Variational AutoEncoder (VAE) in [`benchmarks/VAE.py`](benchmarks/VAE.py)
+ - A Linear Latent Dynamic Variational AutoEncoder (LLD VAE) in [`benchmarks/VAE_LLD.py`](benchmarks/VAE_LLD.py)
 
 ### Augmented Sequential Learning
 

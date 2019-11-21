@@ -126,7 +126,8 @@ All tasks require the jitterbug to remain upright at all times.
  - TD3
 
 To start a SAC agent learning the `move_in_direction` task, enter the following command from the 'benchmarks' directory: `python benchmark.py --alg sac --task move_in_direction --logdir /path/to/save/the/files`.
-The learning performances of the 4 algorithms on each task is shown in [`manuscript/figures/fig-rl-perf.pdf`](manuscript/figures/fig-rl-perf.pdf).
+The learning performances of the 4 algorithms on each task is shown in [`manuscript/figures/fig-rl-perf.pdf`](manuscript/figures/fig-rl-perf.pdf). This figure can also be generated using [`fig-rl-perf.ipynb`](fig-rl-perf.ipynb).
+
 ### Autoencoders
 
 TO DO

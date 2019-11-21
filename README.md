@@ -118,7 +118,7 @@ All tasks require the jitterbug to remain upright at all times.
    
 ### RL Algorithms
 
-4 algorithms are implemented in the `benchmark.py` file, all directly using [`stable-baselines`](https://github.com/hill-a/stable-baselines):
+4 algorithms are implemented in `benchmark.py`, all directly using [`stable-baselines`](https://github.com/hill-a/stable-baselines):
 
  - DDPG
  - PPO

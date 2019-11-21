@@ -115,6 +115,23 @@ All tasks require the jitterbug to remain upright at all times.
    position 
  - `move_to_pose` (hard): The jitterbug must move to a certain cartesian
    position and face in a certain direction 
+   
+### RL Algorithms
+
+4 algorithms are implemented in the benchmark.py file, all directly using the stable-baselines library:
+
+ - DDPG
+ - PPO
+ - SAC
+ - TD3
+
+### Autoencoders
+
+TO DO
+
+### Augmented Sequential Learning
+
+TO DO
 
 ## Common Problems
 

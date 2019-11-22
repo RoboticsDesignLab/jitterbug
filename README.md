@@ -139,6 +139,8 @@ Several types of autoencoders can be found in [`benchmarks`](benchmarks):
  - A Dynamic Denoising AutoEncoder (DDAE) in [`benchmarks/ddae.py`](benchmarks/ddae.py)
  - A Variational AutoEncoder (VAE) in [`benchmarks/VAE.py`](benchmarks/VAE.py) (paper [arXiv:1312.6114](https://arxiv.org/abs/1312.6114))
  - A Linear Latent Dynamic Variational AutoEncoder (LLD VAE) in [`benchmarks/VAE_LLD.py`](benchmarks/VAE_LLD.py) (paper [arXiv:1506.07365](https://arxiv.org/abs/1506.07365))
+ 
+ After training an autoencoder, it can be used by setting one of these Jitterbug attributes to True, depending on the autoencoder to use: `self.use_autoencoder`, `self.use_denoising_autoencoder`, `self.use_VAE`, `self.use_VAE_LLD`. Note that the name of the file containing the autoencoder model needs to be in the `self.jitterbug_autoencder.load_autoencoder()` function.
 
 ### Augmented Sequential Learning
 

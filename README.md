@@ -158,7 +158,13 @@ To make the learning process more robust, `benchmark.py` offers the possibility 
  - The gear
  
 Examples of augmented Jitterbugs are displayed below:
+
+Augmented Jitterbug #1
 ![Augmented Jitterbug #1](figures/aj1.png)
+
+Augmented Jitterbug #2
+![Augmented Jitterbug #2](figures/aj2.png)
+
 ## Common Problems
 
 ### Ubuntu: Problems with GLFW drivers 

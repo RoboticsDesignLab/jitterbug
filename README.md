@@ -144,7 +144,7 @@ Several types of autoencoders can be found in [`benchmarks`](benchmarks):
 
 ### Augmented Sequential Learning
 
-To make the learning process more robust, `benchmark.py` offers the possibility to learn sequentially using augmented Jitterbugs. For example, to sequentially run 10 simulations with different randomly shaped Jitterbugs, enter the command `python benchmark.py --alg sac --task move_in_direction --logdir /path/to/desired/directory/ --domain augmented_jitterbug --num_sim 10`. From this, it will execute the following algorithm:
+To make the learning process more robust, `benchmark.py` offers the possibility to learn sequentially using augmented Jitterbugs. An augmented Jitterbug is a randomly modified version of the original XML file. For example, to sequentially run 10 simulations with different randomly shaped Jitterbugs, enter the command `python benchmark.py --alg sac --task move_in_direction --logdir /path/to/desired/directory/ --domain augmented_jitterbug --num_sim 10`. From this, it will execute the following algorithm:
  
  - Step 1: Generate an `augmented_jitterbug.xml` file by randomly modifying the original `jitterbug.xml` file.
  - Step 2: Start learning a policy for 1e6 steps.

@@ -157,6 +157,8 @@ To make the learning process more robust, `benchmark.py` offers the possibility 
  - The global density
  - The gear
  
+Examples of augmented Jitterbugs are displayed below:
+![Augmented Jitterbug #1](figures/aj1.png)
 ## Common Problems
 
 ### Ubuntu: Problems with GLFW drivers 

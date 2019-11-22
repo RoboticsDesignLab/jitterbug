@@ -140,12 +140,23 @@ Several types of autoencoders can be found in [`benchmarks`](benchmarks):
  - A Variational AutoEncoder (VAE) in [`benchmarks/VAE.py`](benchmarks/VAE.py) (paper [arXiv:1312.6114](https://arxiv.org/abs/1312.6114))
  - A Linear Latent Dynamic Variational AutoEncoder (LLD VAE) in [`benchmarks/VAE_LLD.py`](benchmarks/VAE_LLD.py) (paper [arXiv:1506.07365](https://arxiv.org/abs/1506.07365))
  
- After training an autoencoder, it can be used by setting one of these Jitterbug attributes to True, depending on the autoencoder to use: `self.use_autoencoder`, `self.use_denoising_autoencoder`, `self.use_VAE`, `self.use_VAE_LLD`. Note that the name of the file containing the autoencoder model needs to be in the `self.jitterbug_autoencder.load_autoencoder()` function.
+ After training an autoencoder, it can be used by setting one of these Jitterbug attributes to True, depending on the autoencoder to use: `self.use_autoencoder`, `self.use_denoising_autoencoder`, `self.use_VAE`, `self.use_VAE_LLD`. Note that the name of the file containing the autoencoder model needs to be specified in the `self.jitterbug_autoencder.load_autoencoder()` function.
 
 ### Augmented Sequential Learning
 
-TO DO
-
+To make the learning process more robust, `benchmark.py` offers the possibility to learn sequentially using augmented Jitterbugs. For example, to sequentially run 10 simulations, enter the command `python benchmark.py --alg sac --task move_in_direction --logdir /path/to/desired/directory/ --domain augmented_jitterbug --num_sim 10`. From this, it will execute the following algorithm:
+ 
+ - Step 1: Generate an `augmented_jitterbug.xml` file by randomly modifying the original `jitterbug.xml` file.
+ - Step 2: Start learning a policy for 1e6 steps.
+ - Step 3: Save the policy and go back to step 1. Repeat the process 10 times.
+ 
+ Note that by default, only the shape of the legs and the mass are modified. More features can be tweaked such as (see [`jitterbug_dmc/augmented_jitterbug.py`](jitterbug_dmc/augmented_jitterbug.py):
+ 
+ - CoreBody1 density
+ - CoreBody2 density
+ - The global density
+ - The gear
+ 
 ## Common Problems
 
 ### Ubuntu: Problems with GLFW drivers 

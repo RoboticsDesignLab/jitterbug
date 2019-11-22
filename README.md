@@ -151,8 +151,9 @@ To sequentially run 10 simulations with different randomly shaped Jitterbugs, en
  - Step 2: Start learning a policy for 1e6 steps.
  - Step 3: Save the policy and go back to step 1. Repeat the process 10 times.
  
- The results of such a sequential learning are shown in figure [`manuscript/figures/sac10seq.pdf`](manuscript/figures/sac10seq.pdf).
- Note that by default, only the shape of the legs and the mass are modified. More features can be tweaked such as (see [`jitterbug_dmc/augmented_jitterbug.py`](jitterbug_dmc/augmented_jitterbug.py):
+The results of such a sequential learning are shown in figure [`manuscript/figures/sac10seq.pdf`](manuscript/figures/sac10seq.pdf).
+ 
+Note that by default, only the shape of the legs and the mass are modified. More features can be tweaked such as (see [`jitterbug_dmc/augmented_jitterbug.py`](jitterbug_dmc/augmented_jitterbug.py):
  
  - CoreBody1 density
  - CoreBody2 density

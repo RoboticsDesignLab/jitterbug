@@ -137,7 +137,7 @@ Several types of autoencoders can be found in [`benchmarks`](benchmarks):
  - A classic AutoEncoder (AE) in [`benchmarks/autoencoder.py`](benchmarks/autoencoder.py)
  - A Denoising AutoEncoder (DAE) in [`benchmarks/denoising_autoencoder.py`](benchmarks/denoising_autoencoder.py)
  - A Dynamic Denoising AutoEncoder (DDAE) in [`benchmarks/ddae.py`](benchmarks/ddae.py)
- - A Variational AutoEncoder (VAE) in [`benchmarks/VAE.py`](benchmarks/VAE.py) (paper [arXiv:1312.6114])(https://arxiv.org/abs/1312.6114))
+ - A Variational AutoEncoder (VAE) in [`benchmarks/VAE.py`](benchmarks/VAE.py) (paper [arXiv:1312.6114](https://arxiv.org/abs/1312.6114))
  - A Linear Latent Dynamic Variational AutoEncoder (LLD VAE) in [`benchmarks/VAE_LLD.py`](benchmarks/VAE_LLD.py) (paper [arXiv:1506.07365](https://arxiv.org/abs/1506.07365))
 
 ### Augmented Sequential Learning

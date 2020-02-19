@@ -127,3 +127,6 @@ videos/
 
 # Ignore h5f weight files
 *.h5f
+
+# Ignore *tex templates
+manuscript/template/*

@@ -111,8 +111,8 @@ All tasks require the jitterbug to remain upright at all times.
  - `move_from_origin` (easy): The jitterbug must move away from the origin
  - `face_direction` (easy): The jitterbug must rotate to face a certain
    direction
- - `move_in_direction` (easy): The jitterbug must achieve a positive velocity in
-   a certain direction
+ - `move_in_direction` (easy): The jitterbug must achieve a positive velocity
+   in a certain direction
  - `move_to_position` (hard): The jitterbug must move to a certain cartesian
    position 
  - `move_to_pose` (hard): The jitterbug must move to a certain cartesian
@@ -120,42 +120,71 @@ All tasks require the jitterbug to remain upright at all times.
    
 ### RL Algorithms
 
-4 algorithms are implemented in `benchmark.py`, all directly using [`stable-baselines`](https://github.com/hill-a/stable-baselines):
+Four algorithms are implemented in `benchmark.py`, all using the
+[`stable-baselines`](https://github.com/hill-a/stable-baselines) package:
 
  - DDPG
  - PPO2
  - SAC
  - TD3
 
-To start a SAC agent learning the `move_in_direction` task, enter the following command from the 'benchmarks' directory: `python benchmark.py --alg sac --task move_in_direction --logdir /path/to/desired/directory/`.
-The learning performances of the 4 algorithms on each task is shown in [`manuscript/figures/fig-rl-perf.pdf`](manuscript/figures/fig-rl-perf.pdf). This figure can also be generated using [`fig-rl-perf.ipynb`](fig-rl-perf.ipynb). 
+To start a SAC agent learning the `move_in_direction` task, enter the
+following command from the 'benchmarks' directory:
+`python benchmark.py --alg sac --task move_in_direction --logdir /path/to/desired/directory/`.
+The learning performances of the 4 algorithms on each task is shown in
+[`manuscript/figures/fig-rl-perf.pdf`](manuscript/figures/fig-rl-perf.pdf).
+This figure can also be generated using
+[`fig-rl-perf.ipynb`](fig-rl-perf.ipynb). 
 
-A list of hyper-parameters can be found in the Excel file [`benchmarks/rl-hyper-params.xlsx`](benchmarks/rl-hyper-params.xlsx). This table also gives examples of hyper-parameters derived from [`rl-zoo`](https://github.com/araffin/rl-baselines-zoo).
+A list of hyper-parameters can be found in the Excel file
+[`benchmarks/rl-hyper-params.xlsx`](benchmarks/rl-hyper-params.xlsx).
+This table also gives examples of hyper-parameters derived from
+[`rl-zoo`](https://github.com/araffin/rl-baselines-zoo).
 
 ### Autoencoders
 
 Several types of autoencoders can be found in [`benchmarks`](benchmarks):
  
- - A classic AutoEncoder (AE) in [`benchmarks/autoencoder.py`](benchmarks/autoencoder.py)
- - A Denoising AutoEncoder (DAE) in [`benchmarks/denoising_autoencoder.py`](benchmarks/denoising_autoencoder.py)
- - A Dynamic Denoising AutoEncoder (DDAE) in [`benchmarks/ddae.py`](benchmarks/ddae.py)
- - A Variational AutoEncoder (VAE) in [`benchmarks/VAE.py`](benchmarks/VAE.py) (paper [arXiv:1312.6114](https://arxiv.org/abs/1312.6114))
- - A Linear Latent Dynamic Variational AutoEncoder (LLD VAE) in [`benchmarks/VAE_LLD.py`](benchmarks/VAE_LLD.py) (paper [arXiv:1506.07365](https://arxiv.org/abs/1506.07365))
+ - A classic AutoEncoder (AE) in
+   [`benchmarks/autoencoder.py`](benchmarks/autoencoder.py)
+ - A Denoising AutoEncoder (DAE) in
+   [`benchmarks/denoising_autoencoder.py`](benchmarks/denoising_autoencoder.py)
+ - A Dynamic Denoising AutoEncoder (DDAE) in
+   [`benchmarks/ddae.py`](benchmarks/ddae.py)
+ - A Variational AutoEncoder (VAE) in
+   [`benchmarks/VAE.py`](benchmarks/VAE.py) (paper [arXiv:1312.6114](https://arxiv.org/abs/1312.6114))
+ - A Linear Latent Dynamic Variational AutoEncoder (LLD VAE) in
+   [`benchmarks/VAE_LLD.py`](benchmarks/VAE_LLD.py) (paper
+   [arXiv:1506.07365](https://arxiv.org/abs/1506.07365))
  
- After training an autoencoder, it can be used by setting one of these Jitterbug attributes to True, depending on the autoencoder to use: `self.use_autoencoder`, `self.use_denoising_autoencoder`, `self.use_VAE`, `self.use_VAE_LLD`. Note that the name of the file containing the autoencoder model needs to be specified in the `self.jitterbug_autoencder.load_autoencoder()` function.
+ After training an autoencoder, it can be used by setting one of these
+ Jitterbug attributes to True, depending on the autoencoder to use:
+ `self.use_autoencoder`, `self.use_denoising_autoencoder`,
+ `self.use_VAE`, `self.use_VAE_LLD`.
+ Note that the name of the file containing the autoencoder model needs to be
+ specified in the `self.jitterbug_autoencder.load_autoencoder()` function.
 
 ### Augmented Sequential Learning
 
-To make the learning process more robust, `benchmark.py` offers the possibility to learn sequentially using augmented Jitterbugs. An augmented Jitterbug is a randomly modified version of the original XML file. 
-To sequentially run 10 simulations with different randomly shaped Jitterbugs, enter the command `python benchmark.py --alg sac --task move_in_direction --logdir /path/to/desired/directory/ --domain augmented_jitterbug --num_sim 10`. From this, it will execute the following algorithm:
+To make the learning process more robust, `benchmark.py` offers the
+possibility to learn sequentially using augmented Jitterbugs.
+An augmented Jitterbug is a randomly modified version of the original XML file. 
+To sequentially run 10 simulations with different randomly shaped Jitterbugs,
+enter the command
+`python benchmark.py --alg sac --task move_in_direction --logdir /path/to/desired/directory/ --domain augmented_jitterbug --num_sim 10`.
+From this, it will execute the following algorithm:
  
- - Step 1: Generate an `augmented_jitterbug.xml` file by randomly modifying the original `jitterbug.xml` file.
+ - Step 1: Generate an `augmented_jitterbug.xml` file by randomly modifying
+   the original `jitterbug.xml` file.
  - Step 2: Start learning a policy for 1e6 steps.
  - Step 3: Save the policy and go back to step 1. Repeat the process 10 times.
  
-The results of such a sequential learning are shown in figure [`manuscript/figures/sac10seq.pdf`](manuscript/figures/sac10seq.pdf).
+The results of such a sequential learning are shown in figure
+[`manuscript/figures/sac10seq.pdf`](manuscript/figures/sac10seq.pdf).
  
-Note that by default, only the shape of the legs and the mass are modified. More features can be tweaked such as (see [`jitterbug_dmc/augmented_jitterbug.py`](jitterbug_dmc/augmented_jitterbug.py):
+Note that by default, only the shape of the legs and the mass are modified.
+More features can be tweaked such as (see
+[`jitterbug_dmc/augmented_jitterbug.py`](jitterbug_dmc/augmented_jitterbug.py):
  
  - CoreBody1 density
  - CoreBody2 density
@@ -192,7 +221,8 @@ We observed this happening sometimes on Ubuntu 16.04.5 LTS when running
 is correct.
 It seems to be something wrong with the Ubuntu tensorflow build that gets
 installed by pip.
-However, this doesn't seem to stop the `benchmarks/benchmark.py` file from workgin.
+However, this doesn't seem to stop the `benchmarks/benchmark.py` file from
+working.
 
 ```bash
 [libprotobuf FATAL google/protobuf/stubs/common.cc:61] This program requires version 3.7.0 of the Protocol Buffer runtime library, but the installed version is 2.6.1.  Please update your library.  If you compiled the program yourself, make sure that your headers are from the same version of Protocol Buffers as your link-time library.  (Version verification failed in "bazel-out/k8-opt/genfiles/tensorflow/core/framework/tensor_shape.pb.cc".)

@@ -4,6 +4,8 @@ A 'Jitterbug' under-actuated continuous control Reinforcement Learning domain,
 implemented using the [MuJoCo](http://mujoco.org/) physics engine and
 distributed as an extension to the
 [Deep Mind Control suite (`dm_control`)](https://github.com/deepmind/dm_control).
+This model is also available on the
+[MuJoCo forum resources page](http://www.mujoco.org/forum/index.php?resources/the-jitterbug-domain.29/).
 
 ![Jitterbug model](figures/jitterbug.jpg)
 

@@ -417,7 +417,7 @@ In doing so, the successful policies were able to achieve high cumulative episod
         \textbf{Schematic representation of a Denoising Autoencoder.}
         We use a Denoising Autoencoder as a means to learn a reduced order observation representation in an unsupervised manner.
         The inputs $X$ have $d$ features and the latent variables $Z$ have $l<d$ dimensions.
-    }
+    }\vspace*{-12pt}
     \label{fig:autoencoder}
 \end{figure}
 
@@ -457,7 +457,7 @@ This is consistent with the observation that model-free control policy methods a
         We plot the training performance of a DDPG agent with a full and reduced-order model on the task \textit{Face In Direction} up to 5 million steps.
         Orange: agent with full-order observations (16 dimensions).
         Green: agent with reduced-order observations from Denoising Autoencoder (12 dimensions).
-        A single random seed is shown and a 100{\tiny E}\textsuperscript{3} moving average filter is applied.
+        A single random seed is shown and a 100{\tiny E}\textsuperscript{3} moving average filter is applied.\vspace*{-12pt}
     }
     \label{fig:ae-perf}
 \end{figure}
@@ -472,7 +472,7 @@ This is consistent with the observation that model-free control policy methods a
         This is done over 5 million training steps (5000 episodes).
         We show median (solid line) and the 25\textsuperscript{th} and 75\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
         A a 100{\tiny E}\textsuperscript{3} moving average filter is applied.
-    }
+    }\vspace*{-12pt}
     \label{fig:ae-lowvar}
 \end{figure}
 
@@ -491,34 +491,42 @@ For lower complexity tasks, we see similar results between the approaches.
 Perhaps, this also intuits from model order in a planning and control perspective.
 In general, when planning for a robot one assumes that there is a forward model which may guide the subsequent selection of future actions.
 The more information one has the more that can be exploited, but the more that has to be explored.
-Thus, the reduced order model might help automatically focus the inherent exploration and exploitation trade-off present.
-In conclusion, we see that a `reduced order' modeling approach that takes advantage of the latent structure offers benefits and may help inform an automatic control software process for a novel and interesting class of `reduced order' (underactuated) robot hardware.
+The reduced order model might automatically focus the inherent exploration and exploitation trade-off present.
+In conclusion, a ``reduced order'' modeling approach that takes advantage of the latent structure offers benefits and may help inform an automatic control software process for a novel and interesting class of `reduced order' (underactuated) robot hardware.
 
 
-\begin{figure*}[p]
-    \vspace*{-20pt}
-    \centering
-    \includegraphics[width=\linewidth]{fig-rl-perf}
-    
-    \caption{
-        \textbf{Characterizing the Face Direction Jitterbug task.}
-        We compare the training progress of DDPG, PPO, SAC and TD3 up to 5 million training steps (5000 episodes).
-        We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
-        A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
-        All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.
-    }
-    \label{fig:rl-perf}
-\end{figure*}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Appendixes should appear before the acknowledgment.
+%\clearpage
+\vspace*{-12pt}
+\appendix
+\subsection*{Benchmark Performance of the Jitterbug Task Suite}\label{sec:app}
 
+We consider (in Fig. \ref{fig:rl-perf}) the benchmark performance of the various tasks in the Jitterbug problem task suite DDPG \cite{DDPG} (an off-policy method) and PPO \cite{PPO} (an on-policy method) as well SAC \cite{SAC} and TD3 \cite{TD3}, which are more recent approaches that feature more stable and efficient training and update the policy (actor) network every two timesteps.  We find that DDPG is able to find rewards more stably, particularly for the more challenging cases, such as move to pose, which we assume is because of its replay buffer. %\vspace*{-12pt}
 
 
 \section*{Acknowledgment}
-
+\vspace*{-12pt}
 We thank Dr. Hanna Kurniawati at the ANU Robust Decision-making and Learning Laboratory for discussions and simulation assistance.
-This research was partly supported by an Australian Research Council Discovery Project (DP160100714).
-A. J. Snoswell is supported in part through and Australian Government Research Training Program Scholarship.
+This research is partly supported by an Australian Research Council Discovery Project (DP160100714).
+A. J. Snoswell is supported in part through an Australian Government Research Training Program.
+%\vspace*{4cm}
 
-\vspace*{4cm}
+\begin{figure*}[p]
+	\vspace*{-24pt}
+	\centering
+	\includegraphics[width=\linewidth]{fig-rl-perf}
+	
+	\caption{
+		\textbf{Characterizing the Face Direction Jitterbug task.}
+		We compare the training progress of DDPG, PPO, SAC and TD3 up to 5 million training steps (5000 episodes).
+		We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
+		A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
+		All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.
+	}
+	\label{fig:rl-perf}
+\end{figure*}
+
 
 % Balance the column lengths on the last page
 %\addtolength{\textheight}{-12cm}

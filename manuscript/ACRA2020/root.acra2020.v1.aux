@@ -1,0 +1,147 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{henderson2018deep}
+\citation{DDPG}
+\citation{PPO}
+\citation{SAC}
+\citation{TD3}
+\citation{Islam2017}
+\citation{bhatnagar2009convergent}
+\citation{spong1998underactuated}
+\citation{jgn.thesis}
+\citation{AE_hinton2006reducing}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}}
+\citation{sutton1998reinforcement}
+\citation{duan2016benchmarking}
+\citation{mnih2015human}
+\citation{DDPG}
+\citation{PPO}
+\citation{TRPO}
+\citation{DDPG}
+\citation{SAC}
+\citation{TD3}
+\citation{SAC}
+\citation{DDPG}
+\citation{bhatnagar2009convergent}
+\citation{tedrake2009underactuated}
+\citation{betts2010practical}
+\citation{von1993numerical}
+\citation{kalakrishnan2011stomp}
+\citation{nakajima2015information}
+\citation{AE_hinton2006reducing}
+\citation{ngsparse}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces  \textbf  {The Jitterbug Problem}: The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right). In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor. For scale, the blue checks on the simulated floor on the right are 1 cm in size. \relax }}{2}{figure.caption.1}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:leader}{{1}{2}{\textbf {The Jitterbug Problem}: The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right). In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor. For scale, the blue checks on the simulated floor on the right are 1 cm in size. \relax }{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Deep Reinforcement Learning for Continuous Control}{2}{subsection.2.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Reduced Order Approaches for Underactuated Robotics}{2}{subsection.2.2}}
+\citation{nagabandi2018learning}
+\citation{nishimura2017thin}
+\citation{finn2016deep}
+\citation{bitzer2010using}
+\citation{lynch2019learning}
+\citation{finn2016deep}
+\citation{zhang2018deep}
+\citation{lange2010deep}
+\citation{kimura2018daqn}
+\citation{AE_hinton2006reducing}
+\citation{vincent2008extracting}
+\citation{Todorov2012MuJoCo}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Method}{3}{section.3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  \textbf  {The architecture of our system to make an agent learn a task with a Encoder to reduce the state dimension.} The states are directly read from MuJoCo and are sent through the Encoder to generate new latent states with lower dimension. \relax }}{3}{figure.caption.2}}
+\newlabel{fig:system-arch}{{2}{3}{\textbf {The architecture of our system to make an agent learn a task with a Encoder to reduce the state dimension.} The states are directly read from MuJoCo and are sent through the Encoder to generate new latent states with lower dimension. \relax }{figure.caption.2}{}}
+\citation{Tassa2018DMC}
+\citation{Todorov2012MuJoCo}
+\citation{Brockman2016Gym}
+\citation{Hill2018Stable}
+\citation{Dhariwal2017Baselines}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  Schematic representation of the Jitterbug model. Individual rigid bodies are in different colors and we highlight the position of the center of mass, hinge joints and the single motor. }}{4}{figure.caption.3}}
+\newlabel{fig:parts}{{3}{4}{Schematic representation of the Jitterbug model. Individual rigid bodies are in different colors and we highlight the position of the center of mass, hinge joints and the single motor}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}A Novel, Underactuated Control Benchmark}{4}{section.4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}The Jitterbug Domain}{4}{subsection.4.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}The Jitterbug Task Suite}{4}{subsection.4.2}}
+\newlabel{sec:jt}{{4.2}{4}{The Jitterbug Task Suite}{subsection.4.2}{}}
+\citation{Adam}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces  \textbf  {Characterizing policy behaviors for the \emph  {Move In Direction} task.} We plot the distribution of motor velocities across many episodes for a successful policy (green) and unsuccessful policy (orange). The successful policy learns to pulse the motor in alternating directions as indicated by the spikes near $\pm 1$ in the x-axis. Interestingly, this is the same strategy used by our heuristic policies. In contrast, the unsuccessful policy gets stuck in a local minima where the motor is continuously driven in one direction. \relax }}{5}{figure.caption.4}}
+\newlabel{fig:motor-hist}{{4}{5}{\textbf {Characterizing policy behaviors for the \emph {Move In Direction} task.} We plot the distribution of motor velocities across many episodes for a successful policy (green) and unsuccessful policy (orange). The successful policy learns to pulse the motor in alternating directions as indicated by the spikes near $\pm 1$ in the x-axis. Interestingly, this is the same strategy used by our heuristic policies. In contrast, the unsuccessful policy gets stuck in a local minima where the motor is continuously driven in one direction. \relax }{figure.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  \textbf  {Heatmap showing Jitterbug position over 100 episodes.} The data were collected before (left) and after (right) training DDPG on the task \emph  {Move In Direction}. In the second figure, to evaluate the agent, the target direction was fixed at $+45\degree  $. \relax }}{5}{figure.caption.5}}
+\newlabel{fig:heatmap}{{5}{5}{\textbf {Heatmap showing Jitterbug position over 100 episodes.} The data were collected before (left) and after (right) training DDPG on the task \emph {Move In Direction}. In the second figure, to evaluate the agent, the target direction was fixed at $+45\degree $. \relax }{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Experiments}{5}{section.5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Characterizing Learned Policies}{5}{subsection.5.1}}
+\citation{Abadi2015Tensorflow}
+\citation{Adam}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces  \textbf  {RL Algorithm hyper-parameters.} Values not shown used the defaults from the \texttt  {stable\_baselines} package. \relax }}{6}{table.caption.6}}
+\newlabel{tab:hyper-params}{{1}{6}{\textbf {RL Algorithm hyper-parameters.} Values not shown used the defaults from the \texttt {stable\_baselines} package. \relax }{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Learning Reduced-Order Representations}{6}{subsection.5.2}}
+\newlabel{sec:lro}{{5.2}{6}{Learning Reduced-Order Representations}{subsection.5.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  \textbf  {Schematic representation of a Denoising Autoencoder.} We use a Denoising Autoencoder as a means to learn a reduced order observation representation in an unsupervised manner. The inputs $X$ have $d$ features and the latent variables $Z$ have $l<d$ dimensions. \relax }}{6}{figure.caption.7}}
+\newlabel{fig:autoencoder}{{6}{6}{\textbf {Schematic representation of a Denoising Autoencoder.} We use a Denoising Autoencoder as a means to learn a reduced order observation representation in an unsupervised manner. The inputs $X$ have $d$ features and the latent variables $Z$ have $l<d$ dimensions. \relax }{figure.caption.7}{}}
+\newlabel{eq:MSE}{{1}{6}{Learning Reduced-Order Representations}{equation.5.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Deep RL with Reduced-Order Representations}{6}{subsection.5.3}}
+\citation{DDPG}
+\citation{PPO}
+\citation{SAC}
+\citation{TD3}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  \textbf  {Performance of a deep reinforcement learning agent with a reduced-order representation.} We plot the training performance of a DDPG agent with a full and reduced-order model on the task \textit  {Face In Direction} up to 5 million steps. Orange: agent with full-order observations (16 dimensions). Green: agent with reduced-order observations from Denoising Autoencoder (12 dimensions). \vspace  *{-12pt} \relax }}{7}{figure.caption.8}}
+\newlabel{fig:ae-perf}{{7}{7}{\textbf {Performance of a deep reinforcement learning agent with a reduced-order representation.} We plot the training performance of a DDPG agent with a full and reduced-order model on the task \textit {Face In Direction} up to 5 million steps. Orange: agent with full-order observations (16 dimensions). Green: agent with reduced-order observations from Denoising Autoencoder (12 dimensions). \vspace *{-12pt} \relax }{figure.caption.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{7}{section.6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  \textbf  {Apparent reduction in training process variance.} For a slightly more complex task \textit  {Move In Direction}, we compare the training progress of DDPG with a full (orange) and reduced-order representation (12 dimensions, green). This is done over 5 million training steps (5000 episodes). We show median (solid line) and the 25\textsuperscript  {th} and 75\textsuperscript  {th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure. \relax }}{7}{figure.caption.9}}
+\newlabel{fig:ae-lowvar}{{8}{7}{\textbf {Apparent reduction in training process variance.} For a slightly more complex task \textit {Move In Direction}, we compare the training progress of DDPG with a full (orange) and reduced-order representation (12 dimensions, green). This is done over 5 million training steps (5000 episodes). We show median (solid line) and the 25\textsuperscript {th} and 75\textsuperscript {th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure. \relax }{figure.caption.9}{}}
+\newlabel{sec:app}{{6}{7}{Appendix: Benchmark Performance of the Jitterbug Task Suite}{section*.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces  \textbf  {Characterizing the Face Direction Jitterbug task.} We compare the training progress of DDPG, PPO, SAC and TD3 up to 5 million training steps (5000 episodes). We show median (solid line) and the 10\textsuperscript  {th} and 90\textsuperscript  {th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure. A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line). \relax }}{8}{figure.caption.12}}
+\newlabel{fig:rl-perf}{{9}{8}{\textbf {Characterizing the Face Direction Jitterbug task.} We compare the training progress of DDPG, PPO, SAC and TD3 up to 5 million training steps (5000 episodes). We show median (solid line) and the 10\textsuperscript {th} and 90\textsuperscript {th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure. A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line). \relax }{figure.caption.12}{}}
+\bibstyle{named}
+\bibdata{root}
+\bibcite{Abadi2015Tensorflow}{\citeauthoryear {Abadi \bgroup \em  et al.\egroup }{2015}}
+\bibcite{betts2010practical}{\citeauthoryear {Betts}{2010}}
+\bibcite{bhatnagar2009convergent}{\citeauthoryear {Bhatnagar \bgroup \em  et al.\egroup }{2009}}
+\bibcite{bitzer2010using}{\citeauthoryear {Bitzer \bgroup \em  et al.\egroup }{2010}}
+\bibcite{Brockman2016Gym}{\citeauthoryear {Brockman \bgroup \em  et al.\egroup }{2016}}
+\bibcite{Dhariwal2017Baselines}{\citeauthoryear {Dhariwal \bgroup \em  et al.\egroup }{2017}}
+\bibcite{duan2016benchmarking}{\citeauthoryear {Duan \bgroup \em  et al.\egroup }{2016}}
+\bibcite{finn2016deep}{\citeauthoryear {Finn \bgroup \em  et al.\egroup }{2016}}
+\bibcite{TD3}{\citeauthoryear {Fujimoto \bgroup \em  et al.\egroup }{2018}}
+\bibcite{SAC}{\citeauthoryear {Haarnoja \bgroup \em  et al.\egroup }{2018}}
+\bibcite{henderson2018deep}{\citeauthoryear {Henderson \bgroup \em  et al.\egroup }{2018}}
+\bibcite{Hill2018Stable}{\citeauthoryear {Hill \bgroup \em  et al.\egroup }{2018}}
+\bibcite{AE_hinton2006reducing}{\citeauthoryear {Hinton and Salakhutdinov}{2006}}
+\bibcite{Islam2017}{\citeauthoryear {Islam \bgroup \em  et al.\egroup }{2017}}
+\bibcite{kalakrishnan2011stomp}{\citeauthoryear {Kalakrishnan \bgroup \em  et al.\egroup }{2011}}
+\bibcite{kimura2018daqn}{\citeauthoryear {Kimura}{2018}}
+\bibcite{Adam}{\citeauthoryear {Kingma and Ba}{2014}}
+\bibcite{lange2010deep}{\citeauthoryear {Lange and Riedmiller}{2010}}
+\bibcite{DDPG}{\citeauthoryear {Lillicrap \bgroup \em  et al.\egroup }{2015}}
+\bibcite{lynch2019learning}{\citeauthoryear {Lynch \bgroup \em  et al.\egroup }{2019}}
+\bibcite{mnih2015human}{\citeauthoryear {Mnih \bgroup \em  et al.\egroup }{2015}}
+\bibcite{nagabandi2018learning}{\citeauthoryear {Nagabandi \bgroup \em  et al.\egroup }{2018}}
+\bibcite{nakajima2015information}{\citeauthoryear {Nakajima \bgroup \em  et al.\egroup }{2015}}
+\bibcite{ngsparse}{\citeauthoryear {Ng}{2011}}
+\bibcite{jgn.thesis}{\citeauthoryear {Nichol}{2005}}
+\bibcite{nishimura2017thin}{\citeauthoryear {Nishimura \bgroup \em  et al.\egroup }{2017}}
+\bibcite{TRPO}{\citeauthoryear {Schulman \bgroup \em  et al.\egroup }{2015}}
+\bibcite{PPO}{\citeauthoryear {Schulman \bgroup \em  et al.\egroup }{2017}}
+\bibcite{spong1998underactuated}{\citeauthoryear {Spong}{1998}}
+\bibcite{sutton1998reinforcement}{\citeauthoryear {Sutton and Barto}{1998}}
+\bibcite{Tassa2018DMC}{\citeauthoryear {Tassa \bgroup \em  et al.\egroup }{2018}}
+\bibcite{tedrake2009underactuated}{\citeauthoryear {Tedrake}{2009}}
+\bibcite{Todorov2012MuJoCo}{\citeauthoryear {Todorov \bgroup \em  et al.\egroup }{2012}}
+\bibcite{vincent2008extracting}{\citeauthoryear {Vincent \bgroup \em  et al.\egroup }{2008}}
+\bibcite{von1993numerical}{\citeauthoryear {Von\nobreakspace  {}Stryk}{1993}}
+\bibcite{zhang2018deep}{\citeauthoryear {Zhang \bgroup \em  et al.\egroup }{2018}}

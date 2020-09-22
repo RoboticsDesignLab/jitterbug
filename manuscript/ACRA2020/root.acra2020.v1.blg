@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2017)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: root.acra2020.v1.aux
+The style file: named.bst
+Database file #1: root.bib
+You've used 36 entries,
+            2444 wiz_defined-function locations,
+            753 strings with 12677 characters,
+and the built_in function-call counts, 18374 in all, are:
+= -- 1803
+> -- 1126
+< -- 15
++ -- 410
+- -- 446
+* -- 1496
+:= -- 2979
+add.period$ -- 119
+call.type$ -- 36
+change.case$ -- 346
+chr.to.int$ -- 36
+cite$ -- 36
+duplicate$ -- 659
+empty$ -- 1124
+format.name$ -- 450
+if$ -- 3756
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 32
+newline$ -- 183
+num.names$ -- 108
+pop$ -- 368
+preamble$ -- 1
+purify$ -- 383
+quote$ -- 0
+skip$ -- 566
+stack$ -- 0
+substring$ -- 753
+swap$ -- 220
+text.length$ -- 15
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 280
+warning$ -- 0
+while$ -- 118
+width$ -- 43
+write$ -- 466

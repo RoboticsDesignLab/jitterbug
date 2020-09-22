@@ -1,0 +1,261 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Abadi \bgroup \em et al.\egroup
+  }{2015}]{Abadi2015Tensorflow}
+Mart\'{\i}n Abadi, Ashish Agarwal, Paul Barham, Eugene Brevdo, Zhifeng Chen,
+  Craig Citro, Greg~S. Corrado, Andy Davis, Jeffrey Dean, Matthieu Devin,
+  Sanjay Ghemawat, Ian Goodfellow, Andrew Harp, Geoffrey Irving, Michael Isard,
+  Yangqing Jia, Rafal Jozefowicz, Lukasz Kaiser, Manjunath Kudlur, Josh
+  Levenberg, Dandelion Man\'{e}, Rajat Monga, Sherry Moore, Derek Murray, Chris
+  Olah, Mike Schuster, Jonathon Shlens, Benoit Steiner, Ilya Sutskever, Kunal
+  Talwar, Paul Tucker, Vincent Vanhoucke, Vijay Vasudevan, Fernanda Vi\'{e}gas,
+  Oriol Vinyals, Pete Warden, Martin Wattenberg, Martin Wicke, Yuan Yu, and
+  Xiaoqiang Zheng.
+\newblock {TensorFlow}: Large-scale machine learning on heterogeneous systems,
+  2015.
+\newblock Software available from tensorflow.org.
+
+\bibitem[\protect\citeauthoryear{Betts}{2010}]{betts2010practical}
+John~T Betts.
+\newblock {\em Practical methods for optimal control and estimation using
+  nonlinear programming}, volume~19.
+\newblock {SIAM}, 2010.
+
+\bibitem[\protect\citeauthoryear{Bhatnagar \bgroup \em et al.\egroup
+  }{2009}]{bhatnagar2009convergent}
+Shalabh Bhatnagar, Doina Precup, David Silver, Richard~S Sutton, Hamid~R Maei,
+  and Csaba Szepesv{\'a}ri.
+\newblock Convergent temporal-difference learning with arbitrary smooth
+  function approximation.
+\newblock In {\em Advances in Neural Information Processing Systems}, pages
+  1204--1212, 2009.
+
+\bibitem[\protect\citeauthoryear{Bitzer \bgroup \em et al.\egroup
+  }{2010}]{bitzer2010using}
+Sebastian Bitzer, Matthew Howard, and Sethu Vijayakumar.
+\newblock Using dimensionality reduction to exploit constraints in
+  reinforcement learning.
+\newblock In {\em 2010 IEEE/RSJ International Conference on Intelligent Robots
+  and Systems}, pages 3219--3225. IEEE, 2010.
+
+\bibitem[\protect\citeauthoryear{Brockman \bgroup \em et al.\egroup
+  }{2016}]{Brockman2016Gym}
+Greg Brockman, Vicki Cheung, Ludwig Pettersson, Jonas Schneider, John Schulman,
+  Jie Tang, and Wojciech Zaremba.
+\newblock Openai hym.
+\newblock {\em arXiv preprint arXiv:1606.01540}, 2016.
+
+\bibitem[\protect\citeauthoryear{Dhariwal \bgroup \em et al.\egroup
+  }{2017}]{Dhariwal2017Baselines}
+Prafulla Dhariwal, Christopher Hesse, Oleg Klimov, Alex Nichol, Matthias
+  Plappert, Alec Radford, John Schulman, Szymon Sidor, Yuhuai Wu, and Peter
+  Zhokhov.
+\newblock Openai baselines.
+\newblock \url{https://github.com/openai/baselines}, 2017.
+
+\bibitem[\protect\citeauthoryear{Duan \bgroup \em et al.\egroup
+  }{2016}]{duan2016benchmarking}
+Yan Duan, Xi~Chen, Rein Houthooft, John Schulman, and Pieter Abbeel.
+\newblock Benchmarking deep reinforcement learning for continuous control.
+\newblock In {\em International Conference on Machine Learning}, pages
+  1329--1338, 2016.
+
+\bibitem[\protect\citeauthoryear{Finn \bgroup \em et al.\egroup
+  }{2016}]{finn2016deep}
+Chelsea Finn, Xin~Yu Tan, Yan Duan, Trevor Darrell, Sergey Levine, and Pieter
+  Abbeel.
+\newblock Deep spatial autoencoders for visuomotor learning.
+\newblock In {\em 2016 IEEE International Conference on Robotics and Automation
+  (ICRA)}, pages 512--519. IEEE, 2016.
+
+\bibitem[\protect\citeauthoryear{Fujimoto \bgroup \em et al.\egroup
+  }{2018}]{TD3}
+Scott Fujimoto, Herke van Hoof, and David Meger.
+\newblock Addressing function approximation error in actor-critic methods.
+\newblock {\em arXiv preprint arXiv:1802.09477}, 2018.
+
+\bibitem[\protect\citeauthoryear{Haarnoja \bgroup \em et al.\egroup
+  }{2018}]{SAC}
+Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, and Sergey Levine.
+\newblock Soft actor-critic: Off-policy maximum entropy deep reinforcement
+  learning with a stochastic actor.
+\newblock {\em arXiv preprint arXiv:1801.01290}, 2018.
+
+\bibitem[\protect\citeauthoryear{Henderson \bgroup \em et al.\egroup
+  }{2018}]{henderson2018deep}
+Peter Henderson, Riashat Islam, Philip Bachman, Joelle Pineau, Doina Precup,
+  and David Meger.
+\newblock Deep reinforcement learning that matters.
+\newblock In {\em Thirty-Second AAAI Conference on Artificial Intelligence},
+  2018.
+
+\bibitem[\protect\citeauthoryear{Hill \bgroup \em et al.\egroup
+  }{2018}]{Hill2018Stable}
+Ashley Hill, Antonin Raffin, Maximilian Ernestus, Adam Gleave, Rene Traore,
+  Prafulla Dhariwal, Christopher Hesse, Oleg Klimov, Alex Nichol, Matthias
+  Plappert, Alec Radford, John Schulman, Szymon Sidor, and Yuhuai Wu.
+\newblock Stable baselines.
+\newblock \url{https://github.com/hill-a/stable-baselines}, 2018.
+
+\bibitem[\protect\citeauthoryear{Hinton and
+  Salakhutdinov}{2006}]{AE_hinton2006reducing}
+Geoffrey~E Hinton and Ruslan~R Salakhutdinov.
+\newblock Reducing the dimensionality of data with neural networks.
+\newblock {\em science}, 313(5786):504--507, 2006.
+
+\bibitem[\protect\citeauthoryear{Islam \bgroup \em et al.\egroup
+  }{2017}]{Islam2017}
+Riashat Islam, Peter Henderson, Maziar Gomrokchi, and Doina Precup.
+\newblock Reproducibility of benchmarked deep reinforcement learning tasks for
+  continuous control.
+\newblock {\em arXiv preprint arXiv:1708.04133}, 2017.
+
+\bibitem[\protect\citeauthoryear{Kalakrishnan \bgroup \em et al.\egroup
+  }{2011}]{kalakrishnan2011stomp}
+Mrinal Kalakrishnan, Sachin Chitta, Evangelos Theodorou, Peter Pastor, and
+  Stefan Schaal.
+\newblock Stomp: Stochastic trajectory optimization for motion planning.
+\newblock In {\em 2011 IEEE international conference on robotics and
+  automation}, pages 4569--4574. IEEE, 2011.
+
+\bibitem[\protect\citeauthoryear{Kimura}{2018}]{kimura2018daqn}
+Daiki Kimura.
+\newblock {DAQN}: Deep auto-encoder and q-network.
+\newblock {\em arXiv preprint arXiv:1806.00630}, 2018.
+
+\bibitem[\protect\citeauthoryear{Kingma and Ba}{2014}]{Adam}
+Diederik~P Kingma and Jimmy Ba.
+\newblock Adam: A method for stochastic optimization.
+\newblock {\em arXiv preprint arXiv:1412.6980}, 2014.
+
+\bibitem[\protect\citeauthoryear{Lange and Riedmiller}{2010}]{lange2010deep}
+Sascha Lange and Martin Riedmiller.
+\newblock Deep auto-encoder neural networks in reinforcement learning.
+\newblock In {\em The 2010 International Joint Conference on Neural Networks
+  (IJCNN)}, pages 1--8. IEEE, 2010.
+
+\bibitem[\protect\citeauthoryear{Lillicrap \bgroup \em et al.\egroup
+  }{2015}]{DDPG}
+Timothy~P Lillicrap, Jonathan~J Hunt, Alexander Pritzel, Nicolas Heess, Tom
+  Erez, Yuval Tassa, David Silver, and Daan Wierstra.
+\newblock Continuous control with deep reinforcement learning.
+\newblock {\em arXiv preprint arXiv:1509.02971}, 2015.
+
+\bibitem[\protect\citeauthoryear{Lynch \bgroup \em et al.\egroup
+  }{2019}]{lynch2019learning}
+Corey Lynch, Mohi Khansari, Ted Xiao, Vikash Kumar, Jonathan Tompson, Sergey
+  Levine, and Pierre Sermanet.
+\newblock Learning latent plans from play.
+\newblock {\em arXiv preprint arXiv:1903.01973}, 2019.
+
+\bibitem[\protect\citeauthoryear{Mnih \bgroup \em et al.\egroup
+  }{2015}]{mnih2015human}
+Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Andrei~A Rusu, Joel Veness,
+  Marc~G Bellemare, Alex Graves, Martin Riedmiller, Andreas~K Fidjeland, Georg
+  Ostrovski, et~al.
+\newblock Human-level control through deep reinforcement learning.
+\newblock {\em Nature}, 518(7540):529, 2015.
+
+\bibitem[\protect\citeauthoryear{Nagabandi \bgroup \em et al.\egroup
+  }{2018}]{nagabandi2018learning}
+Anusha Nagabandi, Guangzhao Yang, Thomas Asmar, Ravi Pandya, Gregory Kahn,
+  Sergey Levine, and Ronald~S Fearing.
+\newblock Learning image-conditioned dynamics models for control of
+  underactuated legged millirobots.
+\newblock In {\em 2018 IEEE/RSJ International Conference on Intelligent Robots
+  and Systems (IROS)}, pages 4606--4613. IEEE, 2018.
+
+\bibitem[\protect\citeauthoryear{Nakajima \bgroup \em et al.\egroup
+  }{2015}]{nakajima2015information}
+Kohei Nakajima, Helmut Hauser, Tao Li, and Rolf Pfeifer.
+\newblock Information processing via physical soft body.
+\newblock {\em Scientific reports}, 5:10487, 2015.
+
+\bibitem[\protect\citeauthoryear{Ng}{2011}]{ngsparse}
+Andrew Ng.
+\newblock Sparse autoencoder.
+\newblock {CS294A Lecture Notes}, Stanford University, 2011.
+
+\bibitem[\protect\citeauthoryear{Nichol}{2005}]{jgn.thesis}
+J.~Gordon. Nichol.
+\newblock {\em Design for energy loss and energy control in a galloping
+  artificial quadruped}.
+\newblock PhD thesis, Stanford University, 2005.
+
+\bibitem[\protect\citeauthoryear{Nishimura \bgroup \em et al.\egroup
+  }{2017}]{nishimura2017thin}
+Toshihiro Nishimura, Kaori Mizushima, Yosuke Suzuki, Tokuo Tsuji, and Tetsuyou
+  Watanabe.
+\newblock Thin plate manipulation by an under-actuated robotic soft gripper
+  utilizing the environment.
+\newblock In {\em 2017 IEEE/RSJ International Conference on Intelligent Robots
+  and Systems (IROS)}, pages 1236--1243. IEEE, 2017.
+
+\bibitem[\protect\citeauthoryear{Schulman \bgroup \em et al.\egroup
+  }{2015}]{TRPO}
+John Schulman, Sergey Levine, Pieter Abbeel, Michael Jordan, and Philipp
+  Moritz.
+\newblock Trust region policy optimization.
+\newblock In {\em International conference on machine learning}, pages
+  1889--1897, 2015.
+
+\bibitem[\protect\citeauthoryear{Schulman \bgroup \em et al.\egroup
+  }{2017}]{PPO}
+John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov.
+\newblock Proximal policy optimization algorithms.
+\newblock {\em arXiv preprint arXiv:1707.06347}, 2017.
+
+\bibitem[\protect\citeauthoryear{Spong}{1998}]{spong1998underactuated}
+Mark~W Spong.
+\newblock Underactuated mechanical systems.
+\newblock In {\em Control problems in robotics and automation}, pages 135--150.
+  Springer, 1998.
+
+\bibitem[\protect\citeauthoryear{Sutton and
+  Barto}{1998}]{sutton1998reinforcement}
+Richard~S Sutton and Andrew~G Barto.
+\newblock {\em Reinforcement Learning: An Introduction}.
+\newblock A Bradford Book, 1998.
+
+\bibitem[\protect\citeauthoryear{Tassa \bgroup \em et al.\egroup
+  }{2018}]{Tassa2018DMC}
+Yuval Tassa, Yotam Doron, Alistair Muldal, Tom Erez, Yazhe Li, Diego de~Las
+  Casas, David Budden, Abbas Abdolmaleki, Josh Merel, Andrew Lefrancq, et~al.
+\newblock Deepmind control suite.
+\newblock {\em arXiv preprint arXiv:1801.00690}, 2018.
+
+\bibitem[\protect\citeauthoryear{Tedrake}{2009}]{tedrake2009underactuated}
+Russ Tedrake.
+\newblock Underactuated robotics: Learning, planning, and control for efficient
+  and agile machines: Course notes for mit 6.832.
+\newblock Technical report, Massachusetts Institute of Technology, 2009.
+
+\bibitem[\protect\citeauthoryear{Todorov \bgroup \em et al.\egroup
+  }{2012}]{Todorov2012MuJoCo}
+Emanuel Todorov, Tom Erez, and Yuval Tassa.
+\newblock {MuJoCo}: A physics engine for model-based control.
+\newblock In {\em 2012 IEEE/RSJ International Conference on Intelligent Robots
+  and Systems}, pages 5026--5033. IEEE, 2012.
+
+\bibitem[\protect\citeauthoryear{Vincent \bgroup \em et al.\egroup
+  }{2008}]{vincent2008extracting}
+Pascal Vincent, Hugo Larochelle, Yoshua Bengio, and Pierre-Antoine Manzagol.
+\newblock Extracting and composing robust features with denoising autoencoders.
+\newblock In {\em Proceedings of the 25th international conference on Machine
+  learning}, pages 1096--1103. ACM, 2008.
+
+\bibitem[\protect\citeauthoryear{Von~Stryk}{1993}]{von1993numerical}
+Oskar Von~Stryk.
+\newblock Numerical solution of optimal control problems by direct collocation.
+\newblock In {\em Optimal Control}, pages 129--143. Springer, 1993.
+
+\bibitem[\protect\citeauthoryear{Zhang \bgroup \em et al.\egroup
+  }{2018}]{zhang2018deep}
+Tianhao Zhang, Zoe McCarthy, Owen Jow, Dennis Lee, Xi~Chen, Ken Goldberg, and
+  Pieter Abbeel.
+\newblock Deep imitation learning for complex manipulation tasks from virtual
+  reality teleoperation.
+\newblock In {\em 2018 IEEE International Conference on Robotics and Automation
+  (ICRA)}, pages 1--8. IEEE, 2018.
+
+\end{thebibliography}

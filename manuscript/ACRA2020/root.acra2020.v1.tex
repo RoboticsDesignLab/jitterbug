@@ -1,0 +1,525 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%ACRA 2020 Turbo Submission
+
+% This is the instructions for authors for ACRA.
+\documentclass{article}
+\usepackage{acra}
+
+%In case you encounter the following error:
+%Error 1010 The PDF file may be corrupt (unable to open PDF file) OR
+%Error 1000 An error occurred while parsing a contents stream. Unable to analyze the PDF file.
+%This is a known problem with pdfLaTeX conversion filter. The file cannot be opened with acrobat reader
+%Please use one of the alternatives below to circumvent this error by uncommenting one or the other
+%\pdfobjcompresslevel=0
+%\pdfminorversion=4
+
+% See the \addtolength command later in the file to balance the column lengths
+% on the last page of the document
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{textcomp,gensymb}
+\usepackage{tabularx,booktabs}
+\usepackage{array,subcaption}
+\let\labelindent\relax
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{color,soul}
+
+\captionsetup[table]{
+    justification=centerlast,
+    textfont=small,
+}
+
+\graphicspath{{figures/}}
+
+% Set a style for an entire table row
+\newcolumntype{$}{>{\global\let\currentrowstyle\relax}}
+\newcolumntype{^}{>{\currentrowstyle}}
+\newcommand{\rowstyle}[1]{\gdef\currentrowstyle{#1}%
+    #1\ignorespaces
+}
+
+% Some small icons we use in the text
+\newcommand{\com}{\,\includegraphics[width=9pt]{ico-com}\,}
+\newcommand{\hinge}{\,\includegraphics[width=9pt]{ico-hinge}\,}
+\newcommand{\motor}{\,\includegraphics[width=9pt]{ico-motor}\,}
+
+\usepackage{lipsum}
+
+\title{
+    A Reduced-Order Approach to Assist with Reinforcement Learning for Underactuated Robotics
+}
+
+\author{J\'er\'emy Augot$^{1,2}$, Aaron J. Snoswell$^{2}$ and Surya P. N. Singh$^{2,3}$
+\\ $^{1}$Ecole CentraleSup\'elec, Paris, France
+\\ $^{2}$The Robotics Design Lab, The University of Queensland, Brisbane, Australia
+\\ $^{3}$Intuitive Surgical, Sunnyvale, CA, USA
+\\ {\texttt{\{j.augot, a.snoswell, spns\}@uq.edu.au}}}
+
+
+\begin{document}
+
+\maketitle
+%\thispagestyle{empty}
+%\pagestyle{empty}
+
+\begin{abstract}
+
+Underactuated robot designs are enticing due to their electromechanical simplicity; but, their operation is complex especially for compliant designs that may not have an explicit model.
+Deep reinforcement learning methods together with multi-joint dynamic simulation may help overcome this control bottleneck.
+However, such systems tend to have large continuous action spaces and exhibit sparse rewards, thus making control policy exploration variable and non-trivial.  
+
+Using the observations: (1) that an underactuated system has coupled states, and (2) that a deep function approximator may generalize across compressed (and potentially nonintuitive) states, we consider a reduced order approach based around a generative autoencoder so as to automatically find a better representation to focus a control policy exploration process. 
+
+To help evaluate this approach, we also introduce \emph{The Jitterbug Problem}, which is a series of increasingly specific and challenging motion control tasks for a highly compliant legged toy robot with just a single motor locomoting across a field.  
+
+We benchmarked this problem against off-policy and on-policy deep reinforcement learning algorithms and find that an off-policy approach had better median rewards, but has higher variability. 
+Through this study we find that reducing the model by taking advantage of the latent structure may exhibit similar (reward) performance, yet empirically has less training variance and slightly better learning rates.
+
+\end{abstract}
+
+\section{Introduction}
+
+As robots become increasingly variable and compliant they become more capable, and complex.
+Underactuated robots, for example, provide great design freedom, yet their adoption has been limited by the need for manual controller designs.
+
+Deep reinforcement learning methods offer automated tools for robotic control by identifying a policy that maximizes the expected sum of rewards \cite{henderson2018deep}.
+This has been extended to continuous control domains via algorithms such as the Deep Deterministic Policy Gradient (DDPG) \cite{DDPG}, Proximal Policy Optimization (PPO) \cite{PPO}, Soft Actor-Critic (SAC) \cite{SAC}, and Twin Delayed Deep Deterministic (TD3) \cite{TD3}.
+The power of these methods comes, in part, from the high-dimensional, nonlinear function approximation of both the policy and the expected value by neural networks.
+The dimensionality of these rich representations also presents challenges, particularly for sample collection, stability, and convergence \cite{Islam2017}.
+Reducing the order seems a natural approach to addressing these challenges, but doing so directly requires carefully defining suitable (state-space) features as the aforementioned methods are sensitive to the chosen representation \cite{bhatnagar2009convergent}.  
+
+\begin{figure}[t]
+    
+    \centering
+    
+    \begin{minipage}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{katita}
+    \end{minipage}
+    \begin{minipage}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{jitterbug}
+    \end{minipage}
+    
+    \setlength{\belowcaptionskip}{-10pt}
+    \caption{
+        \textbf{The Jitterbug Problem}: The wind-up children's toy `Katita' (left) was the inspiration for our underactuated `Jitterbug' continuous control task (right).
+        In the simulated robot the wind-up spring is replaced with a controlled single degree-of-freedom motor.
+        For scale, the blue checks on the simulated floor on the right are 1 cm in size.
+    }
+    \vspace*{-6pt}
+    \label{fig:leader}
+    
+\end{figure} 
+
+Interestingly, many robots are underactuated by design, or at times, by circumstance (e.g., due to motor saturation, etc.).
+Such systems achieve their tasks due to the inherent inter-dependence of their actuation states \cite{spong1998underactuated}.
+This implicit structure suggests that an (automatic) reduction of the actuation space may make these systems more compatible with (model-free) deep reinforcement learning methods, which, in turn, would allow for more variable underactuated systems.
+Towards this, we introduce a highly variable, single actuator robotic locomotion benchmark, which we term `The Jitterbug Problem', based around a passive compliant toy system with tasks of varying difficulty, particularly around the sparsity of the reward signal (see also Fig.~\ref{fig:leader}).
+
+Reduced order approaches are a common strategy in engineering.
+An issue herein is that an underactuated system, such as the Jitterbug problem, is highly variant in state space and thus difficult to explicitly model in an analytic form.
+Note that `highly variable' does not imply `chaotic'; that is, the system is deterministic for over short horizons in the state-space.
+However, the motion is clearly non-linear due to the contacts and locomotion phases and gaits.  (Indeed, it has been reported that the Katita toy, on which the problem is inspired, exhibits a `galloping' locomotion mode \cite{jgn.thesis}.)
+A nonlinear approach for automatically discovering interesting structure in empirical models is unsupervised learning.
+Auto-encoders are a well know neural network approach for this that can automatically discover underlying correlations and their interdependencies \cite{AE_hinton2006reducing}.
+In this way, initial (random) exploration helps characterize the implicit structure of the (underactuated) action space that then focuses subsequent deep reinforcement learning control policy learning.
+
+The two contributions of this paper are: (1) a consideration of AutoEncoder-based model reduction for deep reinforcement learning in highly variable, underactuated robot domains; and, (2) the introduction and characterization of the Jitterbug Problem as a diverse underactuated robotics task with dynamic, compliant and non-trivial motion in five scenarios of varying gradations of task complexity.
+We find that reduced order models can have similar (reward) performance, yet empirically have less training variance and slightly better learning rates.  
+The challenging nature of the Jitterbug problem may also help inform future research in automatic controls for flexible robots.
+
+\section{Related Work}
+
+There is a good deal of work, some rather recent, in both the robotics and machine learning communities that is relevant to this work.
+The underactuated physical robotics task has the property of continuous states/actions with some correlations between these states.
+Thus, the control strategy has to operate over continuous actions, and, ideally, could take advantage of the latent structure. 
+
+\subsection{Deep Reinforcement Learning for Continuous Control}
+
+Reinforcement Learning (RL) methods offer automated tools for controller design of such systems via trail and error \cite{sutton1998reinforcement}, but have been been limited by feature representations and forward models \cite{duan2016benchmarking}. 
+Deep reinforcement learning algorithms typically address this through the use of deep neural networks for both the policy (`actor') and value function (`critic') which has allowed for operation to the continuous control domain \cite{mnih2015human,DDPG}. 
+Such systems may be grouped as using `on-policy' or 'off-policy' learning strategies; where on-policy methods, such as PPO \cite{PPO} and TRPO \cite{TRPO}, are those that use a current policy's action to update the value ($Q$) and off-policy approaches are those methods, such as DDPG \cite{DDPG}, SAC \cite{SAC}, TD3 \cite{TD3}, that update the value via the best action and its total discounted future reward.  
+
+In the context of highly variable, underactuated robotics, on-policy methods may exhibit have lower sample efficiency as they would require new samples to be collected for each gradient step \cite{SAC}.
+Conversely, off-policy methods may utilize a replay buffer to minimize correlations between samples \cite{DDPG}, but may have difficulties with brittleness to state-space parameters, stability and convergence \cite{bhatnagar2009convergent}.
+In both cases, however, reducing the dimensionality and using a more aligned state-space may reduce these issues. 
+
+\subsection{Reduced Order Approaches for Underactuated Robotics}
+
+Underactuated robots are fundamentally correlated in their actuation space  \cite{tedrake2009underactuated}.
+When a model is available control strategies including from optimal control \cite{betts2010practical}, direct collocation \cite{von1993numerical}, and trajectory optimization \cite{kalakrishnan2011stomp} have been applied.
+Some novel robots, such as compliant legged robots or soft robots, tend to exhibit complex dynamics that do stymie dynamical system and model reduction approaches as an explicit physical model may not be available \cite{nakajima2015information}.
+
+Given that actuation space for underactuated robots is structured, an autoencoder would be able to automatically discover some of these correlations \cite{AE_hinton2006reducing,ngsparse}.
+A concern, however, is that the reduced model is not always intuitive, which would complicate the subsequent synchronization with a model based control strategy.
+In this way model-free deep reinforcement learning continuous control methods are rather compatible with an autoencoder's reduced state description.
+
+In the underactuated domain, these ideas have been used to get an empirical model that then inform subsequent model-based control.
+For example, Nagabandi, \emph{et al.} \cite{nagabandi2018learning} use a small legged robot in which a neural network forecasts the robot's state at the next timestep which is then used via Model Predictive Control (MPC).
+Nishimura, \emph{et al.} use an autoencoder in a similar fashion to inform manipulation with a soft-gripper \cite{nishimura2017thin}.
+In both these cases the control model is analytic and the engineering effort is needed to synchronize the empirical model with the controller, which can limit the types of policies and strategies that the robot can learn and execute.  
+More generally, model-based methods enjoy sample efficiency, but pose challenges of generalization due the control's model and its assumptions.  
+
+In the machine learning domain, the combination of an autoencoder and deep reinforcement network has been considered for various contexts. 
+This has been particularly effective in cases with very high dimensional inputs, such as from video, for low-dimensional independent constraints, such as obstacle locations \cite{finn2016deep,bitzer2010using,lynch2019learning}.  
+It has have shown promise in a host of challenging applications including visualmotor learning \cite{finn2016deep} and VR teleoperation \cite{zhang2018deep}. 
+
+The system architecture of this work relates to Lange, \emph{et al.} \cite{lange2010deep} in that we train an autoencoder network, remove the decoder side, and then use the remaining encoder network to compress the input features that are used as part of a deep reinforcement learning control policy search.
+In contrast to this work, we do see a benefit with a random policy, sparing the need for a `hint-to-goal' heuristic.
+This idea has also been considered more recently by Kimura \cite{kimura2018daqn} for reducing the number of trials during the RL policy training phase.  
+
+In this work, the task is slightly different in that the action space is correlated not only across states, but also across subsequent states in time.  
+
+\section{Method}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{fig-system-arch}\vspace*{-12pt}
+    \caption{
+        \textbf{The architecture of our system to make an agent learn a task with a Encoder to reduce the state dimension.} The states are directly read from MuJoCo and are sent through the Encoder to generate new latent states with lower dimension.
+    }
+    \label{fig:system-arch}
+\end{figure}
+
+We use the intuition that an underactuated system has correlations between states and thus there is a lower-dimensional representation that could describe this process. 
+
+We choose to use an autoencoder to reduce the state space dimension since it can generate a latent space by exploiting feature correlations \cite{AE_hinton2006reducing}.
+More specifically, we use a denoising autoencoder to increase robustness of the feature compression \cite{vincent2008extracting}.
+Our process can be split into two parts:
+
+\begin{itemize}
+    \item Defining and training an autoencoder that enables an efficient dimension reduction without loosing too much information in the data compression. 
+    \item Integrating the trained encoder to the learning process in order to reduce the dimensionality of the states.
+\end{itemize}
+
+For the first part, we defined a denoising autoencoder composed of two fully-connected layers with $tanh$ activation functions. We train it to compress the states from an input to a latent space - i.e. encode, and then regenerate them as accurately as possible - i.e decode.
+The training process is described in section \ref{sec:lro}.
+Although unused in our later process, the decoder plays a critical part in making sure that the latent space is representative enough of the input.
+
+Once trained, only the encoder is kept for the second step of our process. A Jitterbug agent is trained to perform a specific task on reduced dimension state space - see section \ref{sec:jt} for more details on the tasks.
+To do so, the state $S_t$ and the reward $R_t$  of the Jitterbug are read from the MuJoCo environment \cite{Todorov2012MuJoCo} at each time step $t$.
+The state goes through the encoder which outputs a latent variable $L_t$ with a lower dimension. $L_t$ is then sent to the agent along with the reward $R_t$ in order to generate an action $A_t$.
+In this way, the Jitterbug agent never sees the real state $S_t$, but instead chooses an action by only considering the reduced latent state $L_t$.
+The  DDPG algorithm is used because it has a reply buffer to minimize correlations between samples and because its target value ($Q$) network gives consistent targets subsequent iterations, which should help capture some of the sequencing need for underactuated robots.
+It shows promising results on solving the tasks (see also Fig. \ref{fig:rl-perf}).
+
+\section{A Novel, Underactuated Control Benchmark}
+
+We implemented our Jitterbug benchmark using the DeepMind Control Suite (DMC) framework \cite{Tassa2018DMC}.
+DMC is a framework and set of benchmark tasks for continuous control published by Google DeepMind in 2018.
+DMC benchmarks consist of a \emph{domain} defining a robotic and environment model and \emph{tasks} which are instances of that domain with specific MDP structure
+
+DMC uses the robust Multi-Joint dynamics with Contact (MuJoCo) robotics physics engine for simulation \cite{Todorov2012MuJoCo}.
+To aid comparison across tasks, DMC imposes constraints on rewards ($R \in [0, 1]$) and episode length ($H = 1000$).
+As such, for any DMC task, cumulative episode return $\approx 1000$ indicates success.
+
+DMC tasks are compatible subsets of the popular OpenAI Gym framework \cite{Brockman2016Gym}, meaning many popular RL algorithm frameworks can be used with these benchmarks.
+For our evaluations, we used the \texttt{stable\_baselines} library of RL algorithms \cite{Hill2018Stable}, which is derived from the OpenAI \texttt{baselines} package \cite{Dhariwal2017Baselines}.
+
+\subsection{The Jitterbug Domain}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\linewidth]{fig-jitterbug-parts}\vspace*{-12pt}
+    \caption[
+        Schematic representation of the Jitterbug model.
+        Individual rigid bodies are in different colors and we highlight the position of the center of mass, hinge joints and the single motor.
+    ]{
+        \textbf{Schematic representation of the Jitterbug model.}
+        Individual rigid bodies are in different colors and we highlight the position of the center of mass (\protect\com), hinge joints  (\protect\hinge) and the single motor (\protect\motor).
+    }
+    \label{fig:parts}
+\end{figure}
+
+Our Jitterbug model was inspired by the children's toy Katita (Figure~\ref{fig:leader}).
+We aimed to reproduce the physical dynamics of this toy while enabling control by replacing the wind-up spring with a single actuator of equivalent torque.
+Our Jitterbug model conforms to the dimensions and mass of the Katita, however we replace the wind-up spring with a controlled single degree-of-freedom torque actuator.
+We retain the (non-functional) wind up crank to more closely model the mass distribution of the physical Katita.
+Figure~\ref{fig:parts} shows the schematic composition of our simulated Jitterbug model.
+
+We used high-speed recording and visual tachometry to measure the Katita motor speed and leg vibration modes.
+By reverse-engineering the Katita gearbox we estimated the torque output of the drive spring and configured the MuJoCo actuator appropriately.
+We modeled the legs as rigid bodies with shoulder and elbow hinge joints.
+The hinge stiffness was manually tuned to reproduce the dominant leg vibration mode observed in our high-speed footage.
+The Jitterbug model density was set using standard values for stainless steel ($7700$ kg/m$^3$) for the body and tough plastic ($1100$ kg/m$^3$) for the feet.
+
+Due to the importance of contact and stiff dynamics in the Jitterbug's locomotion, we found it necessary to adjust MuJoCo's default settings, selecting an integration timestep of 0.0002s and semi-implicit Euler integration.
+To simplify the control problem, we use a control timestep of 0.01s.
+Thus, one step in the MDP results in 50 steps of the physics simulation and corresponds to 10ms of elapsed time.
+Accordingly, an episode (1000 MDP steps) corresponds to 10s of elapsed time.
+As is standard practice, during the time between control steps the most recent commanded action is repeated.
+With these settings we qualitatively observed a close correspondence between the Katita and the simulated dynamics under constant motor actuation on the Jitterbug.
+
+DMC supports the definition of physically-based camera models to enable learning from raw pixels if desired.
+We defined several cameras for the Jitterbug domain including an overhead, tracking and ego-centric view.
+
+\subsection{The Jitterbug Task Suite}\label{sec:jt}
+
+The Jitterbug dynamics naturally induce very high variance motion under a range of motor velocities.
+We defined a collection of five tasks of increasing difficulty based on the Jitterbug domain.
+The tasks were designed with increasingly sparse reward signals to increase the difficulty.
+
+For all tasks we choose $\gamma = 0.99$ and consider a task solved when cumulative episode reward is $\gtrapprox 900$.
+In all tasks the Jitterbug is reset to a random pose near the origin at the start of an episode.
+All tasks have a single continuous action controlling the motor $\mathcal{A} = [-1, 1]$ (larger/smaller values are clipped).
+All tasks also share the same continuous state space $\text{dim}(\mathcal{S}) = 31$ but differ in the size of the observation space.
+
+For each task, we report ($\text{dim}(\mathcal{O})$) and a brief description of the reward structure.
+Tasks are reported here in approximate order of increasing difficulty.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig-motor-hist}
+    \caption{
+        \textbf{Characterizing policy behaviors for the \emph{Move In Direction} task.}
+        We plot the distribution of motor velocities across many episodes for a successful policy (green) and unsuccessful policy (orange).
+        The successful policy learns to pulse the motor in alternating directions as indicated by the spikes near $\pm 1$ in the x-axis.
+        Interestingly, this is the same strategy used by our heuristic policies.
+        In contrast, the unsuccessful policy gets stuck in a local minima where the motor is continuously driven in one direction.
+    }
+    \label{fig:motor-hist}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig-heatmap}
+    \caption{
+        \textbf{Heatmap showing Jitterbug position over 100 episodes.}
+        The data were collected before (left) and after (right) training DDPG on the task \emph{Move In Direction}.
+        In the second figure, to evaluate the agent, the target direction was fixed at $+45\degree$.
+    }
+    \label{fig:heatmap}
+\end{figure}
+
+\begin{enumerate}[topsep=8pt, partopsep=0pt]
+    
+    \item \emph{Move From Origin} (15): The Jitterbug must move away from the origin in any direction.
+    Note that a sufficiently fast constant motor velocity is sufficient to solve this task.
+    
+    \item \emph{Face In Direction} (16): The Jitterbug must rotate to face in a randomly selected yaw direction.
+    
+    \item \emph{Move In Direction} (19): The Jitterbug is rewarded for velocity in a randomly selected direction in the X, Y plane.
+    
+    \item \emph{Move To Position} (18): The Jitterbug must move to a randomly selected position in the X, Y plane.
+    
+    \item \emph{Move To Pose} (19): The Jitterbug must move to a randomly selected position in the X, Y plane and rotate to face in a randomly selected yaw direction.
+    Note that due to the multiplication of position and yaw reward components, this task has a \emph{very} sparse reward signal.
+    
+\end{enumerate}
+
+In addition, for all tasks the Jitterbug must remain upright to achieve reward.
+Falling does not terminate the episode early as the leg dynamics are sufficiently springy that bouncing into the upright pose again can allow recovery from this condition (albeit at the loss of some reward).
+Indeed, we observe some learned strategies that appeared to utilize this mode of locomotion!
+
+\section{Experiments}
+
+\begin{table}[h!]
+    
+    \centering
+    \caption{
+        \textbf{RL Algorithm hyper-parameters.}
+        Values not shown used the defaults from the \texttt{stable\_baselines} package.
+    }
+    \label{tab:hyper-params}
+    
+    {\def\arraystretch{1.2}
+        \begin{tabularx}{0.95\linewidth}{$ X ^ c ^ >{\raggedleft\arraybackslash}p{2.5cm}}
+            
+            \toprule
+            
+            Parameter & \phantom{abc} & Value \\
+            \midrule
+            
+            \emph{General} & & \\[1pt]
+            \quad Optimizer & & Adam \cite{Adam} \\
+            \quad Learning Rate (\boldmath$\alpha$) & & 1{\tiny E}\textsuperscript{--4} \\
+            \quad Batch Size & & 256 \\
+            \quad Network Architecture(s) & & Fully Connected \\
+            \quad Hidden Layer Sizes & & [350, 250] \\
+            \quad Activation Functions & & ReLU \\
+            \quad Replay Buffer Size & & 1{\tiny E}\textsuperscript{6} \\
+            [6pt]
+            
+            \emph{DDPG} & & \\[1pt]
+            \quad Action Noise & & Ornstein-Uhlenbeck \\
+            \multicolumn{3}{r}{$\mu = 0.3, \sigma = 0.3, \theta = 0.15$} \\
+            [6pt]
+            
+            \emph{PPO} & & \\[1pt]
+            \quad Steps / Environment / Update & & 256 \\
+            \quad Entropy Coefficient & & 1{\tiny E}\textsuperscript{--2} \\
+            [6pt]
+            
+            \emph{SAC} & & \\[1pt]
+            \quad Action Noise & & Normal \\
+            \multicolumn{3}{r}{$\mu = 0.0, \sigma = 0.2$} \\
+            [6pt]
+            
+            \emph{TD3} & & \\[1pt]
+            \quad Learning Starts & & 10000 \\
+            \quad Gradient Steps & & 1000 \\
+            \quad Train Frequency & & 1000 \\
+            \quad Action Noise & & Normal \\
+            \multicolumn{3}{r}{$\mu = 0.0, \sigma = 0.2$} \\
+            [6pt]
+            
+            \bottomrule
+            
+        \end{tabularx}
+    }
+    
+\end{table}
+
+\subsection{Characterizing Learned Policies}
+
+To verify feasibility, we hand-crafted heuristic policies that can solve each task.
+To characterize the difficulty of the Jitterbug task suite, we performed preliminary hyper-parameter tuning to select reasonable settings and trained several RL algorithms on the tasks.
+
+Figure~\ref{fig:rl-perf} reports training curves for several on- and off-policy algorithms.
+Each figure shows the median and 10\textsuperscript{th} - 90\textsuperscript{th} percentile episode return across 10 different seeds.
+
+Our selected hyper-parameters are reported in Table~\ref{tab:hyper-params}.
+For all cases, we used fully-connected neural networks with hidden layers of size 350 and 250 with ReLU activation.
+Where applicable, we use separate networks for the actor and critic (i.e. no shared weights).
+
+To verify the learned policies were sensible (i.e. to confirm the absence of `reward hacking') we qualitatively and quantitatively investigated the exhibited behaviors.
+
+We observed that a key difference between successful and unsuccessful trained policies seemed to be the ability to learn piecewise control functions.
+For example, for all tasks but \emph{Move From Origin}, achieving high reward requires careful modulation of the reactive torque applied to the Jitterbug body by the motor counterweight.
+One way to achieve this is by pulsing the motor in different directions -- this is the method we use in our heuristic policies.
+We observed that successful policies learned to pulse the motor in short bursts in alternating directions (e.g. $\sim180\degree$ at a time), whereas unsuccessful policies would often drive the motor continuously (Figure~\ref{fig:motor-hist}).
+In doing so, the successful policies were able to achieve high cumulative episode return, and accomplish the high-level task encoded by the reward (Figure~\ref{fig:heatmap}).
+
+\subsection{Learning Reduced-Order Representations}\label{sec:lro}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{fig-autoencoder}\vspace*{-12pt}
+    \caption{
+        \textbf{Schematic representation of a Denoising Autoencoder.}
+        We use a Denoising Autoencoder as a means to learn a reduced order observation representation in an unsupervised manner.
+        The inputs $X$ have $d$ features and the latent variables $Z$ have $l<d$ dimensions.
+    }\vspace*{-12pt}
+    \label{fig:autoencoder}
+\end{figure}
+
+We use a Denoising Autoencoder (DAE) approach to learn a reduced-order observation representation (Figure~\ref{fig:autoencoder}).
+Input states $X$ are corrupted by adding random unbiased noise to each of the features $X_\text{corr} = X + \mathcal{N}(0, 0.1)$.
+The AutoEncoder is then trained with input corrupted data $X_{corr}$ and uncorrupted target labels $X$.
+We implement this using the mid-level API in the \texttt{tensorflow} library \cite{Abadi2015Tensorflow}.
+To optimize the Autoencoder network we use the Mean Squared Error between the output $Y$ and the original data $X$ as a loss and use the Adam optimizer with default settings \cite{Adam}.
+The MSE for each input $X^i$ is defined in equation \ref{eq:MSE}, with $N$ being the total number of data points and $d$ the number of features.
+
+\begin{equation}
+\forall i \in [1..N], MSE = \frac{1}{d} \sum_{k=1}^d(Y_{k}^i - X_{k}^i)^2
+\label{eq:MSE}
+\end{equation}
+
+Training data were gathered by running a random policy on the Jitterbug for 5 million steps, and we used 80\% of this data for training and 20\% as a held-out test set.
+Once trained, the decoder side of the Autoencoder was discarded and the encoder used to provide an augmented observation representation to a Deep Reinforcement Learning algorithm.
+
+\subsection{Deep RL with Reduced-Order Representations}
+
+The next step is to learn the control policy.
+This is done by connecting the output of the DAE's encoder to the input to the agent for subsequent deep reinforcement learning.
+For this study, we used the DDPG algorithm as it is one of many  widely accessible off-policy baseline methods.
+While different solvers may be used, the focus of this part of the study was to investigate the influence of the reduced order approach.  
+
+We considered this for a variety of tasks in the Jitterbug Problem.
+For example, in a simpler orienting task, such as \emph{Face In Direction}, we observe that the training performance of a (half) reduced order representation is on par with a policy trained using the full representation (see also Fig.~\ref{fig:ae-perf}) with very slightly improved learning rates.
+Interestingly, as the ask got more complex, such as in the \emph{Move In Direction} task, we empirically observe a reduction in the variance of the training process with a compressed representation (see also Fig.~\ref{fig:ae-lowvar}).
+While the median rewards are higher with the reduced order representation, the maximum reward found is higher with full action space.
+This is consistent with the observation that model-free control policy methods are more data intensive and can be more difficult to stabilize.  
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=.9\linewidth]{figure7plus}
+    \caption{
+        \textbf{Performance of a deep reinforcement learning agent with a reduced-order representation.}
+        We plot the training performance of a DDPG agent with a full and reduced-order model on the task \textit{Face In Direction} up to 5 million steps.
+        Orange: agent with full-order observations (16 dimensions).
+        Green: agent with reduced-order observations from Denoising Autoencoder (12 dimensions).
+%        A single random seed is shown and a 100{\tiny E}\textsuperscript{3} moving average filter is applied.
+\vspace*{-12pt}
+    }
+    \label{fig:ae-perf}
+\end{figure}
+
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=.9\linewidth]{denoising_autoencoder25_75}
+    \caption{
+        \textbf{Apparent reduction in training process variance.}
+        For a slightly more complex task \textit{Move In Direction}, we compare the training progress of DDPG with a full (orange) and reduced-order representation (12 dimensions, green).
+        This is done over 5 million training steps (5000 episodes).
+        We show median (solid line) and the 25\textsuperscript{th} and 75\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
+%        A a 100{\tiny E}\textsuperscript{3} moving average filter is applied.
+    }\vspace*{-12pt}
+    \label{fig:ae-lowvar}
+\end{figure}
+
+
+\section{Conclusion}
+
+In this paper we consider a reduced order approach based around a generative autoencoder so as to automatically find a better representation to focus a control policy exploration process for a variable and compliant underactuated robot.
+This is based on the intuition that underactuated systems have correlations between their state features by their very nature, and therefore can still be efficiently controlled by reducing the input state space dimension.
+Also, as part of this, we introduce the Jitterbug problem as an example of such a robot with the job of navigating in a field environment.
+It has one actuator (the minimal possible) and has navigation tasks up to three degrees of freedom.
+
+These assumptions and the approach are investigated by showing that a Jitterbug agent can be controlled with fewer features and still solve a task as efficiently as with using the original state space.
+As part of this, we chose a denoising autoencoder to reduce the state space dimension since it is a common tool widely used for data compression and correlation finding.  
+Empirically we find that for more complex tasks the reduced order representation seems to reduce the training variance and have higher (median) reward.
+For lower complexity tasks, we see similar results between the approaches.
+Perhaps, this also intuits from model order in a planning and control perspective.
+In general, when planning for a robot one assumes that there is a forward model which may guide the subsequent selection of future actions.
+The more information one has the more that can be exploited, but the more that has to be explored.
+The reduced order model might automatically focus the inherent exploration and exploitation trade-off present.
+In conclusion, a ``reduced order'' modeling approach that takes advantage of the latent structure offers benefits and may help inform an automatic control software process for a novel and interesting class of `reduced order' (underactuated) robot hardware.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Appendixes should appear before the acknowledgment.
+%\clearpage
+\vspace*{-6pt}
+\subsection*{Appendix: Benchmark Performance of the Jitterbug Task Suite}\label{sec:app}
+
+We consider (in Fig. \ref{fig:rl-perf}) the benchmark performance of the various tasks in the Jitterbug problem task suite DDPG \cite{DDPG} (an off-policy method) and PPO \cite{PPO} (an on-policy method) as well SAC \cite{SAC} and TD3 \cite{TD3}, which are more recent approaches that feature more stable and efficient training and update the policy (actor) network every two timesteps.  We find that DDPG is able to find rewards more stably, particularly for the more challenging cases, such as move to pose, which we assume is because of its replay buffer. %\vspace*{-12pt}
+
+
+\section*{Acknowledgment}
+\vspace*{-6pt}
+We thank Dr. Hanna Kurniawati at the ANU Robust Decision-making and Learning Laboratory for discussions and simulation assistance.
+This research is partly supported by an Australian Research Council Discovery Project (DP160100714).
+A. J. Snoswell is supported in part through an Australian Government Research Training Program.
+%\vspace*{4cm}
+
+\begin{figure*}[p]
+	\vspace*{-24pt}
+	\centering
+	\includegraphics[width=\linewidth]{fig-rl-perf}
+	
+	\caption{
+		\textbf{Characterizing the Face Direction Jitterbug task.}
+		We compare the training progress of DDPG, PPO, SAC and TD3 up to 5 million training steps (5000 episodes).
+		We show median (solid line) and the 10\textsuperscript{th} and 90\textsuperscript{th} quartiles (shaded area) of per-episode episode return across 10 random seeds in each figure.
+		A task is considered `solved' if the trained agent consistently scores $\gtrapprox 900$ return per episode (red line).
+%		All plots are filtered with a 20{\tiny E}\textsuperscript{3} step moving average filter.
+	}
+	\label{fig:rl-perf}
+\end{figure*}
+
+
+% Balance the column lengths on the last page
+%\addtolength{\textheight}{-12cm}
+
+\pagebreak
+\bibliographystyle{named}
+\bibliography{root}
+
+\end{document}
